@@ -1,0 +1,23 @@
+{
+  "dependencies": {
+    "@discordjs/voice": "^0.16.0",
+    "better-sqlite3": "^8.4.0",
+    "discord-html-transcripts": "^3.1.5",
+    "discord.js": "^14.11.0",
+    "eslint": "^8.42.0",
+    "fs-extra": "^11.1.1",
+    "jsonc": "^2.0.0",
+    "quick.db": "^9.1.6",
+    "utf-8-validate": "^6.0.3"
+  },
+  "name": "bluecity-modmail",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node --trace-warnings --trace-uncaught ."
+  },
+  "author": "mytic2330",
+  "license": "ISC",
+  "description": ""
+}

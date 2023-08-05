@@ -1,0 +1,7 @@
+{
+"commands": {
+    "pingjs": {
+        "ping": "Client ping:"
+    }
+}
+}
