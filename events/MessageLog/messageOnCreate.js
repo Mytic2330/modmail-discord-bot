@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 const { Events, EmbedBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ActionRowBuilder } = require('discord.js');
 module.exports = {
 	name: Events.MessageCreate,
@@ -7,10 +8,11 @@ module.exports = {
 		const status = await client.ticket.has(message.channelId);
 		if (status === false) {
 			if (message.guildId === null) {
+				if (await client.ticket.has(message.author.id) === true) return;
 				const channel = await client.channels.fetch(message.channelId);
 				const embed = new EmbedBuilder()
 					.setTitle('Potrebujete pomoč?')
-					.setDescription('Pritisnite spodnji gumb, da začnete pogovor z osebjem. Prosimo za strpnost.\nPočakajte na potrdilo odprtja.')
+					.setDescription('Uporabite spodnji meni, da izberete kategorijo pomoči. Prosimo za strpnost.\nPočakajte na potrdilo odprtja.')
 					.setFooter({ text: 'BlueCityRP', iconURL: 'https://cdn.discordapp.com/icons/978368922527101059/a_4c5511c4cb5008ec4a0aeb0ab63c8368.gif?size=4096&width=0&height=256' })
 					.setTimestamp();
 
@@ -61,97 +63,54 @@ module.exports = {
 				.setTimestamp()
 				.setFooter({ text: 'ID: ' + user.id });
 
-			const reciveImageTemplate = new EmbedBuilder()
-				.setAuthor({ name: user.username, iconURL: user.displayAvatarURL() })
-				.setColor(await client.db.get('recive'))
-				.setTitle('Dodatna slika!')
-				.setTimestamp()
-				.setFooter({ text: 'ID: ' + user.id });
-
-
-			const channelImageTemplate = new EmbedBuilder()
-				.setAuthor({ name: user.username, iconURL: user.displayAvatarURL() })
-				.setColor(await client.db.get('send'))
-				.setTitle('Dodatna slika poslana!')
-				.setTimestamp()
-				.setFooter({ text: 'ID: ' + user.id });
 
 			if (message.content) {
 				channelEmbed.setDescription(message.content);
 				reciveChannelEmbed.setDescription(message.content);
 			}
 			if (message.attachments) {
-				if (message.attachments.size < 2) {
-					message.attachments.forEach((keys) => {
-						console.log(keys);
-						channelEmbed.setImage(keys.attachment);
-						reciveChannelEmbed.setImage(keys.attachment);
-					});
-				}
+				let num = 1;
+				message.attachments.forEach((keys) => {
+					channelEmbed.addFields({ name: `Attachment ${num}`, value: `[**LINK**](${keys.attachment})` });
+					reciveChannelEmbed.addFields({ name: `Attachment ${num}`, value: `[**LINK**](${keys.attachment})` });
+					num++;
+				});
 			}
 			if (message.guildId === null) {
 				const wbh = await client.wbh(recive);
 				try {
-					if (message.content || message.attachments.size < 2) {
-						wbh.send({ embeds: [reciveChannelEmbed] });
-					}
-					if (message.attachments) {
-						if (message.attachments.size > 1) {
-							message.attachments.forEach((keys) => {
-								reciveImageTemplate.setImage(keys.attachment);
-								wbh.send({ embeds: [reciveImageTemplate] });
-							});
-						}
-					}
+					wbh.send({ embeds: [reciveChannelEmbed], files: message.attachments.map(attachment => attachment.url) });
+					/*message.attachments.forEach((keys) => {
+						wbh.send({ content: keys.attachment });
+					});*/
 				}
 				catch (e) {
 					console.log(e);
 				}
 			}
 			else {
-				if (message.content || message.attachments.size < 2) {
-					recive.send({ embeds: [reciveChannelEmbed] });
-				}
-				if (message.attachments) {
-					if (message.attachments.size > 1) {
-						message.attachments.forEach((keys) => {
-							reciveImageTemplate.setImage(keys.attachment);
-							recive.send({ embeds: [reciveImageTemplate] });
-						});
-					}
-				}
+				//if (message.content) {
+					recive.send({ embeds: [reciveChannelEmbed], files: message.attachments.map(attachment => attachment.url) });
+				//}
+				/*message.attachments.forEach((keys) => {
+					recive.send({ content: keys.attachment });
+				});*/
 			}
 
 			//DELETING
 
+
 			if (message.guildId === null) {
-				if (message.content || message.attachments.size < 2) {
-					await channel.send({ embeds: [channelEmbed] });
-				}
-				if (message.attachments) {
-					if (message.attachments.size > 1) {
-						message.attachments.forEach((keys) => {
-							channelImageTemplate.setImage(keys.attachment);
-							channel.send({ embeds: [channelImageTemplate] });
-						});
-					}
-				}
+				channel.send({ embeds: [channelEmbed], files: message.attachments.map(attachment => attachment.url) });
+				/*message.attachments.forEach((keys) => {
+					channel.send({ content: keys.attachment });
+				});*/
 			}
 			else {
 				const wbh = await client.wbh(channel);
 				try {
-					if (message.content || message.attachments.size < 2) {
-						await wbh.send({ embeds: [channelEmbed] });
-					}
+					wbh.send({ embeds: [channelEmbed], files: message.attachments.map(attachment => attachment.url) });
 					message.delete();
-					if (message.attachments) {
-						if (message.attachments.size > 1) {
-							message.attachments.forEach((keys) => {
-								channelImageTemplate.setImage(keys.attachment);
-								wbh.send({ embeds: [channelImageTemplate] });
-							});
-						}
-					}
 				}
 				catch (e) {
 					console.log(e);

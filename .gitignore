@@ -3,3 +3,5 @@
 node_modules
 json.sqlite
 package-lock.json
+logs
+database.sqlite

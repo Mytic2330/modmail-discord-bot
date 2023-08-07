@@ -10,12 +10,19 @@ module.exports = {
 			if (await client.ticket.has(interaction.user.id) === true) {
 				const embed = new EmbedBuilder()
 					.setColor(await client.db.get('color'))
-					.setTitle('Vaš ticket se procesira. Molimo vas počakajte!')
+					.setTitle('Vaš ticket se procesira. Molimo pričekajte!')
 					.setTimestamp();
 				await interaction.editReply({ embeds: [embed] });
 				return;
 			}
 			await client.ticket.set(interaction.user.id, true);
+			const preparing = new EmbedBuilder()
+				.setColor(await client.db.get('color'))
+				.setTitle('Vaš ticket se odpira!')
+				.setDescription('Proismo za poterpežljivost. Po navadi traja nekaj sekund!\n Počakajte na potrdilo odprtja.')
+				.setTimestamp();
+
+			await interaction.message.edit({ embeds: [preparing], components: [] });
 			const guild = await client.guilds.fetch(await client.db.get('guildId'));
 			createChannel(guild, interaction, client);
 		}
@@ -73,8 +80,7 @@ async function sendInitial(x, interaction) {
 		.setColor(await client.db.get('color'))
 		.setTitle('Začeli ste pogovor z staff ekipo.')
 		.setTimestamp();
-	await interaction.editReply('.');
-	await interaction.followUp({ embeds: [embed2] });
+	await interaction.editReply({ embeds: [embed2] });
 	await client.ticket.delete(interaction.user.id, true);
 }
 

@@ -10,7 +10,7 @@ module.exports = {
 			fetchReply: true,
 		});
 		const embed = new EmbedBuilder()
-			.setColor(await client.settings.get('color'))
+			.setColor(await client.db.get('color'))
 			.setTitle(`🏓 ${locales.ping} ${message.createdTimestamp - interaction.createdTimestamp}ms`);
 		await interaction.editReply({
 			embeds: [embed],
