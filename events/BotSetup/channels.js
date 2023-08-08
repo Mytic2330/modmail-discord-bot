@@ -49,11 +49,11 @@ async function permissionSet(category, log, archive, client, guild) {
 
 	const embed = new EmbedBuilder()
 		.setColor(await client.db.get('color'))
-		.setTitle('Started logging new modmails')
+		.setTitle('Začelo zapisovati nove tickete!')
 		.setTimestamp();
 	const embed2 = new EmbedBuilder()
 		.setColor(await client.db.get('color'))
-		.setTitle('Started saving transcribe files')
+		.setTitle('Začelo shranjevati pogovore.')
 		.setTimestamp();
 
 	wbh.send({ embeds: [embed] });

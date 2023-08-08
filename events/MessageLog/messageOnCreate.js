@@ -53,7 +53,7 @@ module.exports = {
 				.setColor(await client.db.get('recive'))
 				.setTitle('Novo sporočilo')
 				.setTimestamp()
-				.setFooter({ text: 'ID: ' + user.id });
+				.setFooter({ text: 'Ekipa BCRP', iconURL: 'https://cdn.discordapp.com/icons/978368922527101059/a_4c5511c4cb5008ec4a0aeb0ab63c8368.gif?size=4096&width=0&height=256' });
 
 
 			const channelEmbed = new EmbedBuilder()
@@ -61,7 +61,7 @@ module.exports = {
 				.setColor(await client.db.get('send'))
 				.setTitle('Sporočilo poslano!')
 				.setTimestamp()
-				.setFooter({ text: 'ID: ' + user.id });
+				.setFooter({ text: 'Ekipa BCRP', iconURL: 'https://cdn.discordapp.com/icons/978368922527101059/a_4c5511c4cb5008ec4a0aeb0ab63c8368.gif?size=4096&width=0&height=256' });
 
 
 			if (message.content) {
@@ -71,7 +71,8 @@ module.exports = {
 			if (message.attachments) {
 				let num = 1;
 				message.attachments.forEach((keys) => {
-					channelEmbed.addFields({ name: `Attachment ${num}`, value: `[**LINK**](${keys.attachment})` });
+					console.log(keys);
+					channelEmbed.addFields({ name: `Attachment ${num}`, value: `[**LINK**](${keys.attachment}) Vrsta: ${keys.contentType.split('/')[0]} Končnica: ${keys.contentType.split('/')[1]}` });
 					reciveChannelEmbed.addFields({ name: `Attachment ${num}`, value: `[**LINK**](${keys.attachment})` });
 					num++;
 				});
@@ -79,32 +80,22 @@ module.exports = {
 			if (message.guildId === null) {
 				const wbh = await client.wbh(recive);
 				try {
-					wbh.send({ embeds: [reciveChannelEmbed], files: message.attachments.map(attachment => attachment.url) });
-					/*message.attachments.forEach((keys) => {
-						wbh.send({ content: keys.attachment });
-					});*/
+					wbh.send({ embeds: [reciveChannelEmbed] });
 				}
 				catch (e) {
 					console.log(e);
 				}
 			}
 			else {
-				//if (message.content) {
 					recive.send({ embeds: [reciveChannelEmbed], files: message.attachments.map(attachment => attachment.url) });
-				//}
-				/*message.attachments.forEach((keys) => {
-					recive.send({ content: keys.attachment });
-				});*/
 			}
 
 			//DELETING
 
 
 			if (message.guildId === null) {
-				channel.send({ embeds: [channelEmbed], files: message.attachments.map(attachment => attachment.url) });
-				/*message.attachments.forEach((keys) => {
-					channel.send({ content: keys.attachment });
-				});*/
+				await message.react('✅');
+				//channel.send({ embeds: [channelEmbed], files: message.attachments.map(attachment => attachment.url) });
 			}
 			else {
 				const wbh = await client.wbh(channel);

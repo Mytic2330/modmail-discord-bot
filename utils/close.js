@@ -108,7 +108,7 @@ async function close(interaction) {
 		const deleteButton = new ButtonBuilder()
 			.setCustomId('delete')
 			.setLabel('Izbriši')
-			.setDisabled(true)
+			.setEmoji('🗑️')
 			.setStyle(ButtonStyle.Danger);
 		const row = new ActionRowBuilder()
 			.addComponents(deleteButton);

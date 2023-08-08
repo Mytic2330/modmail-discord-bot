@@ -10,7 +10,7 @@ module.exports = {
 			if (await client.ticket.has(interaction.user.id) === true) {
 				const embed = new EmbedBuilder()
 					.setColor(await client.db.get('color'))
-					.setTitle('Vaš ticket se procesira. Molimo pričekajte!')
+					.setTitle('Vaš ticket se procesira. Prosimo bodite potrpežljivi.')
 					.setTimestamp();
 				await interaction.editReply({ embeds: [embed] });
 				return;
@@ -78,7 +78,7 @@ async function sendInitial(x, interaction) {
 
 	const embed2 = new EmbedBuilder()
 		.setColor(await client.db.get('color'))
-		.setTitle('Začeli ste pogovor z staff ekipo.')
+		.setTitle('Začeli ste pogovor z staff ekipo. Če želite pogovor končati lahko uporabite /close.')
 		.setTimestamp();
 	await interaction.editReply({ embeds: [embed2] });
 	await client.ticket.delete(interaction.user.id, true);
@@ -91,7 +91,7 @@ async function logInteraction(x, member) {
 
 	const embed = new EmbedBuilder()
 		.setColor(await x.client.db.get('color'))
-		.setTitle(`${member.user.username} has opend a new ticket!`)
+		.setTitle(`${member.user.username} je odprl nov ticket!`)
 		.setTimestamp()
 		.setFooter({ text: 'ID: ' + member.user.id });
 
