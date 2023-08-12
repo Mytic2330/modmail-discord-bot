@@ -8,21 +8,23 @@ module.exports = {
 		if (status === false) {
 			try {
 				const category = await guild.channels.create({
-					name: 'modmail',
+					name: client.locales.events.channelsjs.channelCreation.category,
 					type: ChannelType.GuildCategory,
 				});
 
 				const log = await category.children.create({
-					name: 'modmail-log',
+					name: client.locales.events.channelsjs.channelCreation.log,
 					type: ChannelType.GuildText,
 				});
 
 				const archive = await category.children.create({
-					name: 'modmail-archive',
+					name: client.locales.events.channelsjs.channelCreation.archive,
 					type: ChannelType.GuildText,
 				});
 
 				await category.permissionOverwrites.create(guild.roles.everyone, { ViewChannel: false });
+				await log.permissionOverwrites.create(guild.roles.everyone, { ViewChannel: false });
+				await archive.permissionOverwrites.create(guild.roles.everyone, { ViewChannel: false });
 
 				permissionSet(category, log, archive, client, guild);
 			}
@@ -38,22 +40,22 @@ async function permissionSet(category, log, archive, client, guild) {
 	client.settings.allowedRoles.forEach(element => {
 		const role = guild.roles.cache.get(element);
 		category.permissionOverwrites.create(role, { ViewChannel: true });
+		log.permissionOverwrites.create(role, { ViewChannel: true });
+		archive.permissionOverwrites.create(role, { ViewChannel: true });
 	});
 
-	log.lockPermissions();
-	archive.lockPermissions();
 	const wbh = await client.wbh(log);
 	const wbh2 = await client.wbh(archive);
 
-	await client.db.set(guild.id, { 'logChannel': log.id, 'transcriptChannel': archive.id, 'categoryId': category.id, 'webhook': wbh });
+	await client.db.set(guild.id, { 'logChannel': log.id, 'transcriptChannel': archive.id, 'categoryId': category.id });
 
 	const embed = new EmbedBuilder()
 		.setColor(await client.db.get('color'))
-		.setTitle('Začelo zapisovati nove tickete!')
+		.setTitle(client.locales.events.channelsjs.logEmbed.title)
 		.setTimestamp();
 	const embed2 = new EmbedBuilder()
 		.setColor(await client.db.get('color'))
-		.setTitle('Začelo shranjevati pogovore.')
+		.setTitle(client.locales.events.channelsjs.archiveEmbed.title)
 		.setTimestamp();
 
 	wbh.send({ embeds: [embed] });

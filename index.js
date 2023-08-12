@@ -1,5 +1,5 @@
 require('./utils/logger');
-const { hasNewUsername } = require('./utils/etc');
+const { hasNewUsername, getTimestamp } = require('./utils/etc');
 const { webhook } = require('./utils/webhook');
 const { Client, Collection, GatewayIntentBits, ActivityType, Events, Partials } = require('discord.js');
 const jsonc = require('jsonc');
@@ -9,7 +9,7 @@ const fs = require('fs-extra');
 const path = require('node:path');
 const database = new QuickDB({ filePath: './database.sqlite' });
 const { Token } = jsonc.parse(fs.readFileSync(path.join(__dirname, 'config/settings.jsonc'), 'utf8'));
-const debug = true;
+const debug = false;
 
 
 console.log(` \x1b[36m
@@ -38,7 +38,7 @@ const client = new Client({
 		status: 'online',
 		afk: false,
 		activities: [{
-			name: 'Watching over Slovenian Developer\'s',
+			name: 'Ticket',
 			type: ActivityType.Watching,
 		}],
 	},
@@ -70,27 +70,13 @@ const client = new Client({
 });
 
 client.discord = require('discord.js');
-client.locales = require('./locales/main.json');
 client.db = database;
 client.ticket = database.table('ticket');
 client.settings = jsonc.parse(fs.readFileSync(path.join(__dirname, 'config/settings.jsonc'), 'utf8'));
+client.locales = jsonc.parse(fs.readFileSync(path.join(__dirname, 'locales/locales.jsonc'), 'utf8'));
 client.hasNewUsername = hasNewUsername;
 client.wbh = webhook;
-client.ms = function msh(x) {
-	const day = Math.floor(x / (24 * 60 * 60 * 1000));
-	const dayx = x % (24 * 60 * 60 * 1000);
-	const hour = Math.floor(dayx / (60 * 60 * 1000));
-	const hourx = x % (60 * 60 * 1000);
-	const min = Math.floor(hourx / (60 * 1000));
-	const minx = x % (60 * 1000);
-	const sec = Math.floor(minx / 1000);
-
-	if (day > 0) return `${day}d ${hour}h ${min}m ${sec}s`;
-	if (hour > 0) return `${hour}h ${min}m ${sec}s`;
-	if (min > 0) return `${min}m ${sec}s`;
-	if (sec > 0) return `${sec}s`;
-	return '0s';
-};
+client.timestamp = getTimestamp;
 
 
 client.commands = new Collection();

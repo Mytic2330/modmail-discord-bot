@@ -4,6 +4,7 @@ module.exports = {
 	async execute(interaction) {
 		if (!interaction.isButton) return;
 		if (interaction.customId !== 'delete') return;
+		const locales = interaction.client.locales.events.onDeleteButtonjs;
 		await interaction.deferReply();
 		const data = await interaction.client.db.get(interaction.guildId);
 		const logChannel = await interaction.client.channels.fetch(data.logChannel);
@@ -12,9 +13,12 @@ module.exports = {
 
 		const embed = new EmbedBuilder()
 			.setColor(await interaction.client.db.get('delete'))
-			.setTitle(`Ticket ${channel.name} izbrisan`)
+			.setTitle((locales.embed.title).replace('CHANNELNAME', channel.name))
 			.setTimestamp()
-			.setFooter({ text: `Izbrisal: ${interaction.user.username} | ${interaction.user.id}` });
+			.setFooter({ text: (locales.embed.footer.text)
+				.replace('USERNAME', interaction.user.username)
+				.replace('ID', interaction.user.id),
+			});
 
 		try {
 			channel.delete();

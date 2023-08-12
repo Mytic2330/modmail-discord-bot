@@ -6,11 +6,12 @@ module.exports = {
 		if (interaction.customId !== 'ticket') return;
 		await interaction.deferReply();
 		const client = interaction.client;
+		const locales = client.locales.events.onSelectMenuInteractionjs;
 		if (await client.ticket.has(interaction.channelId) === false) {
 			if (await client.ticket.has(interaction.user.id) === true) {
 				const embed = new EmbedBuilder()
 					.setColor(await client.db.get('color'))
-					.setTitle('Vaš ticket se procesira. Prosimo bodite potrpežljivi.')
+					.setTitle(locales.ticketAlreadyInMakingEmbed.title)
 					.setTimestamp();
 				await interaction.editReply({ embeds: [embed] });
 				return;
@@ -18,8 +19,8 @@ module.exports = {
 			await client.ticket.set(interaction.user.id, true);
 			const preparing = new EmbedBuilder()
 				.setColor(await client.db.get('color'))
-				.setTitle('Vaš ticket se odpira!')
-				.setDescription('Proismo za poterpežljivost. Po navadi traja nekaj sekund!\n Počakajte na potrdilo odprtja.')
+				.setTitle(locales.ticketNowInMaking.title)
+				.setDescription(locales.ticketNowInMaking.description)
 				.setTimestamp();
 
 			await interaction.message.edit({ embeds: [preparing], components: [] });
@@ -29,7 +30,7 @@ module.exports = {
 		else {
 			const embed = new EmbedBuilder()
 				.setColor(await client.db.get('color'))
-				.setTitle('Že imate odprt ticket!')
+				.setTitle(locales.ticketAlreadyOpen.description)
 				.setTimestamp();
 			await interaction.editReply({ embeds: [embed] });
 			return;
@@ -55,6 +56,7 @@ async function createChannel(guild, interaction, client) {
 }
 
 async function sendInitial(x, interaction) {
+	const locales = interaction.client.locales.events.onSelectMenuInteractionjs.initialOpening;
 	const member = await x.guild.members.fetch(interaction.user.id);
 
 	const client = x.client;
@@ -63,9 +65,11 @@ async function sendInitial(x, interaction) {
 	const embed = new EmbedBuilder()
 		.setAuthor({ name: interaction.user.username, iconURL: member.user.displayAvatarURL() })
 		.setColor(await client.db.get('color'))
-		.setTitle('Je odprl ticket z kategorijo: ' + interaction.values[0])
+		.setTitle((locales.logEmbed.title)
+			.replace('CATEGORY', interaction.values[0]))
 		.setTimestamp()
-		.setFooter({ text: 'ID: ' + member.user.id });
+		.setFooter({ text: (locales.logEmbed.footer.text)
+			.replace('USERID', interaction.user.id) });
 	try {
 		wbh.send({ embeds: [embed] });
 	}
@@ -73,27 +77,28 @@ async function sendInitial(x, interaction) {
 		console.log(e);
 	}
 	const db = client.ticket;
-	await db.set(x.id, { 'channel': interaction.channelId, 'author': interaction.user.id, 'guild': x.guild.id });
-	await db.set(interaction.channelId, { 'channel': x.id, 'author': interaction.user.id, 'guild': x.guild.id });
+	await db.set(x.id, { 'channel': [interaction.channelId], 'author': interaction.user.id, 'guild': x.guild.id, users: [interaction.user.id] });
+	await db.set(interaction.channelId, { 'channel': [x.id], 'author': interaction.user.id, 'guild': x.guild.id, users: [interaction.user.id] });
 
 	const embed2 = new EmbedBuilder()
 		.setColor(await client.db.get('color'))
-		.setTitle('Začeli ste pogovor z staff ekipo. Če želite pogovor končati lahko uporabite /close.')
+		.setTitle(locales.channelEmbed.title)
 		.setTimestamp();
 	await interaction.editReply({ embeds: [embed2] });
 	await client.ticket.delete(interaction.user.id, true);
 }
 
 async function logInteraction(x, member) {
+	const locales = x.client.locales.events.onSelectMenuInteractionjs.initialOpening;
 	const data = await x.client.db.get(x.guildId);
 	const channel = await x.guild.channels.fetch(data.logChannel);
 	const wbh = await x.client.wbh(channel);
 
 	const embed = new EmbedBuilder()
 		.setColor(await x.client.db.get('color'))
-		.setTitle(`${member.user.username} je odprl nov ticket!`)
+		.setTitle((locales.otherLogEmbed.title).replace('USERNAME', member.user.username))
 		.setTimestamp()
-		.setFooter({ text: 'ID: ' + member.user.id });
+		.setFooter({ text: (locales.otherLogEmbed.footer.text).replace('USERID', member.user.id) });
 
 
 	wbh.send({ embeds: [embed] });

@@ -2,16 +2,15 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('ping')
-		.setDescription('Latency check on bot!'),
+		.setDescription('Preveri zakasnitev programa'),
 	async execute(interaction, client) {
-		const locales = client.locales.commands.pingjs;
 		const message = await interaction.deferReply({
 			ephemeral: true,
 			fetchReply: true,
 		});
 		const embed = new EmbedBuilder()
 			.setColor(await client.db.get('color'))
-			.setTitle(`🏓 ${locales.ping} ${message.createdTimestamp - interaction.createdTimestamp}ms`);
+			.setTitle(`${client.locales.commands.pingjs.embed.title} ${message.createdTimestamp - interaction.createdTimestamp}ms`);
 		await interaction.editReply({
 			embeds: [embed],
 		});

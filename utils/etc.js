@@ -1,4 +1,4 @@
-module.exports = { hasNewUsername };
+module.exports = { hasNewUsername, getTimestamp };
 
 async function hasNewUsername(x, returnUsername, type) {
 	if (type == 'member') {
@@ -30,4 +30,12 @@ async function hasNewUsername(x, returnUsername, type) {
 		return;
 	}
 	return;
+}
+
+function getTimestamp() {
+	const date = new Date();
+	const hours = String(date.getHours()).padStart(2, '0');
+	const minutes = String(date.getMinutes()).padStart(2, '0');
+	const seconds = String(date.getSeconds()).padStart(2, '0');
+	return `${hours}:${minutes}:${seconds}`;
 }

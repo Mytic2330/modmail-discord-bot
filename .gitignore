@@ -1,7 +1,6 @@
 
-.eslintrc.json
 node_modules
-json.sqlite
+database.sqlite
 package-lock.json
 logs
-database.sqlite
+.eslintrc.json

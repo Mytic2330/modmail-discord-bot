@@ -1,0 +1,142 @@
+{
+	"commands": {
+		"pingjs": {
+			"embed": {
+				"title": "🏓 Zakasnitev:"
+			}
+		},
+		"closejs": {
+			//NIMA PREVODOV
+		}
+	},
+	"events": {
+		"channelsjs": {
+			"channelCreation": {
+				"category": "modmail",
+				"log": "modmail-log",
+				"archive": "modmail-archive"
+			},
+			"logEmbed": {
+				"title": "Začelo zapisovati nove tickete!"
+			},
+			"archiveEmbed": {
+				"title":"Začelo shranjevati pogovore."
+			}
+		},
+		"messageOnCreatejs": {
+			"userSelectCategory": {
+				"embed": {
+					"title": "Potrebuješ pomoč?",
+					"description": "Uporabi spodnji meni, da izbereš kategorijo, ki ustreza tvoji situaciji.\nPočakaj na potrdilo odprtja.",
+					"footer": {
+						"text": "BlueCityRP",
+						"iconURL": "https://cdn.discordapp.com/attachments/1012850899980394557/1138546219640176851/097e89ede70464edaf570046b6b3f7b8.png"
+					}
+				},
+				"SelectMenuPlaceholder": "Izberi kategorijo"
+			},
+			"messageProcessing": {
+				"sendNewMessageEmbed": {
+					"title": "Sporočilo poslano!",
+					"footer": {
+						"text": "Ekipa BCRP",
+						"iconURL": "https://cdn.discordapp.com/attachments/1012850899980394557/1138546219640176851/097e89ede70464edaf570046b6b3f7b8.png"
+					}
+				},
+				"reciveNewMessageEmbed": {
+					"title": "Novo sporočilo",
+					"footer": {
+						"text": "Ekipa BCRP",
+						"iconURL": "https://cdn.discordapp.com/attachments/1012850899980394557/1138546219640176851/097e89ede70464edaf570046b6b3f7b8.png"
+					}
+				}
+			}
+		},
+		"readyjs": {
+		//NIMA PREVODOV
+		},
+		"onDeleteButtonjs": {
+			"embed": {
+				"title": "`Ticket CHANNELNAME izbrisan`",
+				"footer": {
+					"text": "Izbrisal: USERNAME | ID"
+				}
+			}
+		},
+		"onSelectMenuInteractionjs": {
+			"ticketAlreadyInMakingEmbed": {
+				"title": "Ticket se procesira. Prosimo bodite potrpežljivi."
+			},
+			"ticketNowInMaking" : {
+				"title": "Ticket se odpira!",
+				"description": "Prosimo za potrpežljivost. Ponavadi traja le nekaj sekund!\n Počakaj na potrdilo odprtja."
+			},
+			"ticketAlreadyOpen": {
+				"title": "Ticket je že odprt!"
+			},
+
+			"initialOpening" : {
+				"logEmbed": {
+					"title": "Je odprl ticket pod kategorijo: CATEGORY",
+					"footer": {
+						"text": "ID: USERID"
+					}
+				},
+				"channelEmbed": {
+					"title": "Začel si pogovor z administracijo strežnika BlueCity.\nČe želiš pogovor končati, lahko uporabiš komando /close."
+				},
+				"otherLogEmbed": {
+					"title": "`USERNAME je odprl nov ticket!`",
+					"footer": {
+						"text": "ID: USERID"
+					}
+				}
+			}
+		}
+	},
+	"utils": {
+		"closejs": {
+			"wrongChannel": "Napačen kanal. Prosimo uporabite to v ticket kanalu!",
+			"ticketAlreadyClosing": "Ticket se že zapira",
+			"deleteButton": {
+				"lable": "Izbriši",
+				"emoji": "🗑️"
+			},
+			"closeEmbed": {
+				"title": "Ticket zaprt!",
+				"field": {
+					"value": "Ticket je bil zaprt! Ponovno odpiranje ni mogoče."
+				},
+				"footer": {
+					"text": "Zaprl: USERNAME | ID"
+				}
+			},
+			"closeLog": {
+				"title": "`Ticket CHANNELNAME zaprt!`",
+				"field": {
+					"value": "Ticket je bil zaprt! Ponovno odpiranje ni mogoče."
+				},
+				"footer": {
+					"text": "Zaprl: USERNAME | ID"
+				}
+			},
+			"closeDM": {
+				"title": "Ticket zaprt!",
+				"description": "Ticket je bil zaprt! Če želiš odpret nov ticket pošlji sporočilo, \nda prejmeš nov meni za izbiranje kategorije.\n Upamo, da ste vašo težavo z našo pomočjo odpravili. \n\n **BlueCityRP - Smo drugačni, ciljamo višje!**"
+			},
+			"transcriptField": {
+				"name": "Transcript",
+				"value": "Pogovor si lahko ogledate [**TUKAJ**](LINK)"
+			}
+		},
+		"etcjs": {
+		//NIMA PREVODOV
+		},
+		"loggerjs": {
+		//NIMA PREVODOV
+		},
+		"webhookjs": {
+			"avatarURL": "https://cdn.discordapp.com/attachments/1012850899980394557/1138546219640176851/097e89ede70464edaf570046b6b3f7b8.png"
+		}
+	}
+}
