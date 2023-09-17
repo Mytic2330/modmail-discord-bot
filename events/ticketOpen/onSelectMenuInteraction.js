@@ -7,8 +7,15 @@ module.exports = {
 		await interaction.deferReply();
 		const client = interaction.client;
 		const locales = client.locales.events.onSelectMenuInteractionjs;
-		if (await client.ticket.has(interaction.channelId) === false) {
-			if (await client.ticket.has(interaction.user.id) === true) {
+		checkStatus(interaction, client, locales);
+	},
+};
+async function checkStatus(interaction, client, locales) {
+	const channelStatus = await client.ticket.has(interaction.channelId);
+	if (channelStatus === false) {
+		if (await client.ticket.has('users')) {
+			const userAlreadyProcessing = await client.ticket.get('users');
+			if (userAlreadyProcessing.includes(interaction.user.id) === true) {
 				const embed = new EmbedBuilder()
 					.setColor(await client.db.get('color'))
 					.setTitle(locales.ticketAlreadyInMakingEmbed.title)
@@ -16,27 +23,28 @@ module.exports = {
 				await interaction.editReply({ embeds: [embed] });
 				return;
 			}
-			await client.ticket.set(interaction.user.id, true);
-			const preparing = new EmbedBuilder()
-				.setColor(await client.db.get('color'))
-				.setTitle(locales.ticketNowInMaking.title)
-				.setDescription(locales.ticketNowInMaking.description)
-				.setTimestamp();
+		}
+		await client.ticket.push('users', interaction.user.id);
 
-			await interaction.message.edit({ embeds: [preparing], components: [] });
-			const guild = await client.guilds.fetch(await client.db.get('guildId'));
-			createChannel(guild, interaction, client);
-		}
-		else {
-			const embed = new EmbedBuilder()
-				.setColor(await client.db.get('color'))
-				.setTitle(locales.ticketAlreadyOpen.description)
-				.setTimestamp();
-			await interaction.editReply({ embeds: [embed] });
-			return;
-		}
-	},
-};
+		const preparing = new EmbedBuilder()
+			.setColor(await client.db.get('color'))
+			.setTitle(locales.ticketNowInMaking.title)
+			.setDescription(locales.ticketNowInMaking.description)
+			.setTimestamp();
+
+		await interaction.message.edit({ embeds: [preparing], components: [] });
+		const guild = await client.guilds.fetch(await client.db.get('guildId'));
+		createChannel(guild, interaction, client);
+	}
+	if (channelStatus === true) {
+		const embed = new EmbedBuilder()
+			.setColor(await client.db.get('color'))
+			.setTitle(locales.ticketAlreadyOpen.description)
+			.setTimestamp();
+		await interaction.editReply({ embeds: [embed] });
+		return;
+	}
+}
 
 async function createChannel(guild, interaction, client) {
 	const data = await client.db.get(guild.id);
@@ -76,16 +84,13 @@ async function sendInitial(x, interaction) {
 	catch (e) {
 		console.log(e);
 	}
-	const db = client.ticket;
-	await db.set(x.id, { 'channel': [interaction.channelId], 'author': interaction.user.id, 'guild': x.guild.id, users: [interaction.user.id] });
-	await db.set(interaction.channelId, { 'channel': [x.id], 'author': interaction.user.id, 'guild': x.guild.id, users: [interaction.user.id] });
 
 	const embed2 = new EmbedBuilder()
 		.setColor(await client.db.get('color'))
 		.setTitle(locales.channelEmbed.title)
 		.setTimestamp();
 	await interaction.editReply({ embeds: [embed2] });
-	await client.ticket.delete(interaction.user.id, true);
+	databaseSync(interaction, x);
 }
 
 async function logInteraction(x, member) {
@@ -100,6 +105,11 @@ async function logInteraction(x, member) {
 		.setTimestamp()
 		.setFooter({ text: (locales.otherLogEmbed.footer.text).replace('USERID', member.user.id) });
 
-
 	wbh.send({ embeds: [embed] });
+}
+
+async function databaseSync(interaction, x) {
+	await interaction.client.ticket.set(x.id, { 'channel': [interaction.channelId], 'server': x.id, 'author': interaction.user.id, 'guild': x.guild.id, users: [interaction.user.id] });
+	await interaction.client.ticket.set(interaction.channelId, { 'channel': [interaction.channelId], 'server': x.id, 'author': interaction.user.id, 'guild': x.guild.id, users: [interaction.user.id] });
+	await interaction.client.ticket.pull('users', interaction.user.id);
 }

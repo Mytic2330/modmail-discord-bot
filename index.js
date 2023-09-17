@@ -9,7 +9,7 @@ const fs = require('fs-extra');
 const path = require('node:path');
 const database = new QuickDB({ filePath: './database.sqlite' });
 const { Token } = jsonc.parse(fs.readFileSync(path.join(__dirname, 'config/settings.jsonc'), 'utf8'));
-const debug = false;
+const debug = true;
 
 
 console.log(` \x1b[36m

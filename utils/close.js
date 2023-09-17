@@ -18,7 +18,6 @@ async function close(interaction) {
 			return;
 		}
 
-		await client.ticket.set(interaction.channelId + data.channel, true);
 		const guild = await client.guilds.fetch(interaction.guildId);
 		const channel = await guild.channels.fetch(interaction.channelId);
 		const dm = await client.channels.fetch(data.channel);
@@ -81,12 +80,16 @@ async function close(interaction) {
 		interaction.editReply('Ticket closed!');
 	}
 	if (interaction.guildId == null) {
+		if (data.author !== interaction.user.id) {
+			interaction.editReply('You cannot close the ticket!');
+			return;
+		}
 		if (!await client.ticket.has(interaction.channelId)) {
-			interaction.editReply('Ticket ni bil najden!');
+			interaction.editReply(locales.wrongChannel);
 			return;
 		}
 		if (await client.ticket.has(interaction.channelId + data.channel)) {
-			interaction.editReply('Ticket se že zapira');
+			interaction.editReply(locales.ticketAlreadyClosing);
 			return;
 		}
 		await client.ticket.set(interaction.channelId + data.channel, true);
@@ -109,27 +112,27 @@ async function close(interaction) {
 
 		const deleteButton = new ButtonBuilder()
 			.setCustomId('delete')
-			.setLabel('Izbriši')
-			.setEmoji('🗑️')
+			.setLabel(locales.deleteButton.lable)
+			.setEmoji(locales.deleteButton.emoji)
 			.setStyle(ButtonStyle.Danger);
 		const row = new ActionRowBuilder()
 			.addComponents(deleteButton);
 		const closeEmbed = new EmbedBuilder()
 			.setColor(await client.db.get('close'))
-			.setTitle('Ticket zaprt!')
-			.addFields({ name: 'Opis', value: 'Ticket je bil zaprt! Ponovno odpiranje ni mogoče.', inline: true })
+			.setTitle(locales.closeEmbed.title)
+			.addFields({ name: ' ', value: locales.closeEmbed.field.value, inline: true })
 			.setTimestamp()
-			.setFooter({ text: `Zaprl: ${interaction.user.username} | ${interaction.user.id}` });
+			.setFooter({ text: (locales.closeEmbed.footer.text).replace('USERNAME', interaction.user.username).replace('ID', interaction.user.id) });
 		const closeLog = new EmbedBuilder()
 			.setColor(await client.db.get('close'))
-			.setTitle('Ticket ' + author.username + ' zaprt!')
-			.addFields({ name: 'Opis', value: 'Ticket je bil zaprt! Ponovno odpiranje ni mogoče.', inline: true })
+			.setTitle((locales.closeLog.title).replace('CHANNELNAME', author.username))
+			.addFields({ name: ' ', value: locales.closeLog.field.value, inline: true })
 			.setTimestamp()
-			.setFooter({ text: `Zaprl: ${interaction.user.username} | ${interaction.user.id}` });
+			.setFooter({ text: (locales.closeLog.footer.text).replace('USERNAME', interaction.user.username).replace('ID', interaction.user.id) });
 		const closeDmEmbed = new EmbedBuilder()
 			.setColor(await client.db.get('close'))
-			.setTitle('Ticket zaprt!')
-			.setDescription('Ticket je bil zaprt! Če želiš odpret nov ticket pošlji sporočilo, \nda prejmeš nov meni za izbiranje kategorije.\n Upamo, da ste vašo težavo z našo pomočjo odpravili. \n\n **BlueCityRP - Smo drugačni, ciljamo višje!**')
+			.setTitle(locales.closeDM.title)
+			.setDescription(locales.closeDM.description)
 			.setTimestamp();
 
 		const wbh = await client.wbh(logChannel);
@@ -139,8 +142,8 @@ async function close(interaction) {
 		try {
 			const message = await wbhArchive.send({ files: [attachment] });
 			const obj = message.attachments.values().next().value;
-			closeLog.addFields({ name: 'Transcript', value: `Pogovor si lahko ogledate [**TUKAJ**](${obj.url})`, inline: true });
-			closeEmbed.addFields({ name: 'Transcript', value: `Pogovor si lahko ogledate [**TUKAJ**](${obj.url})`, inline: true });
+			closeLog.addFields({ name: locales.transcriptField.name, value: (locales.transcriptField.value).replace('LINK', obj.url), inline: true });
+			closeEmbed.addFields({ name: locales.transcriptField.name, value: (locales.transcriptField.value).replace('LINK', obj.url), inline: true });
 			wbh.send({ embeds: [closeLog] });
 			wbhChannel.send({ embeds: [closeEmbed], components: [row] });
 			dbUpdate(interaction, data, client);
@@ -155,7 +158,9 @@ async function close(interaction) {
 
 
 async function dbUpdate(interaction, data, client) {
-	await client.ticket.delete(data.channel);
+	for (const id of data.channel) {
+		await client.ticket.delete(id);
+	}
+	await client.ticket.delete(data.server);
 	await client.ticket.delete(interaction.channelId);
-	await client.ticket.delete(interaction.channelId + data.channel);
 }

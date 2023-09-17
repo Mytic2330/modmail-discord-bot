@@ -1,3 +1,4 @@
+/* eslint-disable no-redeclare */
 /* eslint-disable no-undef */
 const { Events, EmbedBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ActionRowBuilder } = require('discord.js');
 module.exports = {
@@ -5,10 +6,18 @@ module.exports = {
 	async execute(message) {
 		if (message.author.bot === true) return;
 
+		if (message.guildId != undefined) {
+			if (message.content.toLowerCase().startsWith('!')) {
+				const check = message.content.substring(1, 4);
+				if (check.toLowerCase().startsWith('adm')) {
+					return;
+				}
+			}
+		}
+
 		const client = message.client;
 		const locales = client.locales.events.messageOnCreatejs;
 		const status = await client.ticket.has(message.channelId);
-		console.log(status);
 
 		switch (status) {
 		case true:
@@ -81,7 +90,6 @@ async function messageHandeler(message, client, locales) {
 	if (message.attachments) {
 		let num = 1;
 		message.attachments.forEach((keys) => {
-			console.log(keys);
 			channelEmbed.addFields({ name: `Attachment ${num}`, value: `[**LINK**](${keys.attachment})` });
 			reciveChannelEmbed.addFields({ name: `Attachment ${num}`, value: `[**LINK**](${keys.attachment})` });
 			num++;
@@ -89,18 +97,18 @@ async function messageHandeler(message, client, locales) {
 	}
 	messageReciverSwitch(message, reciveChannelEmbed, client, channelEmbed);
 }
-async function messageReciverSwitch(message, reciveChannelEmbed, client, channelEmbed) {
+async function messageReciverSwitch(message, reciveChannelEmbed, client) {
 	const switchStatus = message.guildId === null;
 
 	switch (switchStatus) {
 	case true: {
 		const sts = await sendToServer(message, reciveChannelEmbed);
-		afterSendHandler(message, channelEmbed, client, 'server', sts);
+		afterSendErrorHandler(message, client, 'server', sts);
 		break;
 	}
 	case false: {
 		const sts = await sendToDMChannel(message, reciveChannelEmbed);
-		afterSendHandler(message, channelEmbed, client, 'DM', sts);
+		afterSendErrorHandler(message, client, 'DM', sts);
 		break;
 	}
 	default: {
@@ -110,21 +118,17 @@ async function messageReciverSwitch(message, reciveChannelEmbed, client, channel
 }
 
 
-async function afterSendHandler(message, channelEmbed, client, type, values) {
-	const channel = await client.channels.fetch(message.channelId);
-	console.log(type);
+async function afterSendErrorHandler(message, client, type, values) {
 	if (type === 'DM') {
-		const wbh = await client.wbh(channel);
-		console.log(values);
 		if (values.channels.length === values.errorSender.length) {
 			const embd = new EmbedBuilder()
 				.setColor(await client.db.get('error'))
 				.setTitle('Sporočila ni bilo mogoče dostaviti!')
-				.setDescription('Lastnik ticketa ni več dostopen. \nMožen razlog je, da je izklopil `allow direct messages`.\n Če uporabnika ne morate ponovno kontaktirate, priporočamo zaprtje ticketa')
+				.setDescription('Uporabnik/i ticketa niso dosegljivi! \nMožen razlog je, da je izklopil `allow direct messages`.\n Če uporabnika ne morate ponovno kontaktirate, priporočamo zaprtje ticketa.')
 				.setTimestamp()
-				.setFooter({ text: 'BCRP Guard}', iconURL: 'https://cdn.discordapp.com/attachments/1012850899980394557/1138546219640176851/097e89ede70464edaf570046b6b3f7b8.png' });
+				.setFooter({ text: 'BCRP Guard', iconURL: 'https://cdn.discordapp.com/attachments/1012850899980394557/1138546219640176851/097e89ede70464edaf570046b6b3f7b8.png' });
 
-			wbh.send({ embeds: [embd] });
+			errorEmbedSender(message, embd, client, type);
 			return;
 		}
 		if (values.channels.length === 0) {
@@ -135,7 +139,7 @@ async function afterSendHandler(message, channelEmbed, client, type, values) {
 				.setTimestamp()
 				.setFooter({ text: 'BCRP Guard', iconURL: 'https://cdn.discordapp.com/attachments/1012850899980394557/1138546219640176851/097e89ede70464edaf570046b6b3f7b8.png' });
 
-			wbh.send({ embeds: [embd] });
+			errorEmbedSender(message, embd, client, type);
 			return;
 		}
 		if (values.channels.length > 1 && values.errorSender.length > 0) {
@@ -144,25 +148,23 @@ async function afterSendHandler(message, channelEmbed, client, type, values) {
 				.setTitle('Enemu ali več uporabnikom ni bilo možno dostaviti sporočila!')
 				.setTimestamp()
 				.setFooter({ text: 'BCRP Guard', iconURL: 'https://cdn.discordapp.com/attachments/1012850899980394557/1138546219640176851/097e89ede70464edaf570046b6b3f7b8.png' });
-			var x = 1;
+			let x = 1;
 			for (const id in values.errorSender) {
 				try {
 					const chan = await client.channels.fetch(id);
-					console.log(!chan);
 					one_time_warn_EMBED.addFields({ name: id, value: `Uporabnik ${chan.recipient.username} NI prejel sporočila!` });
 				}
 				catch (e) {
 					console.log(e);
-					one_time_warn_EMBED.addFields({ name: `Neznan uporabnik ${x}`, value: 'Uporabnik `NI BILO MOGOČE PRIDOBITI UPORABNIKA` NI prejel sporočila!' });
+					one_time_warn_EMBED.addFields({ name: `Neznan uporabnik ${x}`, value: `Uporabnik \`NI BILO MOGOČE PRIDOBITI UPORABNIKA\` NI prejel sporočila! \nID: ${id}` });
 					x++;
 				}
 			}
 
 		}
 		try {
-			await wbh.send({ embeds: [channelEmbed], files: message.attachments.map(attachment => attachment.url) });
-			if (one_time_warn_EMBED) wbh.send({ embeds: [one_time_warn_EMBED] });
-			message.delete();
+			await message.react('✅');
+			if (one_time_warn_EMBED) errorEmbedSender(message, one_time_warn_EMBED, client, type);
 		}
 		catch (e) {
 			console.log(e);
@@ -170,6 +172,27 @@ async function afterSendHandler(message, channelEmbed, client, type, values) {
 	}
 
 	if (type === 'server') {
+		if (values.channels.length > 1 && values.errorSender.length > 0) {
+			var one_time_warn_EMBED = new EmbedBuilder()
+				.setColor(await client.db.get('error'))
+				.setTitle('Enemu ali več uporabnikom ni bilo možno dostaviti sporočila!')
+				.setTimestamp()
+				.setFooter({ text: 'BCRP Guard', iconURL: 'https://cdn.discordapp.com/attachments/1012850899980394557/1138546219640176851/097e89ede70464edaf570046b6b3f7b8.png' });
+			let x = 1;
+			for (const id in values.errorSender) {
+				try {
+					const chan = await client.channels.fetch(id);
+					one_time_warn_EMBED.addFields({ name: id, value: `Uporabnik ${chan.recipient.username} NI prejel sporočila!` });
+				}
+				catch (e) {
+					console.log(e);
+					one_time_warn_EMBED.addFields({ name: `Neznan uporabnik ${x}`, value: `Uporabnik \`NI BILO MOGOČE PRIDOBITI UPORABNIKA\` NI prejel sporočila! \nID: ${id}` });
+					x++;
+				}
+			}
+
+		}
+		if (one_time_warn_EMBED) errorEmbedSender(message, one_time_warn_EMBED, client, type);
 		await message.react('✅');
 	}
 
@@ -186,7 +209,6 @@ async function sendToDMChannel(message, reciveChannelEmbed) {
 			await channel.send({ embeds: [reciveChannelEmbed] });
 		}
 		catch (e) {
-			console.log(e);
 			errorSender.push(id);
 		}
 	}
@@ -195,16 +217,50 @@ async function sendToDMChannel(message, reciveChannelEmbed) {
 
 async function sendToServer(message, reciveChannelEmbed) {
 	const client = message.client;
+	const status = await sendToDMByOtherDM(message, reciveChannelEmbed);
 
 	const reciverData = await client.ticket.get(message.channelId);
-	const recive = await client.channels.fetch(reciverData.channel[0]);
+	const recive = await client.channels.fetch(reciverData.server);
 	const wbh = await client.wbh(recive);
 	try {
 		wbh.send({ embeds: [reciveChannelEmbed] });
-		return true;
+		return status;
 	}
 	catch (e) {
 		console.log(e);
-		return false;
+		return status;
+	}
+}
+
+async function sendToDMByOtherDM(message, reciveChannelEmbed) {
+	const client = message.client;
+	const reciverData = await client.ticket.get(message.channelId);
+	const channels = reciverData.channel;
+	const errorSender = [];
+	for (id of channels) {
+		if (id === message.channelId) continue;
+		try {
+			const channel = await client.channels.fetch(id);
+			await channel.send({ embeds: [reciveChannelEmbed] });
+		}
+		catch (e) {
+			console.log(e);
+			errorSender.push(id);
+		}
+	}
+	return { errorSender, channels };
+}
+
+async function errorEmbedSender(message, embed, client, type) {
+	if (type === 'server') {
+		message.channel.send({ embeds: [embed] });
+		return;
+	}
+	if (type === 'DM') {
+		const channel = await client.channels.fetch(message.channel.id);
+		const wbh = await client.wbh(channel);
+
+		await wbh.send({ embeds: [embed] });
+		return;
 	}
 }
