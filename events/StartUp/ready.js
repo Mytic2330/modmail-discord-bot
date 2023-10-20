@@ -12,7 +12,7 @@ module.exports = {
 ╚═════╝░░╚════╝░░░░╚═╝░░░░░╚═╝░░╚═╝╚══════╝╚═╝░░╚═╝╚═════╝░░░░╚═╝░░░
 
 Logged in as ${client.user.tag}\x1b[0m`);
-		// readyMessage(client);
+		readyMessage(client);
 		await client.db.set('color', 'Aqua');
 		await client.db.set('recive', 'Aqua');
 		await client.db.set('send', 'DarkAqua');
