@@ -5,7 +5,6 @@ module.exports = {
 	name: Events.MessageCreate,
 	async execute(message) {
 		if (message.author.bot === true) return;
-
 		if (message.guildId != undefined) {
 			if (message.content.toLowerCase().startsWith('!')) {
 				const check = message.content.substring(1, 4);
@@ -14,7 +13,6 @@ module.exports = {
 				}
 			}
 		}
-
 		const client = message.client;
 		const locales = client.locales.events.messageOnCreatejs;
 		const status = await client.ticket.has(message.channelId);
@@ -24,15 +22,21 @@ module.exports = {
 			messageHandeler(message, client, locales);
 			break;
 		case false:
-			newTicketOpen(message, client, locales);
+			newTicketOpen(message, client, locales, false);
 			break;
 		}
 	},
+	newTicketOpen,
 };
 
-async function newTicketOpen(message, client, locales) {
+async function newTicketOpen(message, client, locales, comesFromButton) {
 	if (message.guildId !== null) return;
-	if (await client.ticket.has(message.author.id) === true) return;
+	if (comesFromButton == false) {
+		if (await client.ticket.has(message.author.id) === true) return;
+	}
+	if (comesFromButton == true) {
+		if (await client.ticket.has(message.user.id) === true) return;
+	}
 	const channel = await client.channels.fetch(message.channelId);
 	const embed = new EmbedBuilder()
 		.setTitle(locales.userSelectCategory.embed.title)
@@ -90,8 +94,8 @@ async function messageHandeler(message, client, locales) {
 	if (message.attachments) {
 		let num = 1;
 		message.attachments.forEach((keys) => {
-			channelEmbed.addFields({ name: `Attachment ${num}`, value: `[**LINK**](${keys.attachment})` });
-			reciveChannelEmbed.addFields({ name: `Attachment ${num}`, value: `[**LINK**](${keys.attachment})` });
+			channelEmbed.addFields({ name: `${locales.messageProcessing.attachment} ${num}`, value: `[**LINK**](${keys.attachment})` });
+			reciveChannelEmbed.addFields({ name: `${locales.messageProcessing.attachment} ${num}`, value: `[**LINK**](${keys.attachment})` });
 			num++;
 		});
 	}
@@ -117,16 +121,16 @@ async function messageReciverSwitch(message, reciveChannelEmbed, client) {
 	}
 }
 
-
 async function afterSendErrorHandler(message, client, type, values) {
+	const locales = client.locales.events.messageOnCreatejs.errorHandler;
 	if (type === 'DM') {
 		if (values.channels.length === values.errorSender.length) {
 			const embd = new EmbedBuilder()
 				.setColor(await client.db.get('error'))
-				.setTitle('Sporočila ni bilo mogoče dostaviti!')
-				.setDescription('Uporabnik/i ticketa niso dosegljivi! \nMožen razlog je, da je izklopil `allow direct messages`.\n Če uporabnika ne morate ponovno kontaktirate, priporočamo zaprtje ticketa.')
+				.setTitle(locales.messageNotDelivered.title)
+				.setDescription(locales.messageNotDelivered.description)
 				.setTimestamp()
-				.setFooter({ text: 'BCRP Guard', iconURL: 'https://cdn.discordapp.com/attachments/1012850899980394557/1138546219640176851/097e89ede70464edaf570046b6b3f7b8.png' });
+				.setFooter({ text: locales.messageNotDelivered.footer.text, iconURL: locales.messageNotDelivered.footer.iconURL });
 
 			errorEmbedSender(message, embd, client, type);
 			return;
@@ -134,10 +138,10 @@ async function afterSendErrorHandler(message, client, type, values) {
 		if (values.channels.length === 0) {
 			const embd = new EmbedBuilder()
 				.setColor(await client.db.get('error'))
-				.setTitle('Prišlo je do napake!')
-				.setDescription('Prosimo kontaktirajte skribnika bota, da preveri konzolo za neznane pojave.\n Ne moremo vam potrditi, da je sporočilo prispelo uporabniku.')
+				.setTitle(locales.unknownError.title)
+				.setDescription(locales.unknownError.description)
 				.setTimestamp()
-				.setFooter({ text: 'BCRP Guard', iconURL: 'https://cdn.discordapp.com/attachments/1012850899980394557/1138546219640176851/097e89ede70464edaf570046b6b3f7b8.png' });
+				.setFooter({ text: locales.unknownError.footer.text, iconURL: locales.unknownError.footer.iconURL });
 
 			errorEmbedSender(message, embd, client, type);
 			return;
@@ -145,18 +149,18 @@ async function afterSendErrorHandler(message, client, type, values) {
 		if (values.channels.length > 1 && values.errorSender.length > 0) {
 			var one_time_warn_EMBED = new EmbedBuilder()
 				.setColor(await client.db.get('error'))
-				.setTitle('Enemu ali več uporabnikom ni bilo možno dostaviti sporočila!')
+				.setTitle(locales.oneOrMore.title)
 				.setTimestamp()
-				.setFooter({ text: 'BCRP Guard', iconURL: 'https://cdn.discordapp.com/attachments/1012850899980394557/1138546219640176851/097e89ede70464edaf570046b6b3f7b8.png' });
+				.setFooter({ text: locales.oneOrMore.footer.text, iconURL: locales.oneOrMore.footer.iconURL });
 			let x = 1;
 			for (const id in values.errorSender) {
 				try {
 					const chan = await client.channels.fetch(id);
-					one_time_warn_EMBED.addFields({ name: id, value: `Uporabnik ${chan.recipient.username} NI prejel sporočila!` });
+					one_time_warn_EMBED.addFields({ name: id, value: (locales.oneOrMore.fields.user).replace('USERNAME', chan.recipient.username) });
 				}
 				catch (e) {
 					console.log(e);
-					one_time_warn_EMBED.addFields({ name: `Neznan uporabnik ${x}`, value: `Uporabnik \`NI BILO MOGOČE PRIDOBITI UPORABNIKA\` NI prejel sporočila! \nID: ${id}` });
+					one_time_warn_EMBED.addFields({ name: (locales.oneOrMore.fields.unknownUser).replace('NUMBER', x), value: (locales.oneOrMore.fields.unknownUserex).replace('IDNUM', id) });
 					x++;
 				}
 			}
@@ -175,18 +179,18 @@ async function afterSendErrorHandler(message, client, type, values) {
 		if (values.channels.length > 1 && values.errorSender.length > 0) {
 			var one_time_warn_EMBED = new EmbedBuilder()
 				.setColor(await client.db.get('error'))
-				.setTitle('Enemu ali več uporabnikom ni bilo možno dostaviti sporočila!')
+				.setTitle(locales.oneOrMore.title)
 				.setTimestamp()
-				.setFooter({ text: 'BCRP Guard', iconURL: 'https://cdn.discordapp.com/attachments/1012850899980394557/1138546219640176851/097e89ede70464edaf570046b6b3f7b8.png' });
+				.setFooter({ text: locales.oneOrMore.footer.text, iconURL: locales.oneOrMore.footer.iconURL });
 			let x = 1;
 			for (const id in values.errorSender) {
 				try {
 					const chan = await client.channels.fetch(id);
-					one_time_warn_EMBED.addFields({ name: id, value: `Uporabnik ${chan.recipient.username} NI prejel sporočila!` });
+					one_time_warn_EMBED.addFields({ name: id, value: (locales.oneOrMore.fields.user).replace('USERNAME', chan.recipient.username) });
 				}
 				catch (e) {
 					console.log(e);
-					one_time_warn_EMBED.addFields({ name: `Neznan uporabnik ${x}`, value: `Uporabnik \`NI BILO MOGOČE PRIDOBITI UPORABNIKA\` NI prejel sporočila! \nID: ${id}` });
+					one_time_warn_EMBED.addFields({ name: (locales.oneOrMore.fields.unknownUser).replace('NUMBER', x), value: (locales.oneOrMore.fields.unknownUserex).replace('IDNUM', id) });
 					x++;
 				}
 			}
@@ -200,13 +204,23 @@ async function afterSendErrorHandler(message, client, type, values) {
 }
 async function sendToDMChannel(message, reciveChannelEmbed) {
 	const client = message.client;
-	const reciverData = await client.ticket.get(message.channelId);
-	const channels = reciverData.channel;
+	const ticketNumberDatabse = await client.ticket.get(message.channelId);
+	const channels = await client.db.table(`tt_${ticketNumberDatabse}`).get('info.dmChannel');
 	const errorSender = [];
+	await client.db.table(`tt_${ticketNumberDatabse}`).set(message.id, {
+		'mesageData': {
+			'channelId': message.channelId,
+			'guildId': message.guildId,
+			'author': message.authorId,
+		},
+	});
+	await client.db.table(`tt_${ticketNumberDatabse}`).add('messageAnalitys.messages.sentByServer', 1);
+	await client.db.table(`tt_${ticketNumberDatabse}`).push('messageAnalitys.messages.serverMessagesUsers', { 'user': message.author.id });
 	for (id of channels) {
 		try {
 			const channel = await client.channels.fetch(id);
-			await channel.send({ embeds: [reciveChannelEmbed] });
+			const msh = await channel.send({ embeds: [reciveChannelEmbed] });
+			await client.db.table(`tt_${ticketNumberDatabse}`).push(`${message.id}.recive`, `${msh.id}_${msh.channelId}`);
 		}
 		catch (e) {
 			errorSender.push(id);
@@ -218,12 +232,22 @@ async function sendToDMChannel(message, reciveChannelEmbed) {
 async function sendToServer(message, reciveChannelEmbed) {
 	const client = message.client;
 	const status = await sendToDMByOtherDM(message, reciveChannelEmbed);
-
-	const reciverData = await client.ticket.get(message.channelId);
-	const recive = await client.channels.fetch(reciverData.server);
+	const ticketNumberDatabse = await client.ticket.get(message.channelId);
+	const reciverData = await client.db.table(`tt_${ticketNumberDatabse}`).get('info');
+	const recive = await client.channels.fetch(reciverData.guildChannel);
 	const wbh = await client.wbh(recive);
+	await client.db.table(`tt_${ticketNumberDatabse}`).set(message.id, {
+		'mesageData': {
+			'channelId': message.channelId,
+			'guildId': message.guildId,
+			'author': message.authorId,
+		},
+	});
+	await client.db.table(`tt_${ticketNumberDatabse}`).add('messageAnalitys.messages.sentByDM', 1);
+	await client.db.table(`tt_${ticketNumberDatabse}`).push('messageAnalitys.messages.DMMessagesUsers', { 'user': message.author.id });
 	try {
-		wbh.send({ embeds: [reciveChannelEmbed] });
+		const msh = await wbh.send({ embeds: [reciveChannelEmbed] });
+		await client.db.table(`tt_${ticketNumberDatabse}`).push(`${message.id}.recive`, `${msh.id}_${msh.channelId}`);
 		return status;
 	}
 	catch (e) {
@@ -234,14 +258,16 @@ async function sendToServer(message, reciveChannelEmbed) {
 
 async function sendToDMByOtherDM(message, reciveChannelEmbed) {
 	const client = message.client;
-	const reciverData = await client.ticket.get(message.channelId);
-	const channels = reciverData.channel;
+	const ticketNumberDatabse = await client.ticket.get(message.channelId);
+	const reciverData = await client.db.table(`tt_${ticketNumberDatabse}`).get('info');
+	const channels = reciverData.dmChannel;
 	const errorSender = [];
 	for (id of channels) {
 		if (id === message.channelId) continue;
 		try {
 			const channel = await client.channels.fetch(id);
-			await channel.send({ embeds: [reciveChannelEmbed] });
+			const msh = await channel.send({ embeds: [reciveChannelEmbed] });
+			await client.db.table(`tt_${ticketNumberDatabse}`).push(`${message.id}.recive`, `${msh.id}_${msh.channelId}`);
 		}
 		catch (e) {
 			console.log(e);
@@ -259,7 +285,6 @@ async function errorEmbedSender(message, embed, client, type) {
 	if (type === 'DM') {
 		const channel = await client.channels.fetch(message.channel.id);
 		const wbh = await client.wbh(channel);
-
 		await wbh.send({ embeds: [embed] });
 		return;
 	}

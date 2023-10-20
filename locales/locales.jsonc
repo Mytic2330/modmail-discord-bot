@@ -7,6 +7,34 @@
 		},
 		"closejs": {
 			//NIMA PREVODOV
+		},
+		"adduserjs": {
+			"notActiveChannel": "Ta kanal ni aktiven ticket!\n Prosim uporabite v kanalu z ticketom.",
+			"userCheck": {
+				"userInTicket": "Uporabnik je že v ticketu!"
+			},
+			"addUserToTicket": {
+				"userHasTicket": "Uporabnik že ima odprt ticket!",
+				"embed": {
+					"title": "Pozdrav!",
+					"description": "Dodani ste bili v ticket, od **USERNAME**"
+				},
+				"button": {
+					"lable": "From: BlueCityRP"
+				},
+				"error": "Napaka pri dodajanju uporabnika. \nUporabnik mora imeti odprte DMe!",
+				"added": "Uporabnik USERNAME je bil dodan v ticket!"
+			}
+		},
+		"removeUserjs": {
+			"notActiveChannel": "Ta kanal ni aktiven ticket!\n Prosim uporabite v kanalu z ticketom.",
+			"selectMenu": {
+				"placeholder": "Izberite uporabnika za odstranitev!"
+			},
+			"error": {
+				"nousers": "Ni uporabnikov za odstraniti!",
+				"nopremission": "Ne morate odstranjevati uporabnikov!"
+			}
 		}
 	},
 	"events": {
@@ -22,6 +50,31 @@
 			"archiveEmbed": {
 				"title":"Začelo shranjevati pogovore."
 			}
+		},
+		"onButtonPressjs": {
+			"ratebutton": {
+				"ratew1": {
+					"emoji": "⭐",
+					"lable": "1"
+				},
+				"ratew2": {
+					"emoji": "⭐",
+					"lable": "2"
+				},
+				"ratew3": {
+					"emoji": "⭐",
+					"lable": "3"
+				},
+				"ratew4": {
+					"emoji": "⭐",
+					"lable": "4"
+				},
+				"ratew5": {
+					"emoji": "⭐",
+					"lable": "5"
+				}
+			},
+			"newTicket": "Odpri nov ticket"
 		},
 		"messageOnCreatejs": {
 			"userSelectCategory": {
@@ -49,8 +102,50 @@
 						"text": "Ekipa BCRP",
 						"iconURL": "https://cdn.discordapp.com/attachments/1012850899980394557/1138546219640176851/097e89ede70464edaf570046b6b3f7b8.png"
 					}
+				},
+				"attachment": "Priloga"
+			},
+			"errorHandler": {
+				"messageNotDelivered": {
+					"title": "Sporočila ni bilo mogoče dostaviti!",
+					"description": "Uporabnik/i ticketa niso dosegljivi! \nMožen razlog je, da je izklopil `allow direct messages`.\n Če uporabnika ne morate ponovno kontaktirate, priporočamo zaprtje ticketa.",
+					"footer": {
+						"text": "BCRP Guard",
+						"iconURL": "https://cdn.discordapp.com/attachments/1012850899980394557/1138546219640176851/097e89ede70464edaf570046b6b3f7b8.png"
+					}
+				},
+				"unknownError": {
+					"title": "Prišlo je do napake!",
+					"description": "Prosimo kontaktirajte skribnika bota, da preveri konzolo za neznane pojave.\n Ne moremo vam potrditi, da je sporočilo prispelo uporabniku.",
+					"footer": {
+						"text": "BCRP Guard",
+						"iconURL": "https://cdn.discordapp.com/attachments/1012850899980394557/1138546219640176851/097e89ede70464edaf570046b6b3f7b8.png"
+					}
+				},
+				"oneOrMore": {
+					"title": "Enemu ali več uporabnikom ni bilo možno dostaviti sporočila!",
+					"footer": {
+						"text": "BCRP Guard",
+						"iconURL": "https://cdn.discordapp.com/attachments/1012850899980394557/1138546219640176851/097e89ede70464edaf570046b6b3f7b8.png"
+					},
+					"fields": {
+						"user": "Uporabnik USERNAME NI prejel sporočila!",
+						"unknownUser": "Neznan uporabnik NUMBER",
+						"unknownUserex": "Uporabnik `NI BILO MOGOČE PRIDOBITI UPORABNIKA` NI prejel sporočila! \nID: IDNUM"
+					}
 				}
 			}
+		},
+		"removejs": {
+			"userNotInTicket": "Uporabnik ni v ticketu!",
+			"embed": {
+				"title": "Bili ste odstranjeni iz ticketa!",
+				"description": "Če želite odpreti nov ticket,\n pošljite sporočilo, da prejmete sporočilo za novo odprtje."
+			},
+			"openNewTicket": {
+				"lable": "Odpri nov ticket"
+			},
+			"userRemoved": "Uporabnik odstranjen!"
 		},
 		"readyjs": {
 		//NIMA PREVODOV
@@ -83,7 +178,7 @@
 					}
 				},
 				"channelEmbed": {
-					"title": "Začel si pogovor z administracijo strežnika BlueCity.\nČe želiš pogovor končati, lahko uporabiš komando /close."
+					"title": "Začel si pogovor z administracijo strežnika BlueCity."
 				},
 				"otherLogEmbed": {
 					"title": "`USERNAME je odprl nov ticket!`",
@@ -101,6 +196,15 @@
 			"deleteButton": {
 				"lable": "Izbriši",
 				"emoji": "🗑️"
+			},
+			"creatorClose": {
+				"title": "Ticket zaprt!",
+				"field": {
+					"value": "Ticket je bil zaprt! Če želiš odpret nov ticket pošlji sporočilo, \nda prejmeš nov meni za izbiranje kategorije.\n Upamo, da ste vašo težavo z našo pomočjo odpravili. \n\n **BlueCityRP - Smo drugačni, ciljamo višje!**"
+				},
+				"footer": {
+					"text": "Zaprl: USERNAME | ID"
+				}
 			},
 			"closeEmbed": {
 				"title": "Ticket zaprt!",
@@ -127,6 +231,34 @@
 			"transcriptField": {
 				"name": "Transcript",
 				"value": "Pogovor si lahko ogledate [**TUKAJ**](LINK)"
+			},
+			"ratebutton": {
+				"ratew1": {
+					"emoji": "⭐",
+					"lable": "1"
+				},
+				"ratew2": {
+					"emoji": "⭐",
+					"lable": "2"
+				},
+				"ratew3": {
+					"emoji": "⭐",
+					"lable": "3"
+				},
+				"ratew4": {
+					"emoji": "⭐",
+					"lable": "4"
+				},
+				"ratew5": {
+					"emoji": "⭐",
+					"lable": "5"
+				}
+			},
+			"newTicketButton": {
+				"lable": "Odpri nov ticket"
+			},
+			"newTicketButtonRemoved": {
+				"lable": "Odpri nov ticket"
 			}
 		},
 		"etcjs": {
@@ -136,6 +268,7 @@
 		//NIMA PREVODOV
 		},
 		"webhookjs": {
+			"name": "Ticket bot",
 			"avatarURL": "https://cdn.discordapp.com/attachments/1012850899980394557/1138546219640176851/097e89ede70464edaf570046b6b3f7b8.png"
 		}
 	}

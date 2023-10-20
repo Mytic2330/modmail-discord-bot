@@ -1,5 +1,5 @@
 require('./utils/logger');
-const { hasNewUsername, getTimestamp } = require('./utils/etc');
+const { hasNewUsername, getTimestamp, getDatestamp } = require('./utils/etc');
 const { webhook } = require('./utils/webhook');
 const { Client, Collection, GatewayIntentBits, ActivityType, Events, Partials } = require('discord.js');
 const jsonc = require('jsonc');
@@ -13,7 +13,6 @@ const debug = true;
 
 
 console.log(` \x1b[36m
-
 
 ██████╗░██╗░░░░░██╗░░░██╗███████╗░█████╗░██╗████████╗██╗░░░██╗
 ██╔══██╗██║░░░░░██║░░░██║██╔════╝██╔══██╗██║╚══██╔══╝╚██╗░██╔╝
@@ -77,6 +76,8 @@ client.locales = jsonc.parse(fs.readFileSync(path.join(__dirname, 'locales/local
 client.hasNewUsername = hasNewUsername;
 client.wbh = webhook;
 client.timestamp = getTimestamp;
+client.version = version;
+client.datestamp = getDatestamp;
 
 
 client.commands = new Collection();

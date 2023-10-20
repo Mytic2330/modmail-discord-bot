@@ -3,7 +3,8 @@ const { close } = require('../../utils/close');
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('close')
-		.setDescription('Zapri ticket'),
+		.setDescription('Zapri ticket')
+		.setDMPermission(false),
 	async execute(interaction) {
 		close(interaction);
 	},

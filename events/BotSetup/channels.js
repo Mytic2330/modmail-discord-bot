@@ -37,13 +37,14 @@ module.exports = {
 };
 
 async function permissionSet(category, log, archive, client, guild) {
-	client.settings.allowedRoles.forEach(element => {
-		const role = guild.roles.cache.get(element);
-		category.permissionOverwrites.create(role, { ViewChannel: true });
-		log.permissionOverwrites.create(role, { ViewChannel: true });
-		archive.permissionOverwrites.create(role, { ViewChannel: true });
-	});
+	const roles = client.settings.allowedRoles;
 
+	for (const role of roles) {
+		const x = await guild.roles.cache.get(role);
+		await category.permissionOverwrites.create(x, { ViewChannel: true });
+		await log.permissionOverwrites.create(x, { ViewChannel: true });
+		await archive.permissionOverwrites.create(x, { ViewChannel: true });
+	}
 	const wbh = await client.wbh(log);
 	const wbh2 = await client.wbh(archive);
 

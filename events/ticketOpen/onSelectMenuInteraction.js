@@ -4,7 +4,7 @@ module.exports = {
 	async execute(interaction) {
 		if (!interaction.isStringSelectMenu()) return;
 		if (interaction.customId !== 'ticket') return;
-		await interaction.deferReply();
+		await interaction.deferReply({ ephemeral: true });
 		const client = interaction.client;
 		const locales = client.locales.events.onSelectMenuInteractionjs;
 		checkStatus(interaction, client, locales);
@@ -39,7 +39,7 @@ async function checkStatus(interaction, client, locales) {
 	if (channelStatus === true) {
 		const embed = new EmbedBuilder()
 			.setColor(await client.db.get('color'))
-			.setTitle(locales.ticketAlreadyOpen.description)
+			.setTitle(locales.ticketAlreadyOpen.title)
 			.setTimestamp();
 		await interaction.editReply({ embeds: [embed] });
 		return;
@@ -67,8 +67,8 @@ async function sendInitial(x, interaction) {
 	const locales = interaction.client.locales.events.onSelectMenuInteractionjs.initialOpening;
 	const member = await x.guild.members.fetch(interaction.user.id);
 
-	const client = x.client;
 	logInteraction(x, member);
+	const client = x.client;
 	const wbh = await client.wbh(x);
 	const embed = new EmbedBuilder()
 		.setAuthor({ name: interaction.user.username, iconURL: member.user.displayAvatarURL() })
@@ -101,15 +101,41 @@ async function logInteraction(x, member) {
 
 	const embed = new EmbedBuilder()
 		.setColor(await x.client.db.get('color'))
-		.setTitle((locales.otherLogEmbed.title).replace('USERNAME', member.user.username))
+		.setTitle((locales.otherLogEmbed.title)
+			.replace('USERNAME', member.user.username))
 		.setTimestamp()
-		.setFooter({ text: (locales.otherLogEmbed.footer.text).replace('USERID', member.user.id) });
+		.setFooter({ text: (locales.otherLogEmbed.footer.text)
+			.replace('USERID', member.user.id) });
 
 	wbh.send({ embeds: [embed] });
 }
 
 async function databaseSync(interaction, x) {
-	await interaction.client.ticket.set(x.id, { 'channel': [interaction.channelId], 'server': x.id, 'author': interaction.user.id, 'guild': x.guild.id, users: [interaction.user.id] });
-	await interaction.client.ticket.set(interaction.channelId, { 'channel': [interaction.channelId], 'server': x.id, 'author': interaction.user.id, 'guild': x.guild.id, users: [interaction.user.id] });
 	await interaction.client.ticket.pull('users', interaction.user.id);
+	var num = await interaction.client.db.get('ticketNumber');
+	if (num) {
+		await interaction.client.db.set('ticketNumber', num + 1);
+	}
+	else {
+		num = interaction.channelId + x.id;
+		await interaction.client.db.set('ticketNumber', 1);
+	}
+	const newTable = await interaction.client.db.table(`tt_${num}`);
+	await newTable.set('info', {
+		'guildChannel': x.id,
+		'dmChannel': [interaction.channelId],
+		'creatorId': interaction.user.id,
+		'closed': false,
+	});
+	await interaction.client.ticket.set(x.id, num);
+	await interaction.client.ticket.set(interaction.channelId, num);
+	await newTable.set('analytics', {
+		'date': await interaction.client.datestamp(),
+		'time': await interaction.client.timestamp(),
+		'rating': null,
+	});
+	await newTable.set('messageAnalitys', {
+		'messages': { 'sentByDM': 0, 'sentByServer': 0, 'serverMessagesUsers': [], 'DMMessagesUsers': [] },
+	});
+	await interaction.client.ticket.push('tickets', num);
 }

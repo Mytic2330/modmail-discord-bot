@@ -5,38 +5,45 @@ module.exports = {
 		.setDescription('Odstrani uporabnika iz ticketa'),
 	async execute(interaction) {
 		const client = interaction.client;
+		const locales = interaction.client.locales.commands.removeUserjs;
 		const checkOne = await client.ticket.has(interaction.channelId);
 		if (checkOne === false) {
-			interaction.reply('Ta kanal ni aktiven ticket!\n Prosim uporabite v kanalu z ticketom.');
+			interaction.reply(locales.notActiveChannel);
 			return;
 		}
-		const data = await client.ticket.get(interaction.channelId);
+		const number = await client.ticket.get(interaction.channelId);
+		const data = await client.db.table(`tt_${number}`).get('info');
+		if (interaction.guildId || data.creatorId === interaction.user.id) {
+			if (data.dmChannel.length > 1) {
+				const select = new StringSelectMenuBuilder()
+					.setCustomId('removeUser')
+					.setPlaceholder(locales.selectMenu.placeholder);
 
-		if (data.users.length > 1) {
-			const select = new StringSelectMenuBuilder()
-				.setCustomId('removeUser')
-				.setPlaceholder('Izberite uporabnika za odstranitev!');
-
-			for (const id of data.users) {
-				if (id === data.author) continue;
-				if (interaction.user.id === id) continue;
-				const user = await client.users.fetch(id);
-				select.addOptions(
-					new StringSelectMenuOptionBuilder()
-						.setLabel(user.username)
-						.setValue(id),
-				);
+				for (const id of data.dmChannel) {
+					const dm = await client.channels.fetch(id);
+					const user = await dm.recipient;
+					if (user.id === data.creatorId) continue;
+					if (interaction.user.id === user.id) continue;
+					select.addOptions(
+						new StringSelectMenuOptionBuilder()
+							.setLabel(user.username)
+							.setValue(id),
+					);
+				}
+				if (select.options.length === 0) {
+					await interaction.reply({ content: locales.error.nousers, ephemeral: true });
+					return;
+				}
+				const row = new ActionRowBuilder()
+					.addComponents(select);
+				await interaction.reply({ components: [row], ephemeral: true });
 			}
-			if (select.options.length === 0) {
-				await interaction.reply({ content: 'Ni uporabnikov za odstraniti!', ephemeral: true });
-				return;
+			else {
+				await interaction.reply({ content: locales.error.nousers, ephemeral: true });
 			}
-			const row = new ActionRowBuilder()
-				.addComponents(select);
-			await interaction.reply({ components: [row], ephemeral: true });
 		}
 		else {
-			await interaction.reply({ content: 'Ni uporabnikov za odstraniti!', ephemeral: true });
+			await interaction.reply({ content: locales.error.nopermission, ephemeral: true });
 		}
 	},
 };

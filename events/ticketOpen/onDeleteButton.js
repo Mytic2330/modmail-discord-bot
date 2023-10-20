@@ -5,7 +5,6 @@ module.exports = {
 		if (!interaction.isButton) return;
 		if (interaction.customId !== 'delete') return;
 		const locales = interaction.client.locales.events.onDeleteButtonjs;
-		await interaction.deferReply();
 		const data = await interaction.client.db.get(interaction.guildId);
 		const logChannel = await interaction.client.channels.fetch(data.logChannel);
 		const channel = await interaction.client.channels.fetch(interaction.channelId);
