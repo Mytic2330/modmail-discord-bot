@@ -12,7 +12,7 @@ module.exports = {
 			.setColor('Random')
 			.addFields(
 				{ name: '\u200B', value: '\u200B' },
-				{ name: '⭐', value: 'Statistični vpogled v \nzadovoljstvo uporabnikov pri ticketih' },
+				{ name: '⭐', value: 'Statistični vpogled v \nzadovoljstvo uporabnikov pri ticketih,\n povprečni podatki ticketov...' },
 				{ name: '📋', value: 'Statistični vpogled v \npodatke iz ticketa vaše izbere' },
 			);
 		const ratingButton = new ButtonBuilder()
