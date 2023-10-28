@@ -31,14 +31,12 @@ async function rateFnc(interaction) {
 		if (data != undefined) arr.push(data);
 	}
 
-	console.log(arr);
 }
 
 async function getRatingInfo(tc_id, client) {
 	const analytics = await client.db.table(`tt_${tc_id}`).get('analytics');
 	const messageAnalitys = await client.db.table(`tt_${tc_id}`).get('messageAnalitys');
 	const info = await client.db.table(`tt_${tc_id}`).get('info');
-	console.log(info);
 	const isClosed = info.closed;
 	if (isClosed === false) return undefined;
 	const returnData = { 'analytics': analytics, 'messageAnalitys': messageAnalitys };

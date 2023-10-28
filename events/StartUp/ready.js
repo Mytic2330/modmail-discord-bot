@@ -32,7 +32,6 @@ Logged in as ${client.user.tag}\x1b[0m`);
 async function readyMessage(client) {
 	const data = await client.db.get(client.settings.guildId);
 	if (data) {
-		console.log(data);
 		const wbh1 = await client.wbh(await client.channels.fetch(data.logChannel));
 		const wbh2 = await client.wbh(await client.channels.fetch(data.transcriptChannel));
 

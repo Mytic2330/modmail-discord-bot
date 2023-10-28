@@ -49,13 +49,13 @@ async function close(interaction) {
 		const closeEmbed = new EmbedBuilder()
 			.setColor(await client.db.get('close'))
 			.setTitle(locales.closeEmbed.title)
-			.addFields({ name: ' ', value: locales.closeEmbed.field.value, inline: true })
+			.addFields({ name: ' ', value: locales.closeEmbed.field.value }, { name: 'Ticket ID', value: `${number}`, inline: true })
 			.setTimestamp()
 			.setFooter({ text: (locales.closeEmbed.footer.text).replace('USERNAME', interaction.user.username).replace('ID', interaction.user.id) });
 		const closeLog = new EmbedBuilder()
 			.setColor(await client.db.get('close'))
 			.setTitle((locales.closeLog.title).replace('CHANNELNAME', author.username))
-			.addFields({ name: ' ', value: locales.closeLog.field.value, inline: true })
+			.addFields({ name: ' ', value: locales.closeLog.field.value }, { name: 'Ticket ID', value: `${number}`, inline: true })
 			.setTimestamp()
 			.setFooter({ text: (locales.closeLog.footer.text).replace('USERNAME', interaction.user.username).replace('ID', interaction.user.id) });
 		const closeDmEmbed = new EmbedBuilder()
