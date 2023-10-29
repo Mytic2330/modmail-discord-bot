@@ -4,3 +4,4 @@ database.sqlite
 package-lock.json
 logs
 .eslintrc.json
+database.sqlite

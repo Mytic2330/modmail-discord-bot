@@ -100,6 +100,7 @@ async function messageHandeler(message, client, locales) {
 		});
 	}
 	messageReciverSwitch(message, reciveChannelEmbed, client, channelEmbed);
+	resetInaStatus(message, client);
 }
 async function messageReciverSwitch(message, reciveChannelEmbed, client) {
 	const switchStatus = message.guildId === null;
@@ -216,7 +217,7 @@ async function sendToDMChannel(message, reciveChannelEmbed) {
 	});
 	await client.db.table(`tt_${ticketNumberDatabse}`).add('messageAnalitys.messages.sentByServer', 1);
 	await client.db.table(`tt_${ticketNumberDatabse}`).push('messageAnalitys.messages.serverMessagesUsers', { 'user': message.author.id });
-	for (id of channels) {
+	for (const id of channels) {
 		try {
 			const channel = await client.channels.fetch(id);
 			const msh = await channel.send({ embeds: [reciveChannelEmbed] });
@@ -262,7 +263,7 @@ async function sendToDMByOtherDM(message, reciveChannelEmbed) {
 	const reciverData = await client.db.table(`tt_${ticketNumberDatabse}`).get('info');
 	const channels = reciverData.dmChannel;
 	const errorSender = [];
-	for (id of channels) {
+	for (const id of channels) {
 		if (id === message.channelId) continue;
 		try {
 			const channel = await client.channels.fetch(id);
@@ -288,4 +289,18 @@ async function errorEmbedSender(message, embed, client, type) {
 		await wbh.send({ embeds: [embed] });
 		return;
 	}
+}
+
+async function resetInaStatus(message, client) {
+	const ticketNumberDatabse = await client.ticket.get(message.channelId);
+	const inaQueue = await client.ticket.get('inaQueue');
+	if (!inaQueue) return;
+
+	for (const number of inaQueue) {
+		if (number == ticketNumberDatabse) {
+			const db = await client.db.table(`tt_${ticketNumberDatabse}`);
+			await db.set('inaData', 86400000);
+		}
+	}
+
 }

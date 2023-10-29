@@ -81,6 +81,3 @@ async function checkIfUserHasOpenTicket(interaction, DM) {
 	if (status === false) return false;
 	return undefined;
 }
-
-// locales.messageProcessing.sendNewMessageEmbed.footer.text
-// 		const locales = client.locales.events.messageOnCreatejs;
