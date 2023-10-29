@@ -33,12 +33,12 @@ async function inaCheck(client) {
 	for (const id of queue) {
 		const ticket = await client.db.table(`tt_${id}`);
 		const check = await ticket.get('info');
-		if (check.closed === true) return;
+		if (check.closed === true) continue;
 		const currentTime = await ticket.get('inaData');
 		console.log(!currentTime);
 		if (currentTime <= 0) {
 			inaClose(client, id);
-			return;
+			continue;
 		}
 		if (currentTime > 86400000) {
 			await ticket.set('inaData', 86400000);
