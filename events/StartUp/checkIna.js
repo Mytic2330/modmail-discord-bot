@@ -1,4 +1,5 @@
 const { Events } = require('discord.js');
+const { inaClose } = require('../../utils/close');
 module.exports = {
 	name: Events.ClientReady,
 	once: true,
@@ -29,10 +30,16 @@ module.exports = {
 async function inaCheck(client) {
 	const queue = await client.ticket.get('inaQueue');
 	if (!queue) return;
-
 	for (const id of queue) {
 		const ticket = await client.db.table(`tt_${id}`);
+		const check = await ticket.get('info');
+		if (check.closed === true) return;
 		const currentTime = await ticket.get('inaData');
+		console.log(!currentTime);
+		if (currentTime <= 0) {
+			inaClose(client, id);
+			return;
+		}
 		if (currentTime > 86400000) {
 			await ticket.set('inaData', 86400000);
 		}

@@ -100,6 +100,7 @@ async function messageHandeler(message, client, locales) {
 		});
 	}
 	messageReciverSwitch(message, reciveChannelEmbed, client, channelEmbed);
+	resetInaStatus(message, client);
 }
 async function messageReciverSwitch(message, reciveChannelEmbed, client) {
 	const switchStatus = message.guildId === null;
@@ -288,4 +289,18 @@ async function errorEmbedSender(message, embed, client, type) {
 		await wbh.send({ embeds: [embed] });
 		return;
 	}
+}
+
+async function resetInaStatus(message, client) {
+	const ticketNumberDatabse = await client.ticket.get(message.channelId);
+	const inaQueue = await client.ticket.get('inaQueue');
+	if (!inaQueue) return;
+
+	for (const number of inaQueue) {
+		if (number == ticketNumberDatabse) {
+			const db = await client.db.table(`tt_${ticketNumberDatabse}`);
+			await db.set('inaData', 86400000);
+		}
+	}
+
 }
