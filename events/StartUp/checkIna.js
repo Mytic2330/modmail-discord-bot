@@ -1,4 +1,4 @@
-const { Events } = require('discord.js');
+const { Events, EmbedBuilder } = require('discord.js');
 const { inaClose } = require('../../utils/close');
 module.exports = {
 	name: Events.ClientReady,
@@ -32,20 +32,56 @@ async function inaCheck(client) {
 	if (!queue) return;
 	for (const id of queue) {
 		const ticket = await client.db.table(`tt_${id}`);
-		const check = await ticket.get('info');
-		if (check.closed === true) continue;
+		const data = await ticket.get('info');
+		if (data.closed === true) continue;
 		const currentTime = await ticket.get('inaData');
 		console.log(!currentTime);
 		if (currentTime <= 0) {
 			inaClose(client, id);
 			continue;
 		}
-		if (currentTime > 86400000) {
-			await ticket.set('inaData', 86400000);
+		if (currentTime == 86400000) {
+			sendInaWarning(data, client);
 		}
-		else if (currentTime <= 86400000) {
+		if (currentTime > 172800000) {
+			await ticket.set('inaData', 172800000);
+		}
+		else if (currentTime <= 172800000) {
 			const time = currentTime - 60000;
 			await ticket.set('inaData', time);
 		}
 	}
+}
+
+async function sendInaWarning(data, client) {
+	const embed = new EmbedBuilder()
+		.setColor(await client.db.get('color'))
+		.setTitle('Opozorilo o nekativnosti!')
+		.setDescription('Vaš ticket se bo zaprl čez 24 ur, če ne bo nobenega sporočila!');
+
+	const emb = new EmbedBuilder()
+		.setColor(await client.db.get('color'))
+		.setTitle('Opozorilo o nekativnosti!')
+		.setDescription('Ticket se bo zaprl čez 24 ur, če ne bo nobenega sporočila!');
+
+	const channel = await client.channels.fetch(data.guildChannel);
+	sendToServer(client, channel, emb);
+	sendEmbeds(client, data.dmChannel, embed);
+}
+
+async function sendEmbeds(client, channels, embed) {
+	for (const id of channels) {
+		try {
+			const channel = await client.channels.fetch(id);
+			await channel.send({ embeds: [embed] });
+		}
+		catch (e) {
+			console.log(e);
+		}
+	}
+}
+
+async function sendToServer(client, channel, emb) {
+	const wbh = await client.wbh(channel);
+	wbh.send({ embeds: [emb] });
 }

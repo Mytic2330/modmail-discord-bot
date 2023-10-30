@@ -32,12 +32,12 @@ module.exports = {
 		const embed = new EmbedBuilder()
 			.setColor(await client.db.get('color'))
 			.setTitle('Oznaka inaktivnosti')
-			.setDescription('Vaš ticket je bil označen kot neaktiven to pomeni, \nda mora biti v vašem ticketu poslano sporočilo vsakih \n24 ur drugače se bo ticket avtomatsko zapr.');
+			.setDescription('Vaš ticket je bil označen kot neaktiven to pomeni, \nda mora biti v vašem ticketu poslano sporočilo vsakih \n48 ur drugače se bo ticket avtomatsko zaprl.\n24 ur pred zaprtjem boste opozorjeni.');
 
 		const emb = new EmbedBuilder()
 			.setColor(await client.db.get('color'))
 			.setTitle('Oznaka inaktivnosti')
-			.setDescription('Ticket je bil označen kot neaktiven to pomeni, \nda se bo ticket avtomatsko zaprl, če v 24ih urah ni sporočil.');
+			.setDescription('Ticket je bil označen kot neaktiven to pomeni, \nda se bo ticket avtomatsko zaprl, če v 48ih urah ni sporočil.\n24 ur pred zaprtjem boste opozorjeni.');
 
 		const channels = data.dmChannel;
 		const channel = await client.channels.fetch(data.guildChannel);
@@ -70,7 +70,7 @@ async function setData(database) {
 	const currentSec = now.getSeconds();
 	const currentMs = now.getMilliseconds();
 	const rej = (currentSec * 1000) + currentMs;
-	const remainingMilliseconds = (60000 - rej) + 86400000;
+	const remainingMilliseconds = (60000 - rej) + 172800000;
 
 	database.set('inaData', remainingMilliseconds);
 }
