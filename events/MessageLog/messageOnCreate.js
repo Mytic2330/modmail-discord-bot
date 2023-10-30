@@ -299,7 +299,7 @@ async function resetInaStatus(message, client) {
 	for (const number of inaQueue) {
 		if (number == ticketNumberDatabse) {
 			const db = await client.db.table(`tt_${ticketNumberDatabse}`);
-			await db.set('inaData', 86400000);
+			await db.set('inaData', 172800000);
 		}
 	}
 

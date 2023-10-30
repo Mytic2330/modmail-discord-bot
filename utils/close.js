@@ -127,6 +127,7 @@ async function close(interaction) {
 			wbh.send({ embeds: [closeLog] });
 			wbhChannel.send({ embeds: [closeEmbed], components: [row] });
 			dbUpdate(number, data, client);
+			await client.ticket.pull('inaQueue', number);
 		}
 		catch (e) {
 			console.log(e);
