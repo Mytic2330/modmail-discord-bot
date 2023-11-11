@@ -78,28 +78,17 @@ async function messageHandeler(message, client, locales) {
 		.setTimestamp()
 		.setFooter({ text: `${locales.messageProcessing.reciveNewMessageEmbed.footer.text}`, iconURL: locales.messageProcessing.reciveNewMessageEmbed.footer.iconURL });
 
-
-	const channelEmbed = new EmbedBuilder()
-		.setAuthor({ name: user.username, iconURL: user.displayAvatarURL() })
-		.setColor(await client.db.get('send'))
-		.setTitle(locales.messageProcessing.sendNewMessageEmbed.title)
-		.setTimestamp()
-		.setFooter({ text: `${locales.messageProcessing.sendNewMessageEmbed.footer.text}`, iconURL: locales.messageProcessing.sendNewMessageEmbed.footer.iconURL });
-
-
 	if (message.content) {
-		channelEmbed.setDescription(message.content);
 		reciveChannelEmbed.setDescription(message.content);
 	}
 	if (message.attachments) {
 		let num = 1;
 		message.attachments.forEach((keys) => {
-			channelEmbed.addFields({ name: `${locales.messageProcessing.attachment} ${num}`, value: `[**LINK**](${keys.attachment})` });
 			reciveChannelEmbed.addFields({ name: `${locales.messageProcessing.attachment} ${num}`, value: `[**LINK**](${keys.attachment})` });
 			num++;
 		});
 	}
-	messageReciverSwitch(message, reciveChannelEmbed, client, channelEmbed);
+	messageReciverSwitch(message, reciveChannelEmbed, client);
 	resetInaStatus(message, client);
 }
 async function messageReciverSwitch(message, reciveChannelEmbed, client) {
