@@ -210,7 +210,7 @@ async function sendToDMChannel(message, reciveChannelEmbed) {
 		try {
 			const channel = await client.channels.fetch(id);
 			const msh = await channel.send({ embeds: [reciveChannelEmbed] });
-			await client.db.table(`tt_${ticketNumberDatabse}`).push(`${message.id}.recive`, `${msh.id}_${msh.channelId}`);
+			await client.db.table(`tt_${ticketNumberDatabse}`).push(`${message.id}.recive`, { 'channelId': msh.channelId, 'messageId': msh.id, 'guildId': msh.guildId });
 		}
 		catch (e) {
 			errorSender.push(id);
@@ -237,7 +237,7 @@ async function sendToServer(message, reciveChannelEmbed) {
 	await client.db.table(`tt_${ticketNumberDatabse}`).push('messageAnalitys.messages.DMMessagesUsers', { 'user': message.author.id });
 	try {
 		const msh = await wbh.send({ embeds: [reciveChannelEmbed] });
-		await client.db.table(`tt_${ticketNumberDatabse}`).push(`${message.id}.recive`, `${msh.id}_${msh.channelId}`);
+		await client.db.table(`tt_${ticketNumberDatabse}`).push(`${message.id}.recive`, { 'channelId': msh.channelId, 'messageId': msh.id, 'guildId': msh.guildId });
 		return status;
 	}
 	catch (e) {
@@ -257,7 +257,7 @@ async function sendToDMByOtherDM(message, reciveChannelEmbed) {
 		try {
 			const channel = await client.channels.fetch(id);
 			const msh = await channel.send({ embeds: [reciveChannelEmbed] });
-			await client.db.table(`tt_${ticketNumberDatabse}`).push(`${message.id}.recive`, `${msh.id}_${msh.channelId}`);
+			await client.db.table(`tt_${ticketNumberDatabse}`).push(`${message.id}.recive`, { 'channelId': msh.channelId, 'messageId': msh.id, 'guildId': msh.guildId });
 		}
 		catch (e) {
 			console.log(e);

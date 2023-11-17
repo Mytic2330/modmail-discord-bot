@@ -6,3 +6,4 @@ logs
 .eslintrc.json
 database.sqlite
 *.sqlite
+*.sqlite
