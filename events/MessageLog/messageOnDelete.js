@@ -25,16 +25,7 @@ async function handleHasMessage(client, message, table) {
 	const dataMessage = await table.get(message.id);
 	for (const obj of dataMessage.recive) {
 		const channel = await client.channels.fetch(obj.channelId);
-		// DM EDIT
-		if (obj.guildId == null) {
-			const msg = await channel.messages.fetch(obj.messageId);
-			await msg.delete();
-		}
-		// SERVER EDIT
-		if (obj.guildId !== null) {
-			const wbh = await client.wbh(channel);
-			const msg = await wbh.fetchMessage(obj.messageId);
-			await wbh.deleteMessage(msg);
-		}
+		const msg = await channel.messages.fetch(obj.messageId);
+		await msg.delete();
 	}
 }

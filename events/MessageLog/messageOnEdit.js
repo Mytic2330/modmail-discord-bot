@@ -23,29 +23,13 @@ async function handleHasMessage(client, message, table) {
 	const dataMessage = await table.get(message.id);
 	for (const obj of dataMessage.recive) {
 		const channel = await client.channels.fetch(obj.channelId);
-		// DM EDIT
-		if (obj.guildId == null) {
-			const msg = await channel.messages.fetch(obj.messageId);
-			const embed = await createEmbedToSend(client, message);
-			try {
-				await msg.edit({ embeds: [embed] });
-			}
-			catch (e) {
-				console.log(e);
-			}
-
+		const msg = await channel.messages.fetch(obj.messageId);
+		const embed = await createEmbedToSend(client, message);
+		try {
+			await msg.edit({ embeds: [embed] });
 		}
-		// SERVER EDIT
-		if (obj.guildId !== null) {
-			const wbh = await client.wbh(channel);
-			const msg = await wbh.fetchMessage(obj.messageId);
-			const embed = await createEmbedToSend(client, message);
-			try {
-				await wbh.editMessage(msg, { embeds: [embed] });
-			}
-			catch (e) {
-				console.log(e);
-			}
+		catch (e) {
+			console.log(e);
 		}
 	}
 }

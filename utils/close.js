@@ -118,7 +118,6 @@ async function close(interaction) {
 			.addComponents(openNewTicket);
 
 		const wbh = await client.wbh(logChannel);
-		const wbhChannel = await client.wbh(channel);
 		const wbhArchive = await client.wbh(archive);
 
 		try {
@@ -127,7 +126,7 @@ async function close(interaction) {
 			closeLog.addFields({ name: locales.transcriptField.name, value: (locales.transcriptField.value).replace('LINK', obj.url) });
 			closeEmbed.addFields({ name: locales.transcriptField.name, value: (locales.transcriptField.value).replace('LINK', obj.url) });
 			wbh.send({ embeds: [closeLog] });
-			wbhChannel.send({ embeds: [closeEmbed], components: [row] });
+			channel.send({ embeds: [closeEmbed], components: [row] });
 			dataSetUpdate(number, data, client, obj, channel, gData);
 			await client.ticket.pull('inaQueue', number);
 		}
@@ -260,7 +259,6 @@ async function inaClose(client, number) {
 		.addComponents(openNewTicket);
 
 	const wbh = await client.wbh(logChannel);
-	const wbhChannel = await client.wbh(channel);
 	const wbhArchive = await client.wbh(archive);
 
 	try {
@@ -269,7 +267,7 @@ async function inaClose(client, number) {
 		closeLog.addFields({ name: locales.transcriptField.name, value: (locales.transcriptField.value).replace('LINK', obj.url) });
 		closeEmbed.addFields({ name: locales.transcriptField.name, value: (locales.transcriptField.value).replace('LINK', obj.url) });
 		wbh.send({ embeds: [closeLog] });
-		wbhChannel.send({ embeds: [closeEmbed], components: [row] });
+		channel.send({ embeds: [closeEmbed], components: [row] });
 		dataSetUpdate(number, data, client, obj, channel, gData);
 		await client.ticket.pull('inaQueue', number);
 	}
