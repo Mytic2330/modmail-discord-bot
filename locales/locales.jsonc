@@ -42,7 +42,8 @@
 			"channelCreation": {
 				"category": "modmail",
 				"log": "modmail-log",
-				"archive": "modmail-archive"
+				"archive": "modmail-archive",
+				"categoryClosed": "modmail - zaprto"
 			},
 			"logEmbed": {
 				"title": "Začelo zapisovati nove tickete!"
@@ -129,9 +130,10 @@
 						"iconURL": "https://cdn.discordapp.com/attachments/1012850899980394557/1138546219640176851/097e89ede70464edaf570046b6b3f7b8.png"
 					},
 					"fields": {
-						"user": "Uporabnik USERNAME NI prejel sporočila!",
+						"user": "Uporabnik USERNAME **NI** prejel sporočila!",
 						"unknownUser": "Neznan uporabnik NUMBER",
-						"unknownUserex": "Uporabnik `NI BILO MOGOČE PRIDOBITI UPORABNIKA` NI prejel sporočila! \nID: IDNUM"
+						"unknownUserex": "Uporabnik `NI BILO MOGOČE PRIDOBITI UPORABNIKA` NI prejel sporočila! \nID: IDNUM",
+						"knownUser": "ID: IDNUMBER"
 					}
 				}
 			}
@@ -152,7 +154,7 @@
 		},
 		"onDeleteButtonjs": {
 			"embed": {
-				"title": "`Ticket CHANNELNAME izbrisan`",
+				"title": "Ticket CHANNELNAME izbrisan",
 				"footer": {
 					"text": "Izbrisal: USERNAME | ID"
 				}
@@ -172,7 +174,8 @@
 
 			"initialOpening" : {
 				"logEmbed": {
-					"title": "Je odprl ticket pod kategorijo: CATEGORY",
+					"title": "je odprl ticket pod kategorijo: CATEGORY",
+					"ticketNumber": "Številka ticketa",
 					"footer": {
 						"text": "ID: USERID"
 					}
@@ -181,9 +184,10 @@
 					"title": "Začel si pogovor z administracijo strežnika BlueCity."
 				},
 				"otherLogEmbed": {
-					"title": "`USERNAME je odprl nov ticket!`",
+					"title": "USERNAME je odprl nov ticket!",
+					"ticketNumber": "Številka ticketa",
 					"footer": {
-						"text": "ID: USERID"
+						"text": "BlueCityRP"
 					}
 				}
 			}
@@ -216,7 +220,7 @@
 				}
 			},
 			"closeLog": {
-				"title": "`Ticket CHANNELNAME zaprt!`",
+				"title": "Ticket CHANNELNAME zaprt!",
 				"field": {
 					"value": "Ticket je bil zaprt! Ponovno odpiranje ni mogoče."
 				},

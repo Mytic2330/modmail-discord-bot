@@ -11,6 +11,10 @@ module.exports = {
 					name: client.locales.events.channelsjs.channelCreation.category,
 					type: ChannelType.GuildCategory,
 				});
+				const categoryClosed = await guild.channels.create({
+					name: client.locales.events.channelsjs.channelCreation.categoryClosed,
+					type: ChannelType.GuildCategory,
+				});
 
 				const log = await category.children.create({
 					name: client.locales.events.channelsjs.channelCreation.log,
@@ -23,10 +27,11 @@ module.exports = {
 				});
 
 				await category.permissionOverwrites.create(guild.roles.everyone, { ViewChannel: false });
+				await categoryClosed.permissionOverwrites.create(guild.roles.everyone, { ViewChannel: false });
 				await log.permissionOverwrites.create(guild.roles.everyone, { ViewChannel: false });
 				await archive.permissionOverwrites.create(guild.roles.everyone, { ViewChannel: false });
 
-				permissionSet(category, log, archive, client, guild);
+				permissionSet(category, log, archive, categoryClosed, client, guild);
 			}
 			catch (e) {
 				console.log(e);
@@ -36,7 +41,7 @@ module.exports = {
 	},
 };
 
-async function permissionSet(category, log, archive, client, guild) {
+async function permissionSet(category, log, archive, categoryClosed, client, guild) {
 	const roles = client.settings.allowedRoles;
 
 	for (const role of roles) {
@@ -44,11 +49,12 @@ async function permissionSet(category, log, archive, client, guild) {
 		await category.permissionOverwrites.create(x, { ViewChannel: true });
 		await log.permissionOverwrites.create(x, { ViewChannel: true });
 		await archive.permissionOverwrites.create(x, { ViewChannel: true });
+		await categoryClosed.permissionOverwrites.create(x, { ViewChannel: true });
 	}
 	const wbh = await client.wbh(log);
 	const wbh2 = await client.wbh(archive);
 
-	await client.db.set(guild.id, { 'logChannel': log.id, 'transcriptChannel': archive.id, 'categoryId': category.id });
+	await client.db.set(guild.id, { 'logChannel': log.id, 'transcriptChannel': archive.id, 'categoryId': category.id, 'closeCategoryId': categoryClosed.id });
 
 	const embed = new EmbedBuilder()
 		.setColor(await client.db.get('color'))

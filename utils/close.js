@@ -50,12 +50,14 @@ async function close(interaction) {
 			.setColor(await client.db.get('close'))
 			.setTitle(locales.closeEmbed.title)
 			.addFields({ name: ' ', value: locales.closeEmbed.field.value }, { name: 'Ticket ID', value: `${number}`, inline: true })
+			.addFields({ name: 'Uporabniki v ticketu', value: `${await getAllUsers(client, data)}`, inline: true })
 			.setTimestamp()
 			.setFooter({ text: (locales.closeEmbed.footer.text).replace('USERNAME', interaction.user.username).replace('ID', interaction.user.id) });
 		const closeLog = new EmbedBuilder()
 			.setColor(await client.db.get('close'))
 			.setTitle((locales.closeLog.title).replace('CHANNELNAME', author.username))
 			.addFields({ name: ' ', value: locales.closeLog.field.value }, { name: 'Ticket ID', value: `${number}`, inline: true })
+			.addFields({ name: 'Uporabniki v ticketu', value: `${await getAllUsers(client, data)}`, inline: true })
 			.setTimestamp()
 			.setFooter({ text: (locales.closeLog.footer.text).replace('USERNAME', interaction.user.username).replace('ID', interaction.user.id) });
 		const closeDmEmbed = new EmbedBuilder()
@@ -122,11 +124,11 @@ async function close(interaction) {
 		try {
 			const message = await wbhArchive.send({ files: [attachment] });
 			const obj = message.attachments.values().next().value;
-			closeLog.addFields({ name: locales.transcriptField.name, value: (locales.transcriptField.value).replace('LINK', obj.url), inline: true });
-			closeEmbed.addFields({ name: locales.transcriptField.name, value: (locales.transcriptField.value).replace('LINK', obj.url), inline: true });
+			closeLog.addFields({ name: locales.transcriptField.name, value: (locales.transcriptField.value).replace('LINK', obj.url) });
+			closeEmbed.addFields({ name: locales.transcriptField.name, value: (locales.transcriptField.value).replace('LINK', obj.url) });
 			wbh.send({ embeds: [closeLog] });
 			wbhChannel.send({ embeds: [closeEmbed], components: [row] });
-			dbUpdate(number, data, client);
+			dataSetUpdate(number, data, client, obj, channel, gData);
 			await client.ticket.pull('inaQueue', number);
 		}
 		catch (e) {
@@ -134,12 +136,18 @@ async function close(interaction) {
 		}
 		for (const id of data.dmChannel) {
 			const dm = await client.channels.fetch(id);
-			if (dm.recipientId === data.creatorId) {
-				await dm.send({ embeds: [creatorClose], components: [creatorRow, openRow] });
+			try {
+				if (dm.recipientId === data.creatorId) {
+					await dm.send({ embeds: [creatorClose], components: [creatorRow, openRow] });
+				}
+				else {
+					await dm.send({ embeds: [closeDmEmbed], components: [openRowRemoved] });
+				}
 			}
-			else {
-				await dm.send({ embeds: [closeDmEmbed], components: [openRowRemoved] });
+			catch (e) {
+				console.log(e);
 			}
+
 		}
 		interaction.editReply('Ticket closed!');
 	}
@@ -184,12 +192,14 @@ async function inaClose(client, number) {
 		.setColor(await client.db.get('close'))
 		.setTitle(locales.closeEmbed.title)
 		.addFields({ name: ' ', value: locales.closeEmbed.field.value }, { name: 'Ticket ID', value: `${number}`, inline: true })
+		.addFields({ name: 'Uporabniki v ticketu', value: `${await getAllUsers(client, data)}`, inline: true })
 		.setTimestamp()
 		.setFooter({ text: 'Ticket je bil zaprt zaradi neaktivnosti' });
 	const closeLog = new EmbedBuilder()
 		.setColor(await client.db.get('close'))
 		.setTitle((locales.closeLog.title).replace('CHANNELNAME', author.username))
 		.addFields({ name: ' ', value: locales.closeLog.field.value }, { name: 'Ticket ID', value: `${number}`, inline: true })
+		.addFields({ name: 'Uporabniki v ticketu', value: `${await getAllUsers(client, data)}`, inline: true })
 		.setTimestamp()
 		.setFooter({ text: 'Ticket je bil zaprt zaradi neaktivnosti' });
 	const closeDmEmbed = new EmbedBuilder()
@@ -256,11 +266,11 @@ async function inaClose(client, number) {
 	try {
 		const message = await wbhArchive.send({ files: [attachment] });
 		const obj = message.attachments.values().next().value;
-		closeLog.addFields({ name: locales.transcriptField.name, value: (locales.transcriptField.value).replace('LINK', obj.url), inline: true });
-		closeEmbed.addFields({ name: locales.transcriptField.name, value: (locales.transcriptField.value).replace('LINK', obj.url), inline: true });
+		closeLog.addFields({ name: locales.transcriptField.name, value: (locales.transcriptField.value).replace('LINK', obj.url) });
+		closeEmbed.addFields({ name: locales.transcriptField.name, value: (locales.transcriptField.value).replace('LINK', obj.url) });
 		wbh.send({ embeds: [closeLog] });
 		wbhChannel.send({ embeds: [closeEmbed], components: [row] });
-		dbUpdate(number, data, client);
+		dataSetUpdate(number, data, client, obj, channel, gData);
 		await client.ticket.pull('inaQueue', number);
 	}
 	catch (e) {
@@ -277,11 +287,31 @@ async function inaClose(client, number) {
 	}
 }
 
-async function dbUpdate(number, data, client) {
+async function dataSetUpdate(number, data, client, obj, channel, gData) {
+	moveTicket(client, channel, gData);
 	for (const id of data.dmChannel) {
 		await client.ticket.delete(id);
 	}
 	await client.ticket.delete(data.guildChannel);
 	await client.db.table(`tt_${number}`).set('info.closed', true);
+	await client.db.table(`tt_${number}`).set('info.transcript', `${obj.url}`);
 	await client.ticket.pull('closing', number);
+}
+
+async function getAllUsers(client, data) {
+	const arr = [];
+	for (const id of data.dmChannel) {
+		const dm = await client.channels.fetch(id);
+		const user = dm.recipient;
+		arr.push(user);
+	}
+
+	if (arr.length === 0) return null;
+	const string = arr.join('\n');
+	return string;
+}
+
+async function moveTicket(client, channel, gData) {
+	const parent = gData.closeCategoryId;
+	await channel.setParent(parent, { lockPermissions: false });
 }

@@ -7,9 +7,7 @@ module.exports = {
 		if (!await client.ticket.has(newMessage.channelId)) return;
 		const num = await client.ticket.get(newMessage.channelId);
 		const table = await client.db.table(`tt_${num}`);
-
 		const hasMessage = await table.has(newMessage.id);
-
 		switch (hasMessage) {
 		case true:
 			handleHasMessage(client, newMessage, table);
@@ -29,8 +27,12 @@ async function handleHasMessage(client, message, table) {
 		if (obj.guildId == null) {
 			const msg = await channel.messages.fetch(obj.messageId);
 			const embed = await createEmbedToSend(client, message);
-
-			await msg.edit({ embeds: [embed] });
+			try {
+				await msg.edit({ embeds: [embed] });
+			}
+			catch (e) {
+				console.log(e);
+			}
 
 		}
 		// SERVER EDIT
@@ -38,9 +40,12 @@ async function handleHasMessage(client, message, table) {
 			const wbh = await client.wbh(channel);
 			const msg = await wbh.fetchMessage(obj.messageId);
 			const embed = await createEmbedToSend(client, message);
-
-			await wbh.editMessage(msg, { embeds: [embed] });
-
+			try {
+				await wbh.editMessage(msg, { embeds: [embed] });
+			}
+			catch (e) {
+				console.log(e);
+			}
 		}
 	}
 }

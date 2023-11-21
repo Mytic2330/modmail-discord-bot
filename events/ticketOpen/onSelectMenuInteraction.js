@@ -66,8 +66,9 @@ async function createChannel(guild, interaction, client) {
 async function sendInitial(x, interaction) {
 	const locales = interaction.client.locales.events.onSelectMenuInteractionjs.initialOpening;
 	const member = await x.guild.members.fetch(interaction.user.id);
+	const num = await ticketNumberCalculation(interaction, x);
 
-	logInteraction(x, member);
+	logInteraction(x, member, num);
 	const client = x.client;
 	const wbh = await client.wbh(x);
 	const embed = new EmbedBuilder()
@@ -76,6 +77,7 @@ async function sendInitial(x, interaction) {
 		.setTitle((locales.logEmbed.title)
 			.replace('CATEGORY', interaction.values[0]))
 		.setTimestamp()
+		.addFields({ name: locales.logEmbed.ticketNumber, value: `${num}`, inline: true }, { name: 'Profil uporabnika', value: `${member.user}`, inline: true })
 		.setFooter({ text: (locales.logEmbed.footer.text)
 			.replace('USERID', interaction.user.id) });
 	try {
@@ -90,36 +92,29 @@ async function sendInitial(x, interaction) {
 		.setTitle(locales.channelEmbed.title)
 		.setTimestamp();
 	await interaction.editReply({ embeds: [embed2] });
-	databaseSync(interaction, x);
+	databaseSync(interaction, x, num);
 }
 
-async function logInteraction(x, member) {
+async function logInteraction(x, member, num) {
 	const locales = x.client.locales.events.onSelectMenuInteractionjs.initialOpening;
 	const data = await x.client.db.get(x.guildId);
 	const channel = await x.guild.channels.fetch(data.logChannel);
 	const wbh = await x.client.wbh(channel);
 
 	const embed = new EmbedBuilder()
+		.setAuthor({ name: member.user.username, iconURL: member.user.displayAvatarURL() })
 		.setColor(await x.client.db.get('color'))
 		.setTitle((locales.otherLogEmbed.title)
 			.replace('USERNAME', member.user.username))
 		.setTimestamp()
-		.setFooter({ text: (locales.otherLogEmbed.footer.text)
-			.replace('USERID', member.user.id) });
+		.addFields({ name: locales.otherLogEmbed.ticketNumber, value: `${num}`, inline: true }, { name: 'Profil uporabnika', value: `${member.user}`, inline: true })
+		.setFooter({ text: (locales.otherLogEmbed.footer.text) });
 
 	wbh.send({ embeds: [embed] });
 }
 
-async function databaseSync(interaction, x) {
+async function databaseSync(interaction, x, num) {
 	await interaction.client.ticket.pull('users', interaction.user.id);
-	var num = await interaction.client.db.get('ticketNumber');
-	if (num) {
-		await interaction.client.db.set('ticketNumber', num + 1);
-	}
-	else {
-		num = interaction.channelId + x.id;
-		await interaction.client.db.set('ticketNumber', 1);
-	}
 	const newTable = await interaction.client.db.table(`tt_${num}`);
 	await newTable.set('info', {
 		'guildChannel': x.id,
@@ -138,4 +133,16 @@ async function databaseSync(interaction, x) {
 		'messages': { 'sentByDM': 0, 'sentByServer': 0, 'serverMessagesUsers': [], 'DMMessagesUsers': [] },
 	});
 	await interaction.client.ticket.push('tickets', num);
+}
+
+async function ticketNumberCalculation(interaction, x) {
+	var num = await interaction.client.db.get('ticketNumber');
+	if (num) {
+		await interaction.client.db.set('ticketNumber', num + 1);
+	}
+	else {
+		num = interaction.channelId + x.id;
+		await interaction.client.db.set('ticketNumber', 1);
+	}
+	return num;
 }

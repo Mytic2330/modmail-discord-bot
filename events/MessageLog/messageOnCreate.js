@@ -114,103 +114,105 @@ async function messageReciverSwitch(message, reciveChannelEmbed, client) {
 async function afterSendErrorHandler(message, client, type, values) {
 	const locales = client.locales.events.messageOnCreatejs.errorHandler;
 	if (type === 'DM') {
-		if (values.channels.length === values.errorSender.length) {
-			const embd = new EmbedBuilder()
-				.setColor(await client.db.get('error'))
-				.setTitle(locales.messageNotDelivered.title)
-				.setDescription(locales.messageNotDelivered.description)
-				.setTimestamp()
-				.setFooter({ text: locales.messageNotDelivered.footer.text, iconURL: locales.messageNotDelivered.footer.iconURL });
-
-			errorEmbedSender(message, embd, client, type);
-			return;
-		}
-		if (values.channels.length === 0) {
-			const embd = new EmbedBuilder()
-				.setColor(await client.db.get('error'))
-				.setTitle(locales.unknownError.title)
-				.setDescription(locales.unknownError.description)
-				.setTimestamp()
-				.setFooter({ text: locales.unknownError.footer.text, iconURL: locales.unknownError.footer.iconURL });
-
-			errorEmbedSender(message, embd, client, type);
-			return;
-		}
-		if (values.channels.length > 1 && values.errorSender.length > 0) {
-			var one_time_warn_EMBED = new EmbedBuilder()
-				.setColor(await client.db.get('error'))
-				.setTitle(locales.oneOrMore.title)
-				.setTimestamp()
-				.setFooter({ text: locales.oneOrMore.footer.text, iconURL: locales.oneOrMore.footer.iconURL });
-			let x = 1;
-			for (const id in values.errorSender) {
-				try {
-					const chan = await client.channels.fetch(id);
-					one_time_warn_EMBED.addFields({ name: id, value: (locales.oneOrMore.fields.user).replace('USERNAME', chan.recipient.username) });
-				}
-				catch (e) {
-					console.log(e);
-					one_time_warn_EMBED.addFields({ name: (locales.oneOrMore.fields.unknownUser).replace('NUMBER', x), value: (locales.oneOrMore.fields.unknownUserex).replace('IDNUM', id) });
-					x++;
-				}
-			}
-
-		}
+		message.react('✅');
+		const embed = await errorEmbedAsemblyClient(message, client, values, locales);
 		try {
-			await message.react('✅');
-			if (one_time_warn_EMBED) errorEmbedSender(message, one_time_warn_EMBED, client, type);
+			if (embed) errorEmbedSender(message, embed, client, type);
+		}
+		catch (e) {
+			console.log(e);
+		}
+		return;
+	}
+
+	if (type === 'server') {
+		message.react('✅');
+		const embed = await errorEmbedAsemblyServer(message, client, values, locales);
+		try {
+			if (embed) errorEmbedSender(message, embed, client, type);
 		}
 		catch (e) {
 			console.log(e);
 		}
 	}
-
-	if (type === 'server') {
-		if (values.channels.length > 1 && values.errorSender.length > 0) {
-			var one_time_warn_EMBED = new EmbedBuilder()
-				.setColor(await client.db.get('error'))
-				.setTitle(locales.oneOrMore.title)
-				.setTimestamp()
-				.setFooter({ text: locales.oneOrMore.footer.text, iconURL: locales.oneOrMore.footer.iconURL });
-			let x = 1;
-			for (const id in values.errorSender) {
-				try {
-					const chan = await client.channels.fetch(id);
-					one_time_warn_EMBED.addFields({ name: id, value: (locales.oneOrMore.fields.user).replace('USERNAME', chan.recipient.username) });
-				}
-				catch (e) {
-					console.log(e);
-					one_time_warn_EMBED.addFields({ name: (locales.oneOrMore.fields.unknownUser).replace('NUMBER', x), value: (locales.oneOrMore.fields.unknownUserex).replace('IDNUM', id) });
-					x++;
-				}
+}
+async function errorEmbedAsemblyServer(message, client, values, locales) {
+	if (values.channels.length > 1 && values.errorSender.length > 0) {
+		var one_time_warn_EMBED = new EmbedBuilder()
+			.setColor(await client.db.get('error'))
+			.setTitle(locales.oneOrMore.title)
+			.setTimestamp()
+			.setFooter({ text: locales.oneOrMore.footer.text, iconURL: locales.oneOrMore.footer.iconURL });
+		let x = 1;
+		for (const id in values.errorSender) {
+			try {
+				const chan = await client.channels.fetch(id);
+				one_time_warn_EMBED.addFields({ name: id, value: (locales.oneOrMore.fields.user).replace('USERNAME', chan.recipient.username) });
 			}
-
+			catch (e) {
+				console.log(e);
+				one_time_warn_EMBED.addFields({ name: (locales.oneOrMore.fields.unknownUser).replace('NUMBER', x), value: (locales.oneOrMore.fields.unknownUserex).replace('IDNUM', id) });
+				x++;
+			}
 		}
-		if (one_time_warn_EMBED) errorEmbedSender(message, one_time_warn_EMBED, client, type);
-		await message.react('✅');
 	}
+	return one_time_warn_EMBED;
+}
+async function errorEmbedAsemblyClient(message, client, values, locales) {
+	if (values.channels.length === values.errorSender.length) {
+		const embd = new EmbedBuilder()
+			.setColor(await client.db.get('error'))
+			.setTitle(locales.messageNotDelivered.title)
+			.setDescription(locales.messageNotDelivered.description)
+			.setTimestamp()
+			.setFooter({ text: locales.messageNotDelivered.footer.text, iconURL: locales.messageNotDelivered.footer.iconURL });
 
+		errorEmbedSender(message, embd, client, type);
+		return null;
+	}
+	if (values.channels.length === 0) {
+		const embd = new EmbedBuilder()
+			.setColor(await client.db.get('error'))
+			.setTitle(locales.unknownError.title)
+			.setDescription(locales.unknownError.description)
+			.setTimestamp()
+			.setFooter({ text: locales.unknownError.footer.text, iconURL: locales.unknownError.footer.iconURL });
 
+		errorEmbedSender(message, embd, client, type);
+		return null;
+	}
+	if (values.channels.length > 1 && values.errorSender.length > 0) {
+		var one_time_warn_EMBED = new EmbedBuilder()
+			.setColor(await client.db.get('error'))
+			.setTitle(locales.oneOrMore.title)
+			.setTimestamp()
+			.setFooter({ text: locales.oneOrMore.footer.text, iconURL: locales.oneOrMore.footer.iconURL });
+		let x = 1;
+		for (const id of values.errorSender) {
+			try {
+				const chan = await client.channels.fetch(id);
+				one_time_warn_EMBED.addFields({ name: (locales.oneOrMore.fields.knownUser).replace('IDNUMBER', chan.recipient.id), value: (locales.oneOrMore.fields.user).replace('USERNAME', chan.recipient) });
+			}
+			catch (e) {
+				console.log(e);
+				one_time_warn_EMBED.addFields({ name: (locales.oneOrMore.fields.unknownUser).replace('NUMBER', x), value: (locales.oneOrMore.fields.unknownUserex).replace('IDNUM', id) });
+				x++;
+			}
+		}
+	}
+	return one_time_warn_EMBED;
 }
 async function sendToDMChannel(message, reciveChannelEmbed) {
 	const client = message.client;
 	const ticketNumberDatabse = await client.ticket.get(message.channelId);
 	const channels = await client.db.table(`tt_${ticketNumberDatabse}`).get('info.dmChannel');
 	const errorSender = [];
-	await client.db.table(`tt_${ticketNumberDatabse}`).set(message.id, {
-		'mesageData': {
-			'channelId': message.channelId,
-			'guildId': message.guildId,
-			'author': message.authorId,
-		},
-	});
-	await client.db.table(`tt_${ticketNumberDatabse}`).add('messageAnalitys.messages.sentByServer', 1);
-	await client.db.table(`tt_${ticketNumberDatabse}`).push('messageAnalitys.messages.serverMessagesUsers', { 'user': message.author.id });
+	infoWriter(client, ticketNumberDatabse, message, 'toDM');
 	for (const id of channels) {
 		try {
 			const channel = await client.channels.fetch(id);
 			const msh = await channel.send({ embeds: [reciveChannelEmbed] });
-			await client.db.table(`tt_${ticketNumberDatabse}`).push(`${message.id}.recive`, { 'channelId': msh.channelId, 'messageId': msh.id, 'guildId': msh.guildId });
+			sendDBWrite(client, ticketNumberDatabse, message, msh);
 		}
 		catch (e) {
 			errorSender.push(id);
@@ -226,18 +228,10 @@ async function sendToServer(message, reciveChannelEmbed) {
 	const reciverData = await client.db.table(`tt_${ticketNumberDatabse}`).get('info');
 	const recive = await client.channels.fetch(reciverData.guildChannel);
 	const wbh = await client.wbh(recive);
-	await client.db.table(`tt_${ticketNumberDatabse}`).set(message.id, {
-		'mesageData': {
-			'channelId': message.channelId,
-			'guildId': message.guildId,
-			'author': message.authorId,
-		},
-	});
-	await client.db.table(`tt_${ticketNumberDatabse}`).add('messageAnalitys.messages.sentByDM', 1);
-	await client.db.table(`tt_${ticketNumberDatabse}`).push('messageAnalitys.messages.DMMessagesUsers', { 'user': message.author.id });
+	infoWriter(client, ticketNumberDatabse, message, 'toServer');
 	try {
 		const msh = await wbh.send({ embeds: [reciveChannelEmbed] });
-		await client.db.table(`tt_${ticketNumberDatabse}`).push(`${message.id}.recive`, { 'channelId': msh.channelId, 'messageId': msh.id, 'guildId': msh.guildId });
+		sendDBWrite(client, ticketNumberDatabse, message, msh);
 		return status;
 	}
 	catch (e) {
@@ -257,7 +251,7 @@ async function sendToDMByOtherDM(message, reciveChannelEmbed) {
 		try {
 			const channel = await client.channels.fetch(id);
 			const msh = await channel.send({ embeds: [reciveChannelEmbed] });
-			await client.db.table(`tt_${ticketNumberDatabse}`).push(`${message.id}.recive`, { 'channelId': msh.channelId, 'messageId': msh.id, 'guildId': msh.guildId });
+			sendDBWrite(client, ticketNumberDatabse, message, msh);
 		}
 		catch (e) {
 			console.log(e);
@@ -292,4 +286,34 @@ async function resetInaStatus(message, client) {
 		}
 	}
 
+}
+
+async function infoWriter(client, ticketNumberDatabse, message, x) {
+	if (x === 'toServer') {
+		await client.db.table(`tt_${ticketNumberDatabse}`).set(message.id, {
+			'mesageData': {
+				'channelId': message.channelId,
+				'guildId': message.guildId,
+				'author': message.authorId,
+			},
+		});
+		await client.db.table(`tt_${ticketNumberDatabse}`).add('messageAnalitys.messages.sentByDM', 1);
+		await client.db.table(`tt_${ticketNumberDatabse}`).push('messageAnalitys.messages.DMMessagesUsers', { 'user': message.author.id });
+		return;
+	}
+	if (x === 'toDM') {
+		await client.db.table(`tt_${ticketNumberDatabse}`).set(message.id, {
+			'mesageData': {
+				'channelId': message.channelId,
+				'guildId': message.guildId,
+				'author': message.authorId,
+			},
+		});
+		await client.db.table(`tt_${ticketNumberDatabse}`).add('messageAnalitys.messages.sentByServer', 1);
+		await client.db.table(`tt_${ticketNumberDatabse}`).push('messageAnalitys.messages.serverMessagesUsers', { 'user': message.author.id });
+	}
+}
+
+async function sendDBWrite(client, ticketNumberDatabse, message, msh) {
+	await client.db.table(`tt_${ticketNumberDatabse}`).push(`${message.id}.recive`, { 'channelId': msh.channelId, 'messageId': msh.id, 'guildId': msh.guildId });
 }
