@@ -6,6 +6,8 @@ module.exports = {
 		.setDefaultMemberPermissions(PermissionFlagsBits.MoveMembers)
 		.setDescription('Preveri statistike'),
 	async execute(interaction) {
+		interaction.reply({ content: 'Ta komanda trenutno ni v uporabi!', ephemeral: true });
+		return;
 		const embed = new EmbedBuilder()
 			.setTitle('Pregled statistik')
 			.setDescription('Izberite kategorijo statistike, ki si jo želite ogledati:')
