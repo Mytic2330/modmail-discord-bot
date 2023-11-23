@@ -276,12 +276,18 @@ async function inaClose(client, number) {
 	}
 	for (const id of data.dmChannel) {
 		const dm = await client.channels.fetch(id);
-		if (dm.recipientId === data.creatorId) {
-			await dm.send({ embeds: [creatorClose], components: [creatorRow, openRow] });
+		try {
+			if (dm.recipientId === data.creatorId) {
+				await dm.send({ embeds: [creatorClose], components: [creatorRow, openRow] });
+			}
+			else {
+				await dm.send({ embeds: [closeDmEmbed], components: [openRowRemoved] });
+			}
 		}
-		else {
-			await dm.send({ embeds: [closeDmEmbed], components: [openRowRemoved] });
+		catch (e) {
+			console.log(e);
 		}
+
 	}
 }
 

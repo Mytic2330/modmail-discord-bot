@@ -144,10 +144,10 @@ async function errorEmbedAsemblyServer(message, client, values, locales) {
 			.setTimestamp()
 			.setFooter({ text: locales.oneOrMore.footer.text, iconURL: locales.oneOrMore.footer.iconURL });
 		let x = 1;
-		for (const id in values.errorSender) {
+		for (const id of values.errorSender) {
 			try {
 				const chan = await client.channels.fetch(id);
-				one_time_warn_EMBED.addFields({ name: id, value: (locales.oneOrMore.fields.user).replace('USERNAME', chan.recipient.username) });
+				one_time_warn_EMBED.addFields({ name: id, value: (locales.oneOrMore.fields.user).replace('USERNAME', chan.recipient) });
 			}
 			catch (e) {
 				console.log(e);
@@ -191,7 +191,7 @@ async function errorEmbedAsemblyClient(message, client, values, locales) {
 		for (const id of values.errorSender) {
 			try {
 				const chan = await client.channels.fetch(id);
-				one_time_warn_EMBED.addFields({ name: (locales.oneOrMore.fields.knownUser).replace('IDNUMBER', chan.recipient.id), value: (locales.oneOrMore.fields.user).replace('USERNAME', chan.recipient) });
+				one_time_warn_EMBED.addFields({ name: id, value: (locales.oneOrMore.fields.user).replace('USERNAME', chan.recipient) });
 			}
 			catch (e) {
 				console.log(e);
@@ -234,7 +234,6 @@ async function sendToServer(message, reciveChannelEmbed) {
 		return status;
 	}
 	catch (e) {
-		console.log(e);
 		return status;
 	}
 }
@@ -253,7 +252,6 @@ async function sendToDMByOtherDM(message, reciveChannelEmbed) {
 			sendDBWrite(client, ticketNumberDatabse, message, msh);
 		}
 		catch (e) {
-			console.log(e);
 			errorSender.push(id);
 		}
 	}

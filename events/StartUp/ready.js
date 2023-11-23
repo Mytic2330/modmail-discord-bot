@@ -12,14 +12,13 @@ module.exports = {
 ╚═════╝░░╚════╝░░░░╚═╝░░░░░╚═╝░░╚═╝╚══════╝╚═╝░░╚═╝╚═════╝░░░░╚═╝░░░
 
 Logged in as ${client.user.tag}\x1b[0m`);
-		// readyMessage(client);
-		await client.db.set('color', 'Aqua');
-		await client.db.set('recive', 'Aqua');
-		await client.db.set('send', 'DarkAqua');
-		await client.db.set('close', 'Red');
-		await client.db.set('open', 'Aqua');
-		await client.db.set('delete', 'DarkRed');
-		await client.db.set('error', 'Red');
+		readyMessage(client);
+		await client.db.set('color', client.settings.colors.default);
+		await client.db.set('recive', client.settings.colors.recive);
+		await client.db.set('close', client.settings.colors.close);
+		await client.db.set('open', client.settings.colors.open);
+		await client.db.set('delete', client.settings.colors.delete);
+		await client.db.set('error', client.settings.colors.error);
 		await client.db.set('guildId', client.settings.guildId);
 		await client.db.set('botID', client.user.id);
 		await client.db.set('ApplicationID', client.application.id);

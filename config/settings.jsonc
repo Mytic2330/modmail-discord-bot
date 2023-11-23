@@ -11,5 +11,13 @@
 		"ban_Bani_Pomoč glede banov, opozoril...",
 		"donacija_Donacije_Donacije",
 		"ostalo_Ostalo_Ostala pomoč"
-	]
+	],
+	"colors": {
+		"default": "Aqua",
+		"recive": "Green",
+		"close": "Red",
+		"open": "Aqua",
+		"delete": "Orange",
+		"error": "Red"
+	}
 }
