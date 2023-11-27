@@ -4,30 +4,52 @@ const util = require('util');
 
 const logDirectory = path.join(__dirname, '../logs');
 let currentLogFile = getCurrentLogFile();
-let logStream = createLogStream(currentLogFile);
+let logStreams = createLogStreams();
 
 const originalConsoleLog = console.log;
+const originalConsoleWarn = console.warn;
+const originalConsoleError = console.error;
+const originalConsoleInfo = console.info;
 
-console.log = function(message, ...args) {
-	const timestamp = getTimestamp();
-	const logMessage = `[${timestamp}] ${util.format(message, ...args)}\n`;
+console.log = createConsoleLog(originalConsoleLog, 'log');
+console.warn = createConsoleLog(originalConsoleWarn, 'warn');
+console.error = createConsoleLog(originalConsoleError, 'error');
+console.info = createConsoleLog(originalConsoleInfo, 'info');
 
-	const isWriteStreamFull = !logStream.write(logMessage);
-	if (isWriteStreamFull) {
-		logStream.once('drain', () => {
-			originalConsoleLog(message, ...args);
-		});
-	}
-	else {
-		originalConsoleLog(message, ...args);
-	}
+function createConsoleLog(originalFunction, type) {
+	return function(message, ...args) {
+		const timestamp = getTimestamp();
+		const logMessage = `[${type.toUpperCase()}][${timestamp}] ${util.format(message, ...args)}\n`;
 
-	if (!isSameHour(currentLogFile)) {
-		logStream.end();
-		currentLogFile = getCurrentLogFile();
-		logStream = createLogStream(currentLogFile);
-	}
-};
+		const logStream = logStreams[type];
+
+		const isWriteStreamFull = !logStream.write(logMessage);
+		if (isWriteStreamFull) {
+			logStream.once('drain', () => {
+				originalFunction(message, ...args);
+			});
+		}
+		else {
+			originalFunction(message, ...args);
+		}
+
+		if (!isSameHour(currentLogFile)) {
+			logStream.end();
+			currentLogFile = getCurrentLogFile();
+			logStreams = createLogStreams();
+		}
+	};
+}
+
+function createLogStreams() {
+	const streams = {};
+	['log', 'warn', 'error', 'info'].forEach(type => {
+		const logFile = getCurrentLogFile();
+		const logStream = createLogStream(logFile);
+		streams[type] = logStream;
+	});
+	return streams;
+}
 
 function getTimestamp() {
 	const date = new Date();
@@ -66,4 +88,4 @@ function isSameHour(logFile) {
 	return fileHour === currentHour;
 }
 
-module.exports = logStream;
+module.exports = logStreams['log'];

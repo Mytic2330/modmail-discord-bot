@@ -65,7 +65,7 @@ async function newTicketOpen(message, client, locales, comesFromButton) {
 		channel.send({ embeds: [embed], components: [row] });
 	}
 	catch (e) {
-		console.log(e);
+		console.error(e);
 	}
 }
 
@@ -73,7 +73,7 @@ async function messageHandeler(message, client, locales) {
 	const user = await client.users.fetch(message.author.id);
 	const reciveChannelEmbed = new EmbedBuilder()
 		.setAuthor({ name: user.username, iconURL: user.displayAvatarURL() })
-		.setColor(await client.db.get('recive'))
+		.setColor(await client.db.get('color.recive'))
 		.setTitle(locales.messageProcessing.reciveNewMessageEmbed.title)
 		.setTimestamp()
 		.setFooter({ text: `${locales.messageProcessing.reciveNewMessageEmbed.footer.text}`, iconURL: locales.messageProcessing.reciveNewMessageEmbed.footer.iconURL });
@@ -106,7 +106,7 @@ async function messageReciverSwitch(message, reciveChannelEmbed, client) {
 		break;
 	}
 	default: {
-		console.log('ERR');
+		console.error('ERR');
 	}
 	}
 }
@@ -120,7 +120,7 @@ async function afterSendErrorHandler(message, client, type, values) {
 			if (embed) errorEmbedSender(message, embed);
 		}
 		catch (e) {
-			console.log(e);
+			console.error(e);
 		}
 		return;
 	}
@@ -132,14 +132,14 @@ async function afterSendErrorHandler(message, client, type, values) {
 			if (embed) errorEmbedSender(message, embed);
 		}
 		catch (e) {
-			console.log(e);
+			console.error(e);
 		}
 	}
 }
 async function errorEmbedAsemblyServer(message, client, values, locales) {
 	if (values.channels.length > 1 && values.errorSender.length > 0) {
 		var one_time_warn_EMBED = new EmbedBuilder()
-			.setColor(await client.db.get('error'))
+			.setColor(await client.db.get('color.error'))
 			.setTitle(locales.oneOrMore.title)
 			.setTimestamp()
 			.setFooter({ text: locales.oneOrMore.footer.text, iconURL: locales.oneOrMore.footer.iconURL });
@@ -150,7 +150,7 @@ async function errorEmbedAsemblyServer(message, client, values, locales) {
 				one_time_warn_EMBED.addFields({ name: id, value: (locales.oneOrMore.fields.user).replace('USERNAME', chan.recipient) });
 			}
 			catch (e) {
-				console.log(e);
+				console.error(e);
 				one_time_warn_EMBED.addFields({ name: (locales.oneOrMore.fields.unknownUser).replace('NUMBER', x), value: (locales.oneOrMore.fields.unknownUserex).replace('IDNUM', id) });
 				x++;
 			}
@@ -161,7 +161,7 @@ async function errorEmbedAsemblyServer(message, client, values, locales) {
 async function errorEmbedAsemblyClient(message, client, values, locales) {
 	if (values.channels.length === values.errorSender.length) {
 		const embd = new EmbedBuilder()
-			.setColor(await client.db.get('error'))
+			.setColor(await client.db.get('color.error'))
 			.setTitle(locales.messageNotDelivered.title)
 			.setDescription(locales.messageNotDelivered.description)
 			.setTimestamp()
@@ -172,7 +172,7 @@ async function errorEmbedAsemblyClient(message, client, values, locales) {
 	}
 	if (values.channels.length === 0) {
 		const embd = new EmbedBuilder()
-			.setColor(await client.db.get('error'))
+			.setColor(await client.db.get('color.error'))
 			.setTitle(locales.unknownError.title)
 			.setDescription(locales.unknownError.description)
 			.setTimestamp()
@@ -183,7 +183,7 @@ async function errorEmbedAsemblyClient(message, client, values, locales) {
 	}
 	if (values.channels.length > 1 && values.errorSender.length > 0) {
 		var one_time_warn_EMBED = new EmbedBuilder()
-			.setColor(await client.db.get('error'))
+			.setColor(await client.db.get('color.error'))
 			.setTitle(locales.oneOrMore.title)
 			.setTimestamp()
 			.setFooter({ text: locales.oneOrMore.footer.text, iconURL: locales.oneOrMore.footer.iconURL });
@@ -194,7 +194,7 @@ async function errorEmbedAsemblyClient(message, client, values, locales) {
 				one_time_warn_EMBED.addFields({ name: id, value: (locales.oneOrMore.fields.user).replace('USERNAME', chan.recipient) });
 			}
 			catch (e) {
-				console.log(e);
+				console.error(e);
 				one_time_warn_EMBED.addFields({ name: (locales.oneOrMore.fields.unknownUser).replace('NUMBER', x), value: (locales.oneOrMore.fields.unknownUserex).replace('IDNUM', id) });
 				x++;
 			}

@@ -2,7 +2,6 @@ const { Events } = require('discord.js');
 module.exports = {
 	name: Events.MessageDelete,
 	async execute(message) {
-		console.log(message);
 		const client = message.client;
 		// if (message.author.bot === true) return;
 		if (!await client.ticket.has(message.channelId)) return;

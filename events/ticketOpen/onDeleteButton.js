@@ -11,7 +11,7 @@ module.exports = {
 		const wbh = await interaction.client.wbh(logChannel);
 
 		const embed = new EmbedBuilder()
-			.setColor(await interaction.client.db.get('delete'))
+			.setColor(await interaction.client.db.get('color.delete'))
 			.setTitle((locales.embed.title).replace('CHANNELNAME', channel.name))
 			.setTimestamp()
 			.setFooter({ text: (locales.embed.footer.text)
@@ -24,7 +24,7 @@ module.exports = {
 			wbh.send({ embeds: [embed] });
 		}
 		catch (e) {
-			console.log(e);
+			console.error(e);
 		}
 	},
 };

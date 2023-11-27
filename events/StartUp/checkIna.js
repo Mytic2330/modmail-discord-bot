@@ -16,11 +16,11 @@ module.exports = {
 		let x = 0;
 		waitForNextMinute(() => {
 			inaCheck(client);
-			if (x >= 172800) console.log('\x1b[31m BOT RESTART IS ADVISED ⚠️\x1b[0m');
+			if (x >= 172800) console.info('\x1b[31m BOT RESTART IS ADVISED ⚠️\x1b[0m');
 			x = x + 1;
 			setInterval(() => {
 				inaCheck(client);
-				if (x >= 172800) console.log('\x1b[31m BOT RESTART IS ADVISED ⚠️\x1b[0m');
+				if (x >= 172800) console.info('\x1b[31m BOT RESTART IS ADVISED ⚠️\x1b[0m');
 				x = x + 1;
 			}, 60000);
 		});
@@ -35,7 +35,6 @@ async function inaCheck(client) {
 		const data = await ticket.get('info');
 		if (data.closed === true) continue;
 		const currentTime = await ticket.get('inaData');
-		console.log(!currentTime);
 		if (currentTime <= 0) {
 			inaClose(client, id);
 			continue;
@@ -55,12 +54,12 @@ async function inaCheck(client) {
 
 async function sendInaWarning(data, client) {
 	const embed = new EmbedBuilder()
-		.setColor(await client.db.get('color'))
+		.setColor(await client.db.get('color.default'))
 		.setTitle('Opozorilo o nekativnosti!')
 		.setDescription('Vaš ticket se bo zaprl čez 24 ur, če ne bo nobenega sporočila!');
 
 	const emb = new EmbedBuilder()
-		.setColor(await client.db.get('color'))
+		.setColor(await client.db.get('color.default'))
 		.setTitle('Opozorilo o nekativnosti!')
 		.setDescription('Ticket se bo zaprl čez 24 ur, če ne bo nobenega sporočila!');
 
@@ -76,7 +75,7 @@ async function sendEmbeds(client, channels, embed) {
 			await channel.send({ embeds: [embed] });
 		}
 		catch (e) {
-			console.log(e);
+			console.error(e);
 		}
 	}
 }

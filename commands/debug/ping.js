@@ -10,7 +10,7 @@ module.exports = {
 			fetchReply: true,
 		});
 		const embed = new EmbedBuilder()
-			.setColor(await client.db.get('color'))
+			.setColor(await client.db.get('color.default'))
 			.setTitle(`${client.locales.commands.pingjs.embed.title} ${message.createdTimestamp - interaction.createdTimestamp}ms`);
 		await interaction.editReply({
 			embeds: [embed],

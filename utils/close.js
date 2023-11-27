@@ -29,6 +29,7 @@ async function close(interaction) {
 		const gData = await client.db.get(guild.id);
 		const logChannel = await client.channels.fetch(gData.logChannel);
 		const archive = await client.channels.fetch(gData.transcriptChannel);
+		const users = await getAllUsers(client, data);
 
 		const attachment = await discordTranscripts.createTranscript(channel, {
 			limit: -1,
@@ -47,28 +48,28 @@ async function close(interaction) {
 		const row = new ActionRowBuilder()
 			.addComponents(deleteButton);
 		const closeEmbed = new EmbedBuilder()
-			.setColor(await client.db.get('close'))
+			.setColor(await client.db.get('color.close'))
 			.setTitle(locales.closeEmbed.title)
 			.addFields({ name: ' ', value: locales.closeEmbed.field.value }, { name: 'Ticket ID', value: `${number}`, inline: true })
-			.addFields({ name: 'Uporabniki v ticketu', value: `${await getAllUsers(client, data)}`, inline: true })
+			.addFields({ name: 'Uporabniki v ticketu', value: `${users}`, inline: true })
 			.setTimestamp()
 			.setFooter({ text: (locales.closeEmbed.footer.text).replace('USERNAME', interaction.user.username).replace('ID', interaction.user.id) });
 		const closeLog = new EmbedBuilder()
-			.setColor(await client.db.get('close'))
+			.setColor(await client.db.get('color.close'))
 			.setTitle((locales.closeLog.title).replace('CHANNELNAME', author.username))
 			.addFields({ name: ' ', value: locales.closeLog.field.value }, { name: 'Ticket ID', value: `${number}`, inline: true })
-			.addFields({ name: 'Uporabniki v ticketu', value: `${await getAllUsers(client, data)}`, inline: true })
+			.addFields({ name: 'Uporabniki v ticketu', value: `${users}`, inline: true })
 			.setTimestamp()
 			.setFooter({ text: (locales.closeLog.footer.text).replace('USERNAME', interaction.user.username).replace('ID', interaction.user.id) });
 		const closeDmEmbed = new EmbedBuilder()
-			.setColor(await client.db.get('close'))
+			.setColor(await client.db.get('color.close'))
 			.setTitle(locales.closeDM.title)
 			.setDescription(locales.closeDM.description)
 			.setTimestamp();
 
 
 		const creatorClose = new EmbedBuilder()
-			.setColor(await client.db.get('close'))
+			.setColor(await client.db.get('color.close'))
 			.setTitle(locales.creatorClose.title)
 			.addFields({ name: ' ', value: locales.creatorClose.field.value, inline: true })
 			.setTimestamp()
@@ -131,7 +132,7 @@ async function close(interaction) {
 			await client.ticket.pull('inaQueue', number);
 		}
 		catch (e) {
-			console.log(e);
+			console.error(e);
 		}
 		for (const id of data.dmChannel) {
 			const dm = await client.channels.fetch(id);
@@ -144,7 +145,7 @@ async function close(interaction) {
 				}
 			}
 			catch (e) {
-				console.log(e);
+				console.error(e);
 			}
 
 		}
@@ -188,28 +189,28 @@ async function inaClose(client, number) {
 	const row = new ActionRowBuilder()
 		.addComponents(deleteButton);
 	const closeEmbed = new EmbedBuilder()
-		.setColor(await client.db.get('close'))
+		.setColor(await client.db.get('color.close'))
 		.setTitle(locales.closeEmbed.title)
 		.addFields({ name: ' ', value: locales.closeEmbed.field.value }, { name: 'Ticket ID', value: `${number}`, inline: true })
 		.addFields({ name: 'Uporabniki v ticketu', value: `${await getAllUsers(client, data)}`, inline: true })
 		.setTimestamp()
 		.setFooter({ text: 'Ticket je bil zaprt zaradi neaktivnosti' });
 	const closeLog = new EmbedBuilder()
-		.setColor(await client.db.get('close'))
+		.setColor(await client.db.get('color.close'))
 		.setTitle((locales.closeLog.title).replace('CHANNELNAME', author.username))
 		.addFields({ name: ' ', value: locales.closeLog.field.value }, { name: 'Ticket ID', value: `${number}`, inline: true })
 		.addFields({ name: 'Uporabniki v ticketu', value: `${await getAllUsers(client, data)}`, inline: true })
 		.setTimestamp()
 		.setFooter({ text: 'Ticket je bil zaprt zaradi neaktivnosti' });
 	const closeDmEmbed = new EmbedBuilder()
-		.setColor(await client.db.get('close'))
+		.setColor(await client.db.get('color.close'))
 		.setTitle(locales.closeDM.title)
 		.setDescription(locales.closeDM.description)
 		.setTimestamp();
 
 
 	const creatorClose = new EmbedBuilder()
-		.setColor(await client.db.get('close'))
+		.setColor(await client.db.get('color.close'))
 		.setTitle(locales.creatorClose.title)
 		.addFields({ name: ' ', value: locales.creatorClose.field.value, inline: true })
 		.setTimestamp()
@@ -272,7 +273,7 @@ async function inaClose(client, number) {
 		await client.ticket.pull('inaQueue', number);
 	}
 	catch (e) {
-		console.log(e);
+		console.error(e);
 	}
 	for (const id of data.dmChannel) {
 		const dm = await client.channels.fetch(id);
@@ -285,7 +286,7 @@ async function inaClose(client, number) {
 			}
 		}
 		catch (e) {
-			console.log(e);
+			console.error(e);
 		}
 
 	}
@@ -310,7 +311,7 @@ async function getAllUsers(client, data) {
 		arr.push(user);
 	}
 
-	if (arr.length === 0) return null;
+	if (arr.length === 0) return 'err';
 	const string = arr.join('\n');
 	return string;
 }

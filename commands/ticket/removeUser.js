@@ -22,8 +22,6 @@ module.exports = {
 				for (const id of data.dmChannel) {
 					const dm = await client.channels.fetch(id);
 					const user = await dm.recipient;
-					console.log(user.id === data.creatorId);
-					console.log(interaction.user.id === user.id);
 
 					if (user.id === data.creatorId) continue;
 					if (interaction.user.id === user.id) continue;

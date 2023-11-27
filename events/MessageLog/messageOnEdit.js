@@ -21,6 +21,7 @@ module.exports = {
 
 async function handleHasMessage(client, message, table) {
 	const dataMessage = await table.get(message.id);
+	const arr = [];
 	for (const obj of dataMessage.recive) {
 		const channel = await client.channels.fetch(obj.channelId);
 		const msg = await channel.messages.fetch(obj.messageId);
@@ -29,8 +30,14 @@ async function handleHasMessage(client, message, table) {
 			await msg.edit({ embeds: [embed] });
 		}
 		catch (e) {
-			console.log(e);
+			console.error(e);
+			arr.push(obj.channelId);
 		}
+	}
+
+	if (arr.length != 0) {
+		const string = arr.join('\n');
+		message.reply({ content: 'Ni bilo mogoče spremeniti sporočila v naslednjih kanalih:\n' + string });
 	}
 }
 
@@ -42,7 +49,7 @@ async function createEmbedToSend(client, message) {
 	const user = await client.users.fetch(message.author.id);
 	const reciveChannelEmbed = new EmbedBuilder()
 		.setAuthor({ name: user.username, iconURL: user.displayAvatarURL() })
-		.setColor(await client.db.get('recive'))
+		.setColor(await client.db.get('color.recive'))
 		.setTitle('Novo sporočilo')
 		.setTimestamp()
 		.setFooter({ text: `${'Ekipa BCRP'}`, iconURL: 'https://cdn.discordapp.com/attachments/1012850899980394557/1138546219640176851/097e89ede70464edaf570046b6b3f7b8.png' });

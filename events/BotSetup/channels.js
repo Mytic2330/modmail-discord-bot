@@ -34,7 +34,7 @@ module.exports = {
 				permissionSet(category, log, archive, categoryClosed, client, guild);
 			}
 			catch (e) {
-				console.log(e);
+				console.error(e);
 			}
 		}
 
@@ -57,11 +57,11 @@ async function permissionSet(category, log, archive, categoryClosed, client, gui
 	await client.db.set(guild.id, { 'logChannel': log.id, 'transcriptChannel': archive.id, 'categoryId': category.id, 'closeCategoryId': categoryClosed.id });
 
 	const embed = new EmbedBuilder()
-		.setColor(await client.db.get('color'))
+		.setColor(await client.db.get('color.default'))
 		.setTitle(client.locales.events.channelsjs.logEmbed.title)
 		.setTimestamp();
 	const embed2 = new EmbedBuilder()
-		.setColor(await client.db.get('color'))
+		.setColor(await client.db.get('color.default'))
 		.setTitle(client.locales.events.channelsjs.archiveEmbed.title)
 		.setTimestamp();
 

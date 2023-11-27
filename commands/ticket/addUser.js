@@ -62,7 +62,7 @@ async function addUserToTicket(interaction,	user, num) {
 		await DM.send({ embeds: [embed], components: [acrow] });
 	}
 	catch (e) {
-		console.log(e);
+		console.error(e);
 		interaction.reply(locales.error);
 		return;
 	}

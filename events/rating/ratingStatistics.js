@@ -84,14 +84,14 @@ async function gatherTicketInfo(client, num) {
 		return obj;
 	}
 	catch (e) {
-		console.log(e);
+		console.error(e);
 		return null;
 	}
 }
 
 async function embedCreator(obj, client) {
 	var embed = new EmbedBuilder()
-		.setColor(await client.db.get('color'))
+		.setColor(await client.db.get('color.default'))
 		.setTitle(`Ticket številka ${obj.num}`)
 		.setTimestamp()
 		.setFooter({ text: 'BCRP podatki' });

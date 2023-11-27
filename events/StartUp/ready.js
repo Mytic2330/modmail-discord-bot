@@ -12,15 +12,18 @@ module.exports = {
 ╚═════╝░░╚════╝░░░░╚═╝░░░░░╚═╝░░╚═╝╚══════╝╚═╝░░╚═╝╚═════╝░░░░╚═╝░░░
 
 Logged in as ${client.user.tag}\x1b[0m`);
-		readyMessage(client);
-		await client.db.set('color', client.settings.colors.default);
-		await client.db.set('recive', client.settings.colors.recive);
-		await client.db.set('close', client.settings.colors.close);
-		await client.db.set('open', client.settings.colors.open);
-		await client.db.set('delete', client.settings.colors.delete);
-		await client.db.set('error', client.settings.colors.error);
+		// readyMessage(client);
+		const colorSettings = client.settings.colors;
+		await client.db.set('color', { 'default': colorSettings.default,
+			'recive': colorSettings.recive,
+			'close': colorSettings.close,
+			'open': colorSettings.open,
+			'delete': colorSettings.delete,
+			'error': colorSettings.error,
+		});
 		await client.db.set('guildId', client.settings.guildId);
 		await client.db.set('botID', client.user.id);
+		await client.db.set('ApplicationID', client.application.id);
 		await client.db.set('ApplicationID', client.application.id);
 		if (!await client.db.has('ticketNumber')) {
 			await client.db.set('ticketNumber', 1);
@@ -44,7 +47,7 @@ async function readyMessage(client) {
 			await wbh2.send({ embeds: [embed] });
 		}
 		catch (e) {
-			console.log(e);
+			console.error(e);
 		}
 	}
 }

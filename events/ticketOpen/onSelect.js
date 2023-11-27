@@ -17,7 +17,7 @@ async function checkStatus(interaction, client, locales) {
 			const userAlreadyProcessing = await client.ticket.get('users');
 			if (userAlreadyProcessing.includes(interaction.user.id) === true) {
 				const embed = new EmbedBuilder()
-					.setColor(await client.db.get('color'))
+					.setColor(await client.db.get('color.default'))
 					.setTitle(locales.ticketAlreadyInMakingEmbed.title)
 					.setTimestamp();
 				await interaction.editReply({ embeds: [embed] });
@@ -27,7 +27,7 @@ async function checkStatus(interaction, client, locales) {
 		await client.ticket.push('users', interaction.user.id);
 
 		const preparing = new EmbedBuilder()
-			.setColor(await client.db.get('color'))
+			.setColor(await client.db.get('color.default'))
 			.setTitle(locales.ticketNowInMaking.title)
 			.setDescription(locales.ticketNowInMaking.description)
 			.setTimestamp();
@@ -38,7 +38,7 @@ async function checkStatus(interaction, client, locales) {
 	}
 	if (channelStatus === true) {
 		const embed = new EmbedBuilder()
-			.setColor(await client.db.get('color'))
+			.setColor(await client.db.get('color.default'))
 			.setTitle(locales.ticketAlreadyOpen.title)
 			.setTimestamp();
 		await interaction.editReply({ embeds: [embed] });
@@ -59,7 +59,7 @@ async function createChannel(guild, interaction, client) {
 		sendInitial(channel, interaction);
 	}
 	catch (e) {
-		console.log(e);
+		console.error(e);
 	}
 }
 
@@ -73,7 +73,7 @@ async function sendInitial(x, interaction) {
 	const wbh = await client.wbh(x);
 	const embed = new EmbedBuilder()
 		.setAuthor({ name: interaction.user.username, iconURL: member.user.displayAvatarURL() })
-		.setColor(await client.db.get('color'))
+		.setColor(await client.db.get('color.default'))
 		.setTitle((locales.logEmbed.title)
 			.replace('CATEGORY', interaction.values[0]))
 		.setTimestamp()
@@ -84,11 +84,11 @@ async function sendInitial(x, interaction) {
 		wbh.send({ embeds: [embed] });
 	}
 	catch (e) {
-		console.log(e);
+		console.error(e);
 	}
 
 	const embed2 = new EmbedBuilder()
-		.setColor(await client.db.get('color'))
+		.setColor(await client.db.get('color.default'))
 		.setTitle(locales.channelEmbed.title)
 		.setTimestamp();
 	await interaction.editReply({ embeds: [embed2] });
@@ -103,7 +103,7 @@ async function logInteraction(x, member, num) {
 
 	const embed = new EmbedBuilder()
 		.setAuthor({ name: member.user.username, iconURL: member.user.displayAvatarURL() })
-		.setColor(await x.client.db.get('color'))
+		.setColor(await x.client.db.get('color.default'))
 		.setTitle((locales.otherLogEmbed.title)
 			.replace('USERNAME', member.user.username))
 		.setTimestamp()

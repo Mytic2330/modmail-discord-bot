@@ -11,7 +11,7 @@ async function webhook(channel) {
 		return (wbh);
 	}
 	catch (error) {
-		console.log(error);
+		console.error(error);
 		return ('ERROR');
 	}
 }

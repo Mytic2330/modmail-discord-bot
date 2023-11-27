@@ -46,7 +46,7 @@ async function removeUserFromTicket(interaction, user, num) {
 		interaction.reply({ content: locales.userRemoved, ephemeral: true });
 	}
 	catch (e) {
-		console.log(e);
+		console.error(e);
 	}
 }
 

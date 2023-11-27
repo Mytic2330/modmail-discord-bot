@@ -31,12 +31,12 @@ module.exports = {
 			}
 		}
 		const embed = new EmbedBuilder()
-			.setColor(await client.db.get('color'))
+			.setColor(await client.db.get('color.default'))
 			.setTitle('Oznaka inaktivnosti')
 			.setDescription('Vaš ticket je bil označen kot neaktiven to pomeni, \nda mora biti v vašem ticketu poslano sporočilo vsakih \n48 ur drugače se bo ticket avtomatsko zaprl.\n24 ur pred zaprtjem boste opozorjeni.');
 
 		const emb = new EmbedBuilder()
-			.setColor(await client.db.get('color'))
+			.setColor(await client.db.get('color.default'))
 			.setTitle('Oznaka inaktivnosti')
 			.setDescription('Ticket je bil označen kot neaktiven to pomeni, \nda se bo ticket avtomatsko zaprl, če v 48ih urah ni sporočil.\n24 ur pred zaprtjem boste opozorjeni.');
 
@@ -56,7 +56,7 @@ async function sendEmbeds(client, channels, embed) {
 			await channel.send({ embeds: [embed] });
 		}
 		catch (e) {
-			console.log(e);
+			console.error(e);
 		}
 	}
 }
