@@ -21,12 +21,20 @@ Logged in as ${client.user.tag}\x1b[0m`);
 			'delete': colorSettings.delete,
 			'error': colorSettings.error,
 		});
+		await client.db.set('screenshareRole', client.settings.screenshareRole);
+		await client.db.set('screenshareChannels', client.settings.screenshareChannels);
+		if (client.settings.vactarCommunityID.length > 1) {
+			await client.db.set('vactarCommunityID', client.settings.vactarCommunityID);
+		}
 		await client.db.set('guildId', client.settings.guildId);
 		await client.db.set('botID', client.user.id);
 		await client.db.set('ApplicationID', client.application.id);
 		await client.db.set('ApplicationID', client.application.id);
 		if (!await client.db.has('ticketNumber')) {
 			await client.db.set('ticketNumber', 1);
+		}
+		if (!await client.db.has('uWsr')) {
+			await client.db.set('uWsr', []);
 		}
 	},
 };

@@ -20,6 +20,12 @@ module.exports = {
 };
 
 async function handleHasMessage(client, message, table) {
+	if (message.content.toLowerCase().startsWith('!')) {
+		const check = message.content.substring(1, 4);
+		if (check.toLowerCase().startsWith('adm')) {
+			return;
+		}
+	}
 	const dataMessage = await table.get(message.id);
 	const arr = [];
 	for (const obj of dataMessage.recive) {

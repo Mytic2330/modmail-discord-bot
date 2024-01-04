@@ -176,9 +176,15 @@
 				"logEmbed": {
 					"title": "je odprl ticket pod kategorijo: CATEGORY",
 					"ticketNumber": "Številka ticketa",
+					"userProfile": "Profil uporabnika",
+					"vactar": "Vactar",
+					"openHere": "[Tukaj](LINK)",
 					"footer": {
 						"text": "ID: USERID"
 					}
+				},
+				"button": {
+					"lable": "Zapri"
 				},
 				"channelEmbed": {
 					"title": "Začel si pogovor z administracijo strežnika BlueCity."
@@ -186,6 +192,7 @@
 				"otherLogEmbed": {
 					"title": "USERNAME je odprl nov ticket!",
 					"ticketNumber": "Številka ticketa",
+					"userProfile": "Profil uporabnika",
 					"footer": {
 						"text": "BlueCityRP"
 					}

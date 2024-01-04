@@ -1,4 +1,4 @@
-const { Events, ChannelType, EmbedBuilder } = require('discord.js');
+const { Events, ChannelType, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
 module.exports = {
 	name: Events.InteractionCreate,
 	async execute(interaction) {
@@ -70,18 +70,27 @@ async function sendInitial(x, interaction) {
 
 	logInteraction(x, member, num);
 	const client = x.client;
-	const wbh = await client.wbh(x);
 	const embed = new EmbedBuilder()
 		.setAuthor({ name: interaction.user.username, iconURL: member.user.displayAvatarURL() })
 		.setColor(await client.db.get('color.default'))
 		.setTitle((locales.logEmbed.title)
 			.replace('CATEGORY', interaction.values[0]))
 		.setTimestamp()
-		.addFields({ name: locales.logEmbed.ticketNumber, value: `${num}`, inline: true }, { name: 'Profil uporabnika', value: `${member.user}`, inline: true })
+		.addFields({ name: locales.logEmbed.ticketNumber, value: `${num}`, inline: true }, { name: locales.logEmbed.userProfile, value: `${member.user}`, inline: true })
 		.setFooter({ text: (locales.logEmbed.footer.text)
 			.replace('USERID', interaction.user.id) });
+	if (await client.db.get('vactarCommunityID')) {
+		embed.addFields({ name: locales.logEmbed.vactar, value: (locales.logEmbed.openHere).replace('LINK', `https://app.vactar.io/communities/${await client.db.get('vactarCommunityID')}/players/identifiers?search=${member.user.id}`), inline: true });
+	}
+	const select = new ButtonBuilder()
+		.setCustomId('closeByOpen')
+		.setLabel(locales.button.lable)
+		.setStyle(ButtonStyle.Danger);
+
+	const row = new ActionRowBuilder()
+		.addComponents(select);
 	try {
-		wbh.send({ embeds: [embed] });
+		x.send({ embeds: [embed], components: [row] });
 	}
 	catch (e) {
 		console.error(e);
@@ -107,7 +116,7 @@ async function logInteraction(x, member, num) {
 		.setTitle((locales.otherLogEmbed.title)
 			.replace('USERNAME', member.user.username))
 		.setTimestamp()
-		.addFields({ name: locales.otherLogEmbed.ticketNumber, value: `${num}`, inline: true }, { name: 'Profil uporabnika', value: `${member.user}`, inline: true })
+		.addFields({ name: locales.otherLogEmbed.ticketNumber, value: `${num}`, inline: true }, { name: locales.otherLogEmbed.userProfile, value: `${member.user}`, inline: true })
 		.setFooter({ text: (locales.otherLogEmbed.footer.text) });
 
 	wbh.send({ embeds: [embed] });

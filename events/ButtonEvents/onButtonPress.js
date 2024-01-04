@@ -1,10 +1,14 @@
 const { Events, ButtonStyle, ButtonBuilder, ActionRowBuilder } = require('discord.js');
 const { newTicketOpen } = require('../MessageLog/messageOnCreate.js');
+const { close } = require('../../utils/close.js');
 module.exports = {
 	name: Events.InteractionCreate,
 	async execute(interaction) {
 		if (!interaction.isButton()) return;
-		if (interaction.customId.startsWith('rat')) {
+		if (interaction.customId == 'closeByOpen') {
+			close(interaction);
+		}
+		else if (interaction.customId.startsWith('rat')) {
 			ratingButtonPressed(interaction);
 		}
 		else if (interaction.customId === 'openNewTicketButton') {

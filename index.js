@@ -37,7 +37,7 @@ const client = new Client({
 		status: 'online',
 		afk: false,
 		activities: [{
-			name: 'Ticket',
+			name: 'Tickets',
 			type: ActivityType.Watching,
 		}],
 	},
@@ -60,6 +60,8 @@ const client = new Client({
 		GatewayIntentBits.GuildVoiceStates,
 		GatewayIntentBits.GuildWebhooks,
 		GatewayIntentBits.Guilds,
+		// SCREENSHARE COMMAND
+		GatewayIntentBits.GuildVoiceStates,
 	],
 	partials: [
 		Partials.Message,

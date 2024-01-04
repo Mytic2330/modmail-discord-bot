@@ -1,6 +1,12 @@
 {
 	// BOT TOKEN => https://discord.com/developers/applications
 	"Token": "MTA4MTM0NTQyMjgzNDAxMjI0MA.GDiiBt.a-Km_f9DGpOi0y-XlvGoe7mttwpB5PLeePqS80",
+	"clientId": "1081345422834012240",
+	"screenshareRole": "1122603209215713290",
+	"screenshareChannels": [
+		"1182785238993215599",
+		"1181274033694720030"
+	],
 	// IDs of roles that get access to tickets
 	"allowedRoles": [
 		"1122603209299603576",
@@ -25,5 +31,6 @@
 		"error": "Red"
 	},
 	// Delay between user closing a ticket and being able to open another one (in milliseconds)
-	"DMClose": 60000
+	"DMClose": 60000,
+	"vactarCommunityID": "61a151532b0b55369034aaf0" // LEAVE EMPTY IF YOU DON'T USE VACTAR
 }
