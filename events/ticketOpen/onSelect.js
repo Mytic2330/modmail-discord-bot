@@ -50,7 +50,7 @@ async function createChannel(guild, interaction, client) {
 	const data = await client.db.get(guild.id);
 	const category = await guild.channels.fetch(data.categoryId);
 	const username = await interaction.client.hasNewUsername(interaction.user, true, 'user');
-	const name = `${username}-${interaction.values[0]}`;
+	const name = `${interaction.values[0]}-${username}`;
 	try {
 		const channel = await category.children.create({
 			name: name,
@@ -90,7 +90,9 @@ async function sendInitial(x, interaction) {
 	const row = new ActionRowBuilder()
 		.addComponents(select);
 	try {
-		x.send({ embeds: [embed], components: [row] });
+		const mes = await x.send({ embeds: [embed], components: [row] });
+		await mes.pin();
+		x.bulkDelete(1);
 	}
 	catch (e) {
 		console.error(e);

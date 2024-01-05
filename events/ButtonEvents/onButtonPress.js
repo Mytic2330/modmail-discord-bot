@@ -6,7 +6,7 @@ module.exports = {
 	async execute(interaction) {
 		if (!interaction.isButton()) return;
 		if (interaction.customId == 'closeByOpen') {
-			close(interaction);
+			close(interaction, 'cls');
 		}
 		else if (interaction.customId.startsWith('rat')) {
 			ratingButtonPressed(interaction);

@@ -6,6 +6,6 @@ module.exports = {
 		.setDescription('Zapri ticket')
 		.setDMPermission(false),
 	async execute(interaction) {
-		close(interaction);
+		close(interaction, 'cls');
 	},
 };

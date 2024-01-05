@@ -1,5 +1,5 @@
 const { Events, EmbedBuilder } = require('discord.js');
-const { inaClose } = require('../../utils/close');
+const { close } = require('../../utils/close');
 module.exports = {
 	name: Events.ClientReady,
 	once: true,
@@ -36,7 +36,7 @@ async function inaCheck(client) {
 		if (data.closed === true) continue;
 		const currentTime = await ticket.get('inaData');
 		if (currentTime <= 0) {
-			inaClose(client, id);
+			close(client, 'ina', id);
 			continue;
 		}
 		if (currentTime == 86400000) {

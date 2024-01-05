@@ -1,45 +1,147 @@
-module.exports = { close, inaClose };
+module.exports = { close };
 const discordTranscripts = require('discord-html-transcripts');
 const { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
 
-async function close(interaction) {
-	const client = interaction.client;
-	const locales = client.locales.utils.closejs;
-	await interaction.deferReply({ ephemeral: true });
-
-	if (!await client.ticket.has(interaction.channelId)) {
-		interaction.editReply(locales.wrongChannel);
+async function close(base, type, num) {
+	// BASIC DEFINING
+	var x;
+	var client;
+	var number;
+	var channelId;
+	var closeUser;
+	// CHECK TYPE
+	if (type == 'ina') {
+		x = true;
+	}
+	else if (type == 'cls') {
+		x = false;
+	}
+	else {
 		return;
 	}
-	const number = await client.ticket.get(interaction.channelId);
+	// DEFINE CLIENT
+	if (x) { client = base; }
+	else { client = base.client; }
+	// DEFFER IF INTERACTION
+	if (!x) { await base.deferReply({ ephemeral: true }); }
+	const locales = client.locales.utils.closejs;
+	// CHECK IF TICKET IS VALID
+	if (!await client.ticket.has(base.channelId) && !x) {
+		base.editReply(locales.wrongChannel);
+		return;
+	}
+	// DATABASE DEFINING
+	if (x) { number = num; }
+	else {number = await client.ticket.get(base.channelId); }
 	const data = await client.db.table(`tt_${number}`).get('info');
-	if (interaction.guildId !== null) {
-		const st = await client.ticket.get('closing');
-		if (!st) {
-			await client.ticket.set('closing', []);
-		}
-		else if (st.includes(number)) {
-			interaction.editReply(locales.ticketAlreadyClosing);
-			return;
-		}
-		await client.ticket.push('closing', number);
-		const guild = await client.guilds.fetch(interaction.guildId);
-		const channel = await guild.channels.fetch(interaction.channelId);
-		const author = await client.users.fetch(data.creatorId);
-		const gData = await client.db.get(guild.id);
-		const logChannel = await client.channels.fetch(gData.logChannel);
-		const archive = await client.channels.fetch(gData.transcriptChannel);
-		const users = await getAllUsers(client, data);
+	if (x) { channelId = data.guildChannel; }
+	else { channelId = base.channelId; }
+	// CHECK FOR DUPLICATE INTERACTIONS
+	const st = await client.ticket.get('closing');
+	if (!st) {
+		await client.ticket.set('closing', []);
+	}
+	else if (st.includes(number)) {
+		if (!x) { base.editReply(locales.ticketAlreadyClosing); }
+		return;
+	}
+	// PREVENT DUPLICATE STARTS
+	await setClosing(client, number);
+	// INFO DEFINING
+	const guild = await client.guilds.fetch(await client.db.get('guildId'));
+	const channel = await guild.channels.fetch(channelId);
+	const author = await client.users.fetch(data.creatorId);
+	const gData = await client.db.get(guild.id);
+	const logChannel = await client.channels.fetch(gData.logChannel);
+	const archive = await client.channels.fetch(gData.transcriptChannel);
+	if (x) { closeUser = { 'username': 'Neaktivnost', 'id': '0' }; }
+	else { closeUser = { 'username': base.user.username, 'id': base.user.id }; }
+	// GET ALL USERS IN TICKET
+	const users = await getAllUsers(client, data);
 
-		const attachment = await discordTranscripts.createTranscript(channel, {
-			limit: -1,
-			returnType: 'attachment',
-			filename: `${author.username}.htm`,
-			saveImages: true,
-			footerText: 'Made by mytic2330',
-			poweredBy: false,
-		});
+	// ROW BUILDING
+	const creatorRow = await buildRow('rate', { 'locales': locales, 'number': number });
+	const deleteRow = await buildRow('delete', { 'locales': locales });
+	const openRow = await buildRow('new', { 'locales': locales });
+	const openRowRemoved = await buildRow('newremoved', { 'locales': locales });
+	// EMBED BUILDING
+	const embedData = { 'locales': locales, 'users': users, 'closeUser': closeUser, 'client': client, 'number': number, 'author': author.username };
+	const closeLog = await embedBuilder('log', embedData);
+	const closeEmbed = await embedBuilder('close', embedData);
+	const creatorClose = await embedBuilder('creator', embedData);
+	const closeDmEmbed = await embedBuilder('dm', embedData);
+	// TRANSCRIPT BULDING
+	const attachment = await discordTranscripts.createTranscript(channel, {
+		limit: -1,
+		returnType: 'attachment',
+		filename: `${author.username}.htm`,
+		saveImages: true,
+		footerText: 'Made by mytic2330',
+		poweredBy: false,
+	});
+	// LOG WEBHOOK DEFINING
+	const wbh = await client.wbh(logChannel);
+	const wbhArchive = await client.wbh(archive);
+	// TRANSCRIPT ARCHIVING
+	const message = await wbhArchive.send({ files: [attachment] });
+	const obj = message.attachments.values().next().value;
+	// ADDING TRANSCRIPT LINK TO LOG EMBEDS
+	closeLog.addFields({ name: locales.transcriptField.name, value: (locales.transcriptField.value).replace('LINK', obj.url) });
+	closeEmbed.addFields({ name: locales.transcriptField.name, value: (locales.transcriptField.value).replace('LINK', obj.url) });
+	// COMPACTING STRUCTURE
+	const embeds = { 'closeLog': closeLog, 'closeEmbed': closeEmbed, 'creatorClose': creatorClose, 'closeDmEmbed': closeDmEmbed };
+	const rows = { 'creatorRow': creatorRow, 'deleteRow': deleteRow, 'openRow': openRow, 'openRowRemoved': openRowRemoved };
+	const compactData = { 'channel': channel, 'wbh': wbh, 'dmChannels': data.dmChannel, 'client': client, 'creatorId': data.creatorId };
+	// SEND ALL CLOSE EMBEDS
+	await sendSwitch(embeds, rows, compactData);
+	// UPDATE DATABASE
+	dataSetUpdate(number, data, client, obj, channel, gData);
+	// FINISHING
+	unsetClosing(client, number);
+	if (!x) {base.editReply('Ticket closed!');}
+}
 
+async function sendSwitch(embeds, rows, compactData) {
+	try {
+		compactData.wbh.send({ embeds: [embeds.closeLog] });
+	}
+	catch (e) {
+		console.error(e);
+	}
+	try {
+		compactData.channel.send({ embeds: [embeds.closeEmbed], components: [rows.deleteRow] });
+	}
+	catch (e) {
+		console.error(e);
+	}
+	for (const id of compactData.dmChannels) {
+		const dm = await compactData.client.channels.fetch(id);
+		try {
+			if (dm.recipientId === compactData.creatorId) {
+				await dm.send({ embeds: [embeds.creatorClose], components: [rows.creatorRow, rows.openRow] });
+			}
+			else {
+				await dm.send({ embeds: [embeds.closeDmEmbed], components: [rows.openRowRemoved] });
+			}
+		}
+		catch (e) {
+			console.error(e);
+		}
+	}
+}
+
+async function setClosing(client, number) {
+	await client.ticket.push('closing', number);
+}
+
+async function unsetClosing(client, number) {
+	await client.ticket.pull('inaQueue', number);
+}
+
+async function buildRow(type, data) {
+	const locales = data.locales;
+	const number = data.number;
+	if (type == 'delete') {
 		const deleteButton = new ButtonBuilder()
 			.setCustomId('delete')
 			.setLabel(locales.deleteButton.lable)
@@ -47,33 +149,10 @@ async function close(interaction) {
 			.setStyle(ButtonStyle.Danger);
 		const row = new ActionRowBuilder()
 			.addComponents(deleteButton);
-		const closeEmbed = new EmbedBuilder()
-			.setColor(await client.db.get('color.close'))
-			.setTitle(locales.closeEmbed.title)
-			.addFields({ name: ' ', value: locales.closeEmbed.field.value }, { name: 'Ticket ID', value: `${number}`, inline: true })
-			.addFields({ name: 'Uporabniki v ticketu', value: `${users}`, inline: true })
-			.setTimestamp()
-			.setFooter({ text: (locales.closeEmbed.footer.text).replace('USERNAME', interaction.user.username).replace('ID', interaction.user.id) });
-		const closeLog = new EmbedBuilder()
-			.setColor(await client.db.get('color.close'))
-			.setTitle((locales.closeLog.title).replace('CHANNELNAME', author.username))
-			.addFields({ name: ' ', value: locales.closeLog.field.value }, { name: 'Ticket ID', value: `${number}`, inline: true })
-			.addFields({ name: 'Uporabniki v ticketu', value: `${users}`, inline: true })
-			.setTimestamp()
-			.setFooter({ text: (locales.closeLog.footer.text).replace('USERNAME', interaction.user.username).replace('ID', interaction.user.id) });
-		const closeDmEmbed = new EmbedBuilder()
-			.setColor(await client.db.get('color.close'))
-			.setTitle(locales.closeDM.title)
-			.setDescription(locales.closeDM.description)
-			.setTimestamp();
 
-
-		const creatorClose = new EmbedBuilder()
-			.setColor(await client.db.get('color.close'))
-			.setTitle(locales.creatorClose.title)
-			.addFields({ name: ' ', value: locales.creatorClose.field.value, inline: true })
-			.setTimestamp()
-			.setFooter({ text: (locales.creatorClose.footer.text).replace('USERNAME', interaction.user.username).replace('ID', interaction.user.id) });
+		return row;
+	}
+	if (type == 'rate') {
 		const rate5 = new ButtonBuilder()
 			.setCustomId(`rat5_${number}`)
 			.setEmoji(locales.ratebutton.ratew5.emoji)
@@ -99,196 +178,82 @@ async function close(interaction) {
 			.setEmoji(locales.ratebutton.ratew1.emoji)
 			.setLabel(locales.ratebutton.ratew1.lable)
 			.setStyle(ButtonStyle.Secondary);
-		const openNewTicket = new ButtonBuilder()
-			.setCustomId('openNewTicketButton')
-			.setLabel(locales.newTicketButton.lable)
-			.setStyle(ButtonStyle.Primary);
-		const openNewTicketRemoved = new ButtonBuilder()
-			.setCustomId('openNewTicketButtonRemoved')
-			.setLabel(locales.newTicketButtonRemoved.lable)
-			.setStyle(ButtonStyle.Primary);
-		const openRowRemoved = new ActionRowBuilder()
-			.addComponents(openNewTicketRemoved);
-		const creatorRow = new ActionRowBuilder()
+		const row = new ActionRowBuilder()
 			.addComponents(rate5)
 			.addComponents(rate4)
 			.addComponents(rate3)
 			.addComponents(rate2)
 			.addComponents(rate1);
-		const openRow = new ActionRowBuilder()
+
+		return row;
+	}
+	if (type == 'new') {
+		const openNewTicket = new ButtonBuilder()
+			.setCustomId('openNewTicketButton')
+			.setLabel(locales.newTicketButton.lable)
+			.setStyle(ButtonStyle.Primary);
+		const row = new ActionRowBuilder()
 			.addComponents(openNewTicket);
 
-		const wbh = await client.wbh(logChannel);
-		const wbhArchive = await client.wbh(archive);
+		return row;
+	}
+	if (type == 'newremoved') {
+		const openNewTicketRemoved = new ButtonBuilder()
+			.setCustomId('openNewTicketButtonRemoved')
+			.setLabel(locales.newTicketButtonRemoved.lable)
+			.setStyle(ButtonStyle.Primary);
+		const row = new ActionRowBuilder()
+			.addComponents(openNewTicketRemoved);
 
-		try {
-			const message = await wbhArchive.send({ files: [attachment] });
-			const obj = message.attachments.values().next().value;
-			closeLog.addFields({ name: locales.transcriptField.name, value: (locales.transcriptField.value).replace('LINK', obj.url) });
-			closeEmbed.addFields({ name: locales.transcriptField.name, value: (locales.transcriptField.value).replace('LINK', obj.url) });
-			wbh.send({ embeds: [closeLog] });
-			channel.send({ embeds: [closeEmbed], components: [row] });
-			dataSetUpdate(number, data, client, obj, channel, gData);
-			await client.ticket.pull('inaQueue', number);
-		}
-		catch (e) {
-			console.error(e);
-		}
-		for (const id of data.dmChannel) {
-			const dm = await client.channels.fetch(id);
-			try {
-				if (dm.recipientId === data.creatorId) {
-					await dm.send({ embeds: [creatorClose], components: [creatorRow, openRow] });
-				}
-				else {
-					await dm.send({ embeds: [closeDmEmbed], components: [openRowRemoved] });
-				}
-			}
-			catch (e) {
-				console.error(e);
-			}
-
-		}
-		interaction.editReply('Ticket closed!');
+		return row;
 	}
 }
 
-async function inaClose(client, number) {
-	const locales = client.locales.utils.closejs;
+async function embedBuilder(type, data) {
+	const locales = data.locales;
+	const client = data.client;
+	const color = await client.db.get('color.close');
+	const users = data.users;
+	const number = data.number;
+	const closeUser = data.closeUser;
+	const author = data.author;
 
-	const data = await client.db.table(`tt_${number}`).get('info');
-	const st = await client.ticket.get('closing');
-	if (!st) {
-		await client.ticket.set('closing', []);
+	if (type == 'close') {
+		const embed = new EmbedBuilder()
+			.setColor(color)
+			.setTitle(locales.closeEmbed.title)
+			.addFields({ name: ' ', value: locales.closeEmbed.field.value }, { name: 'Ticket ID', value: `${number}`, inline: true })
+			.addFields({ name: 'Uporabniki v ticketu', value: `${users}`, inline: true })
+			.setTimestamp()
+			.setFooter({ text: (locales.closeEmbed.footer.text).replace('USERNAME', closeUser.username).replace('ID', closeUser.id) });
+		return embed;
 	}
-	else if (st.includes(number)) {
-		return;
+	if (type == 'log') {
+		const embed = new EmbedBuilder()
+			.setColor(color)
+			.setTitle((locales.closeLog.title).replace('CHANNELNAME', author))
+			.addFields({ name: ' ', value: locales.closeLog.field.value }, { name: 'Ticket ID', value: `${number}`, inline: true })
+			.addFields({ name: 'Uporabniki v ticketu', value: `${users}`, inline: true })
+			.setTimestamp()
+			.setFooter({ text: (locales.closeLog.footer.text).replace('USERNAME', closeUser.username).replace('ID', closeUser.id) });
+		return embed;
 	}
-	await client.ticket.push('closing', number);
-	const guild = await client.guilds.fetch(await client.db.get('guildId'));
-	const channel = await guild.channels.fetch(data.guildChannel);
-	const author = await client.users.fetch(data.creatorId);
-	const gData = await client.db.get(guild.id);
-	const logChannel = await client.channels.fetch(gData.logChannel);
-	const archive = await client.channels.fetch(gData.transcriptChannel);
-
-	const attachment = await discordTranscripts.createTranscript(channel, {
-		limit: -1,
-		returnType: 'attachment',
-		filename: `${author.username}.htm`,
-		saveImages: true,
-		footerText: 'Made by mytic2330',
-		poweredBy: false,
-	});
-
-	const deleteButton = new ButtonBuilder()
-		.setCustomId('delete')
-		.setLabel(locales.deleteButton.lable)
-		.setEmoji(locales.deleteButton.emoji)
-		.setStyle(ButtonStyle.Danger);
-	const row = new ActionRowBuilder()
-		.addComponents(deleteButton);
-	const closeEmbed = new EmbedBuilder()
-		.setColor(await client.db.get('color.close'))
-		.setTitle(locales.closeEmbed.title)
-		.addFields({ name: ' ', value: locales.closeEmbed.field.value }, { name: 'Ticket ID', value: `${number}`, inline: true })
-		.addFields({ name: 'Uporabniki v ticketu', value: `${await getAllUsers(client, data)}`, inline: true })
-		.setTimestamp()
-		.setFooter({ text: 'Ticket je bil zaprt zaradi neaktivnosti' });
-	const closeLog = new EmbedBuilder()
-		.setColor(await client.db.get('color.close'))
-		.setTitle((locales.closeLog.title).replace('CHANNELNAME', author.username))
-		.addFields({ name: ' ', value: locales.closeLog.field.value }, { name: 'Ticket ID', value: `${number}`, inline: true })
-		.addFields({ name: 'Uporabniki v ticketu', value: `${await getAllUsers(client, data)}`, inline: true })
-		.setTimestamp()
-		.setFooter({ text: 'Ticket je bil zaprt zaradi neaktivnosti' });
-	const closeDmEmbed = new EmbedBuilder()
-		.setColor(await client.db.get('color.close'))
-		.setTitle(locales.closeDM.title)
-		.setDescription(locales.closeDM.description)
-		.setTimestamp();
-
-
-	const creatorClose = new EmbedBuilder()
-		.setColor(await client.db.get('color.close'))
-		.setTitle(locales.creatorClose.title)
-		.addFields({ name: ' ', value: locales.creatorClose.field.value, inline: true })
-		.setTimestamp()
-		.setFooter({ text: 'Ticket je bil zaprt zaradi neaktivnosti' });
-	const rate5 = new ButtonBuilder()
-		.setCustomId(`rat5_${number}`)
-		.setEmoji(locales.ratebutton.ratew5.emoji)
-		.setLabel(locales.ratebutton.ratew5.lable)
-		.setStyle(ButtonStyle.Secondary);
-	const rate4 = new ButtonBuilder()
-		.setCustomId(`rat4_${number}`)
-		.setEmoji(locales.ratebutton.ratew4.emoji)
-		.setLabel(locales.ratebutton.ratew4.lable)
-		.setStyle(ButtonStyle.Secondary);
-	const rate3 = new ButtonBuilder()
-		.setCustomId(`rat3_${number}`)
-		.setEmoji(locales.ratebutton.ratew3.emoji)
-		.setLabel(locales.ratebutton.ratew3.lable)
-		.setStyle(ButtonStyle.Secondary);
-	const rate2 = new ButtonBuilder()
-		.setCustomId(`rat2_${number}`)
-		.setEmoji(locales.ratebutton.ratew2.emoji)
-		.setLabel(locales.ratebutton.ratew2.lable)
-		.setStyle(ButtonStyle.Secondary);
-	const rate1 = new ButtonBuilder()
-		.setCustomId(`rat1_${number}`)
-		.setEmoji(locales.ratebutton.ratew1.emoji)
-		.setLabel(locales.ratebutton.ratew1.lable)
-		.setStyle(ButtonStyle.Secondary);
-	const openNewTicket = new ButtonBuilder()
-		.setCustomId('openNewTicketButton')
-		.setLabel(locales.newTicketButton.lable)
-		.setStyle(ButtonStyle.Primary);
-	const openNewTicketRemoved = new ButtonBuilder()
-		.setCustomId('openNewTicketButtonRemoved')
-		.setLabel(locales.newTicketButtonRemoved.lable)
-		.setStyle(ButtonStyle.Primary);
-	const openRowRemoved = new ActionRowBuilder()
-		.addComponents(openNewTicketRemoved);
-	const creatorRow = new ActionRowBuilder()
-		.addComponents(rate5)
-		.addComponents(rate4)
-		.addComponents(rate3)
-		.addComponents(rate2)
-		.addComponents(rate1);
-	const openRow = new ActionRowBuilder()
-		.addComponents(openNewTicket);
-
-	const wbh = await client.wbh(logChannel);
-	const wbhArchive = await client.wbh(archive);
-
-	try {
-		const message = await wbhArchive.send({ files: [attachment] });
-		const obj = message.attachments.values().next().value;
-		closeLog.addFields({ name: locales.transcriptField.name, value: (locales.transcriptField.value).replace('LINK', obj.url) });
-		closeEmbed.addFields({ name: locales.transcriptField.name, value: (locales.transcriptField.value).replace('LINK', obj.url) });
-		wbh.send({ embeds: [closeLog] });
-		channel.send({ embeds: [closeEmbed], components: [row] });
-		dataSetUpdate(number, data, client, obj, channel, gData);
-		await client.ticket.pull('inaQueue', number);
+	if (type == 'creator') {
+		const embed = new EmbedBuilder()
+			.setColor(color)
+			.setTitle(locales.creatorClose.title)
+			.addFields({ name: ' ', value: locales.creatorClose.field.value, inline: true })
+			.setTimestamp()
+			.setFooter({ text: (locales.creatorClose.footer.text).replace('USERNAME', closeUser.username).replace('ID', closeUser.id) });
+		return embed;
 	}
-	catch (e) {
-		console.error(e);
-	}
-	for (const id of data.dmChannel) {
-		const dm = await client.channels.fetch(id);
-		try {
-			if (dm.recipientId === data.creatorId) {
-				await dm.send({ embeds: [creatorClose], components: [creatorRow, openRow] });
-			}
-			else {
-				await dm.send({ embeds: [closeDmEmbed], components: [openRowRemoved] });
-			}
-		}
-		catch (e) {
-			console.error(e);
-		}
-
+	if (type == 'dm') {
+		const embed = new EmbedBuilder()
+			.setColor(color)
+			.setTitle(locales.closeDM.title)
+			.setDescription(locales.closeDM.description)
+			.setTimestamp();
+		return embed;
 	}
 }
 
