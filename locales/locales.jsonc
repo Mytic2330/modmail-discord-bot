@@ -78,17 +78,6 @@
 			"newTicket": "Odpri nov ticket"
 		},
 		"messageOnCreatejs": {
-			"userSelectCategory": {
-				"embed": {
-					"title": "Potrebuješ pomoč?",
-					"description": "Uporabi spodnji meni, da izbereš kategorijo, ki ustreza tvoji situaciji.\nPočakaj na potrdilo odprtja.",
-					"footer": {
-						"text": "BlueCityRP",
-						"iconURL": "https://cdn.discordapp.com/attachments/1012850899980394557/1138546219640176851/097e89ede70464edaf570046b6b3f7b8.png"
-					}
-				},
-				"SelectMenuPlaceholder": "Izberi kategorijo"
-			},
 			"messageProcessing": {
 				"sendNewMessageEmbed": {
 					"title": "Sporočilo poslano!",
@@ -201,6 +190,19 @@
 		}
 	},
 	"utils": {
+		"openTicketjs": {
+			"userSelectCategory": {
+				"embed": {
+					"title": "Potrebuješ pomoč?",
+					"description": "Uporabi spodnji meni, da izbereš kategorijo, ki ustreza tvoji situaciji.\nPočakaj na potrdilo odprtja.",
+					"footer": {
+						"text": "BlueCityRP",
+						"iconURL": "https://cdn.discordapp.com/attachments/1012850899980394557/1138546219640176851/097e89ede70464edaf570046b6b3f7b8.png"
+					}
+				},
+				"SelectMenuPlaceholder": "Izberi kategorijo"
+			}
+		},
 		"closejs": {
 			"wrongChannel": "Napačen kanal. Prosimo uporabite to v ticket kanalu!",
 			"ticketAlreadyClosing": "Ticket se že zapira",

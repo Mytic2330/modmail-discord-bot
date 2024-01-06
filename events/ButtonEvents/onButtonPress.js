@@ -1,12 +1,11 @@
 const { Events, ButtonStyle, ButtonBuilder, ActionRowBuilder } = require('discord.js');
-const { newTicketOpen } = require('../MessageLog/messageOnCreate.js');
-const { close } = require('../../utils/close.js');
 module.exports = {
 	name: Events.InteractionCreate,
 	async execute(interaction) {
 		if (!interaction.isButton()) return;
 		if (interaction.customId == 'closeByOpen') {
-			close(interaction, 'cls');
+			const lib = interaction.client.lib;
+			lib.close(interaction, 'cls');
 		}
 		else if (interaction.customId.startsWith('rat')) {
 			ratingButtonPressed(interaction);
@@ -80,7 +79,8 @@ async function ratingButtonPressed(interaction) {
 }
 
 async function newTicketButtonPressed(interaction) {
-	newTicketOpen(interaction, interaction.client, interaction.client.locales.events.messageOnCreatejs, true);
+	const lib = interaction.client.lib;
+	lib.newTicket(interaction);
 	const locales = interaction.client.locales.events.onButtonPressjs;
 	const openNewTicket = new ButtonBuilder()
 		.setCustomId('openNewTicketButton')
@@ -93,7 +93,8 @@ async function newTicketButtonPressed(interaction) {
 }
 
 async function openNewTicketButtonRemoved(interaction) {
-	newTicketOpen(interaction, interaction.client, interaction.client.locales.events.messageOnCreatejs, true);
+	const lib = interaction.client.lib;
+	lib.newTicket(interaction);
 	const locales = interaction.client.locales.events.onButtonPressjs;
 	const openNewTicket = new ButtonBuilder()
 		.setCustomId('openNewTicketButton')

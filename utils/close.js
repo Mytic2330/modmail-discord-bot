@@ -1,4 +1,4 @@
-module.exports = { close };
+module.exports = close;
 const discordTranscripts = require('discord-html-transcripts');
 const { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
 

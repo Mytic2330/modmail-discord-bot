@@ -1,6 +1,6 @@
 /* eslint-disable no-redeclare */
 /* eslint-disable no-undef */
-const { Events, EmbedBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ActionRowBuilder } = require('discord.js');
+const { Events, EmbedBuilder } = require('discord.js');
 module.exports = {
 	name: Events.MessageCreate,
 	async execute(message) {
@@ -14,6 +14,7 @@ module.exports = {
 			}
 		}
 		const client = message.client;
+		const lib = client.lib;
 		const locales = client.locales.events.messageOnCreatejs;
 		const status = await client.ticket.has(message.channelId);
 
@@ -22,52 +23,11 @@ module.exports = {
 			messageHandeler(message, client, locales);
 			break;
 		case false:
-			newTicketOpen(message, client, locales, false);
+			lib.newTicket(message);
 			break;
 		}
 	},
-	newTicketOpen,
 };
-
-async function newTicketOpen(message, client, locales, comesFromButton) {
-	if (message.guildId !== null) return;
-	if (comesFromButton == false) {
-		if (await client.ticket.has(message.author.id) === true) return;
-	}
-	if (comesFromButton == true) {
-		if (await client.ticket.has(message.user.id) === true) return;
-	}
-	const channel = await client.channels.fetch(message.channelId);
-	const embed = new EmbedBuilder()
-		.setTitle(locales.userSelectCategory.embed.title)
-		.setDescription(locales.userSelectCategory.embed.description)
-		.setFooter({ text: locales.userSelectCategory.embed.footer.text, iconURL: locales.userSelectCategory.embed.footer.iconURL })
-		.setTimestamp();
-
-	const select = new StringSelectMenuBuilder()
-		.setCustomId('ticket')
-		.setPlaceholder(locales.userSelectCategory.SelectMenuPlaceholder);
-
-	client.settings.categories.forEach(x => {
-		const options = x.split('_');
-		select.addOptions(
-			new StringSelectMenuOptionBuilder()
-				.setLabel(options[1])
-				.setDescription(options[2])
-				.setValue(options[0]),
-		);
-	});
-
-	const row = new ActionRowBuilder()
-		.addComponents(select);
-
-	try {
-		channel.send({ embeds: [embed], components: [row] });
-	}
-	catch (e) {
-		console.error(e);
-	}
-}
 
 async function messageHandeler(message, client, locales) {
 	const user = await client.users.fetch(message.author.id);

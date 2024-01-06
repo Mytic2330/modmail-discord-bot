@@ -9,6 +9,7 @@ const fs = require('fs-extra');
 const path = require('node:path');
 const database = new QuickDB({ filePath: './database.sqlite' });
 const { Token } = jsonc.parse(fs.readFileSync(path.join(__dirname, 'config/settings.jsonc'), 'utf8'));
+const { lib } = require('./bridge/bridge.js');
 const debug = true;
 
 
@@ -80,6 +81,7 @@ client.wbh = webhook;
 client.timestamp = getTimestamp;
 client.version = version;
 client.datestamp = getDatestamp;
+client.lib = lib;
 
 
 client.commands = new Collection();
