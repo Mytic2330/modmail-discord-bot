@@ -1,8 +1,8 @@
-const { Events, ChannelType, EmbedBuilder } = require('discord.js');
+import { Events, ChannelType, EmbedBuilder, TextChannel, CategoryChannel } from 'discord.js';
 module.exports = {
 	name: Events.ClientReady,
 	once: true,
-	async execute(client) {
+	async execute(client:any) {
 		const guild = await client.guilds.fetch(client.settings.guildId);
 		const status = await client.db.has(guild.id);
 		if (status === false) {
@@ -41,7 +41,7 @@ module.exports = {
 	},
 };
 
-async function permissionSet(category, log, archive, categoryClosed, client, guild) {
+async function permissionSet(category:any, log:TextChannel, archive:TextChannel, categoryClosed:CategoryChannel, client:any, guild:any) {
 	const roles = client.settings.allowedRoles;
 
 	for (const role of roles) {

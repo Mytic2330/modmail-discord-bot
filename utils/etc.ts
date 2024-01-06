@@ -1,30 +1,38 @@
-module.exports = { hasNewUsername, getTimestamp, getDatestamp };
+import { GuildMember, User } from "discord.js";
 
-async function hasNewUsername(x, returnUsername, type) {
+const etc = {
+	hasNewUsername,
+	getTimestamp,
+	getDatestamp
+}
+
+async function hasNewUsername(x: User|GuildMember, returnUsername: boolean, type:string) {
 	if (type == 'member') {
-		const discriminator = x.user.discriminator;
+		const guildMember = x as GuildMember;
+		const discriminator = guildMember.user.discriminator;
 		const field = discriminator.split('#');
 		const len = field[0].split('').length;
 		if (len != 4) {
-			if (returnUsername == true) return x.user.username;
+			if (returnUsername == true) return guildMember.user.username;
 			return true;
 		}
 		if (len == 4) {
-			if (returnUsername == true) return x.user.tag;
+			if (returnUsername == true) return guildMember.user.tag;
 			return false;
 		}
 		return;
 	}
 	if (type == 'user') {
-		const discriminator = x.discriminator;
+		const user = x as User;
+		const discriminator = user.discriminator;
 		const field = discriminator.split('#');
 		const len = field[0].split('').length;
 		if (len != 4) {
-			if (returnUsername == true) return x.username;
+			if (returnUsername == true) return user.username;
 			return true;
 		}
 		if (len == 4) {
-			if (returnUsername == true) return x.tag;
+			if (returnUsername == true) return user.tag;
 			return false;
 		}
 		return;
@@ -50,10 +58,12 @@ function getDatestamp() {
 	return `D:${day}_W:${week}_M:${month}_Y:${year}`;
 }
 
-function getWeekNumber(date) {
-	const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+function getWeekNumber(date: any) {
+	const d:any = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
 	d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
-	const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+	const yearStart: any = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
 	const weekNumber = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
 	return weekNumber;
 }
+
+export default etc;

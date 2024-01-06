@@ -1,9 +1,9 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('ping')
 		.setDescription('Preveri zakasnitev programa'),
-	async execute(interaction) {
+	async execute(interaction:any) {
 		const client = interaction.client;
 		const message = await interaction.deferReply({
 			ephemeral: true,

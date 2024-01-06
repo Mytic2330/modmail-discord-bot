@@ -1,10 +1,12 @@
-module.exports = { webhook };
+import { TextChannel } from "discord.js";
 
-async function webhook(channel) {
+export default webhook;
+
+async function webhook(channel:TextChannel) {
 	try {
 		let webhooks = await channel.fetchWebhooks();
 		if (webhooks.size === 0) {
-			await channel.createWebhook({ name: channel.client.locales.utils.webhookjs.name, avatar: channel.client.locales.utils.webhookjs.avatarURL });
+			await channel.createWebhook({ name: (channel.client as any).locales.utils.webhookjs.name, avatar: (channel.client as any).locales.utils.webhookjs.avatarURL });
 			webhooks = await channel.fetchWebhooks();
 		}
 		const wbh = webhooks.find((webhookurl) => webhookurl.token);

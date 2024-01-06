@@ -1,7 +1,7 @@
-const { Events } = require('discord.js');
+import { Events } from 'discord.js';
 module.exports = {
 	name: Events.TypingStart,
-	async execute(typingRefrence) {
+	async execute(typingRefrence: any) {
 		const client = typingRefrence.client;
 		const channelId = typingRefrence.channel.id;
 		const user = typingRefrence.user;

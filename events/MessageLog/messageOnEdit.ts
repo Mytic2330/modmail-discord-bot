@@ -1,7 +1,8 @@
-const { Events, EmbedBuilder } = require('discord.js');
+import { Events, EmbedBuilder, Message } from 'discord.js';
+import { Table } from 'quick.db';
 module.exports = {
 	name: Events.MessageUpdate,
-	async execute(oldMessage, newMessage) {
+	async execute(newMessage: any) {
 		const client = newMessage.client;
 		if (newMessage.author.bot === true) return;
 		if (!await client.ticket.has(newMessage.channelId)) return;
@@ -13,13 +14,13 @@ module.exports = {
 			handleHasMessage(client, newMessage, table);
 			break;
 		case false:
-			handleNoMessage(client, newMessage);
+			handleNoMessage(newMessage);
 			break;
 		}
 	},
 };
 
-async function handleHasMessage(client, message, table) {
+async function handleHasMessage(client:any, message:any, table:Table) {
 	if (message.content.toLowerCase().startsWith('!')) {
 		const check = message.content.substring(1, 4);
 		if (check.toLowerCase().startsWith('adm')) {
@@ -47,11 +48,11 @@ async function handleHasMessage(client, message, table) {
 	}
 }
 
-async function handleNoMessage(client, message) {
+async function handleNoMessage(message:Message) {
 	await message.reply({ content: 'Ni mogoče poslati spremenjenega sporočila' });
 }
 
-async function createEmbedToSend(client, message) {
+async function createEmbedToSend(client:any, message:any) {
 	const user = await client.users.fetch(message.author.id);
 	const reciveChannelEmbed = new EmbedBuilder()
 		.setAuthor({ name: user.username, iconURL: user.displayAvatarURL() })
@@ -65,7 +66,7 @@ async function createEmbedToSend(client, message) {
 	}
 	if (message.attachments) {
 		let num = 1;
-		message.attachments.forEach((keys) => {
+		message.attachments.forEach((keys:any) => {
 			reciveChannelEmbed.addFields({ name: `Priponka ${num}`, value: `[**LINK**](${keys.attachment})` });
 			num++;
 		});

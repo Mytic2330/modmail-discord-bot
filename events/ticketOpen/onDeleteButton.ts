@@ -1,7 +1,7 @@
-const { Events, EmbedBuilder } = require('discord.js');
+import { Events, EmbedBuilder } from 'discord.js';
 module.exports = {
 	name: Events.InteractionCreate,
-	async execute(interaction) {
+	async execute(interaction: any) {
 		if (!interaction.isButton) return;
 		if (interaction.customId !== 'delete') return;
 		const locales = interaction.client.locales.events.onDeleteButtonjs;

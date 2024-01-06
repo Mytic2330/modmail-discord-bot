@@ -1,7 +1,7 @@
-const { Events, ButtonStyle, ButtonBuilder, ActionRowBuilder } = require('discord.js');
+import { Events, ButtonStyle, ButtonBuilder, ActionRowBuilder } from 'discord.js';
 module.exports = {
 	name: Events.InteractionCreate,
-	async execute(interaction) {
+	async execute(interaction:any) {
 		if (!interaction.isButton()) return;
 		if (interaction.customId == 'closeByOpen') {
 			const lib = interaction.client.lib;
@@ -20,7 +20,7 @@ module.exports = {
 };
 
 
-async function ratingButtonPressed(interaction) {
+async function ratingButtonPressed(interaction:any) {
 	const rating = interaction.customId.slice(3, 4);
 	const ticketNumber = interaction.customId.split('_')[1];
 
@@ -78,7 +78,7 @@ async function ratingButtonPressed(interaction) {
 	await interaction.update({ embeds: [interaction.message.embeds[0]], components: [creatorRow, interaction.message.components[1]] });
 }
 
-async function newTicketButtonPressed(interaction) {
+async function newTicketButtonPressed(interaction:any) {
 	const lib = interaction.client.lib;
 	lib.newTicket(interaction);
 	const locales = interaction.client.locales.events.onButtonPressjs;
@@ -92,7 +92,7 @@ async function newTicketButtonPressed(interaction) {
 	await interaction.update({ embeds: [interaction.message.embeds[0]], components: [interaction.message.components[0], openRow] });
 }
 
-async function openNewTicketButtonRemoved(interaction) {
+async function openNewTicketButtonRemoved(interaction:any) {
 	const lib = interaction.client.lib;
 	lib.newTicket(interaction);
 	const locales = interaction.client.locales.events.onButtonPressjs;

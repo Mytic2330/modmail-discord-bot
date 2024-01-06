@@ -1,40 +1,42 @@
-module.exports = close;
+export default close
 const discordTranscripts = require('discord-html-transcripts');
-const { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
+import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, Embed, Client, TextChannel } from 'discord.js';
 
-async function close(base, type, num) {
+async function close(base: any, type:string, num: number | null) {
 	// BASIC DEFINING
-	var x;
+	var ina;
 	var client;
+	var interaction;
 	var number;
 	var channelId;
 	var closeUser;
 	// CHECK TYPE
 	if (type == 'ina') {
-		x = true;
+		//ina = true;
+		client = base
+		interaction = null
 	}
 	else if (type == 'cls') {
-		x = false;
+		//ina = false;
+		interaction = base
+		client = interaction.client
 	}
 	else {
 		return;
 	}
-	// DEFINE CLIENT
-	if (x) { client = base; }
-	else { client = base.client; }
 	// DEFFER IF INTERACTION
-	if (!x) { await base.deferReply({ ephemeral: true }); }
+	if (!ina && interaction) { await interaction.deferReply({ ephemeral: true }); }
 	const locales = client.locales.utils.closejs;
 	// CHECK IF TICKET IS VALID
-	if (!await client.ticket.has(base.channelId) && !x) {
+	if (!await client.ticket.has(base.channelId) && !ina) {
 		base.editReply(locales.wrongChannel);
 		return;
 	}
 	// DATABASE DEFINING
-	if (x) { number = num; }
+	if (ina) { number = num; }
 	else {number = await client.ticket.get(base.channelId); }
 	const data = await client.db.table(`tt_${number}`).get('info');
-	if (x) { channelId = data.guildChannel; }
+	if (ina) { channelId = data.guildChannel; }
 	else { channelId = base.channelId; }
 	// CHECK FOR DUPLICATE INTERACTIONS
 	const st = await client.ticket.get('closing');
@@ -42,7 +44,7 @@ async function close(base, type, num) {
 		await client.ticket.set('closing', []);
 	}
 	else if (st.includes(number)) {
-		if (!x) { base.editReply(locales.ticketAlreadyClosing); }
+		if (!ina) { base.editReply(locales.ticketAlreadyClosing); }
 		return;
 	}
 	// PREVENT DUPLICATE STARTS
@@ -54,16 +56,17 @@ async function close(base, type, num) {
 	const gData = await client.db.get(guild.id);
 	const logChannel = await client.channels.fetch(gData.logChannel);
 	const archive = await client.channels.fetch(gData.transcriptChannel);
-	if (x) { closeUser = { 'username': 'Neaktivnost', 'id': '0' }; }
+	if (ina) { closeUser = { 'username': 'Neaktivnost', 'id': '0' }; }
 	else { closeUser = { 'username': base.user.username, 'id': base.user.id }; }
 	// GET ALL USERS IN TICKET
 	const users = await getAllUsers(client, data);
 
 	// ROW BUILDING
-	const creatorRow = await buildRow('rate', { 'locales': locales, 'number': number });
-	const deleteRow = await buildRow('delete', { 'locales': locales });
-	const openRow = await buildRow('new', { 'locales': locales });
-	const openRowRemoved = await buildRow('newremoved', { 'locales': locales });
+	const RowData = { 'locales': locales, 'number': number }
+	const creatorRow = await buildRow('rate', RowData);
+	const deleteRow = await buildRow('delete', RowData);
+	const openRow = await buildRow('new', RowData);
+	const openRowRemoved = await buildRow('newremoved', RowData);
 	// EMBED BUILDING
 	const embedData = { 'locales': locales, 'users': users, 'closeUser': closeUser, 'client': client, 'number': number, 'author': author.username };
 	const closeLog = await embedBuilder('log', embedData);
@@ -86,8 +89,8 @@ async function close(base, type, num) {
 	const message = await wbhArchive.send({ files: [attachment] });
 	const obj = message.attachments.values().next().value;
 	// ADDING TRANSCRIPT LINK TO LOG EMBEDS
-	closeLog.addFields({ name: locales.transcriptField.name, value: (locales.transcriptField.value).replace('LINK', obj.url) });
-	closeEmbed.addFields({ name: locales.transcriptField.name, value: (locales.transcriptField.value).replace('LINK', obj.url) });
+	closeLog?.addFields({ name: locales.transcriptField.name, value: (locales.transcriptField.value).replace('LINK', obj.url) });
+	closeEmbed?.addFields({ name: locales.transcriptField.name, value: (locales.transcriptField.value).replace('LINK', obj.url) });
 	// COMPACTING STRUCTURE
 	const embeds = { 'closeLog': closeLog, 'closeEmbed': closeEmbed, 'creatorClose': creatorClose, 'closeDmEmbed': closeDmEmbed };
 	const rows = { 'creatorRow': creatorRow, 'deleteRow': deleteRow, 'openRow': openRow, 'openRowRemoved': openRowRemoved };
@@ -98,10 +101,10 @@ async function close(base, type, num) {
 	dataSetUpdate(number, data, client, obj, channel, gData);
 	// FINISHING
 	unsetClosing(client, number);
-	if (!x) {base.editReply('Ticket closed!');}
+	if (!ina) {base.editReply('Ticket closed!');}
 }
 
-async function sendSwitch(embeds, rows, compactData) {
+async function sendSwitch(embeds: any, rows: any, compactData: any) {
 	try {
 		compactData.wbh.send({ embeds: [embeds.closeLog] });
 	}
@@ -130,15 +133,15 @@ async function sendSwitch(embeds, rows, compactData) {
 	}
 }
 
-async function setClosing(client, number) {
+async function setClosing(client: any, number: number) {
 	await client.ticket.push('closing', number);
 }
 
-async function unsetClosing(client, number) {
+async function unsetClosing(client: any, number: number) {
 	await client.ticket.pull('inaQueue', number);
 }
 
-async function buildRow(type, data) {
+async function buildRow(type: string, data: { locales: any, number: number | null}) {
 	const locales = data.locales;
 	const number = data.number;
 	if (type == 'delete') {
@@ -209,7 +212,7 @@ async function buildRow(type, data) {
 	}
 }
 
-async function embedBuilder(type, data) {
+async function embedBuilder(type: string, data: { 'locales': any, 'users': any, 'closeUser': any, 'client': any, 'number': number, 'author': string }) {
 	const locales = data.locales;
 	const client = data.client;
 	const color = await client.db.get('color.close');
@@ -257,7 +260,7 @@ async function embedBuilder(type, data) {
 	}
 }
 
-async function dataSetUpdate(number, data, client, obj, channel, gData) {
+async function dataSetUpdate(number: number, data: { dmChannel: any, guildChannel: any }, client: any, obj: any, channel: TextChannel, gData: any) {
 	moveTicket(client, channel, gData);
 	for (const id of data.dmChannel) {
 		await client.ticket.delete(id);
@@ -268,7 +271,7 @@ async function dataSetUpdate(number, data, client, obj, channel, gData) {
 	await client.ticket.pull('closing', number);
 }
 
-async function getAllUsers(client, data) {
+async function getAllUsers(client: any, data: { dmChannel: any}) {
 	const arr = [];
 	for (const id of data.dmChannel) {
 		const dm = await client.channels.fetch(id);
@@ -281,7 +284,7 @@ async function getAllUsers(client, data) {
 	return string;
 }
 
-async function moveTicket(client, channel, gData) {
+async function moveTicket(client: any, channel: TextChannel, gData: any) {
 	const parent = gData.closeCategoryId;
 	await channel.setParent(parent, { lockPermissions: false });
 }

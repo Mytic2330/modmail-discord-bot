@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('screenshare')
@@ -10,7 +10,7 @@ module.exports = {
 				.setDescription('Uporabnik, ki bo dobil callperm')
 				.setRequired(true))
 		.setDescription('Daj rolo za screenshare'),
-	async execute(interaction) {
+	async execute(interaction:any) {
 		const client = interaction.client;
 		const target = interaction.options.getUser('target');
 		const member = await interaction.guild.members.fetch(target);

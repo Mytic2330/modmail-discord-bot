@@ -1,8 +1,8 @@
-const { Events } = require('discord.js');
+import { Events, GuildMember, Role, VoiceState } from 'discord.js';
 module.exports = {
 	name: Events.VoiceStateUpdate,
 	once: false,
-	async execute(interaction) {
+	async execute(interaction: any) {
 		const client = interaction.client;
 		const usersWithRole = await client.db.get('uWsr');
 		const role = await client.db.get('screenshareRole');
@@ -23,7 +23,7 @@ module.exports = {
 };
 
 
-async function userMatch(client, role, member, status) {
+async function userMatch(client: any, role: Role, member: GuildMember, status: VoiceState) {
 	if (!status.channelId) {
 		await member.roles.remove(role)
 			.then(function() {

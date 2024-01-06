@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
+import { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, User, DMChannel } from 'discord.js';
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('add')
@@ -7,7 +7,7 @@ module.exports = {
 			option.setName('user')
 				.setDescription('Uporabnik, ki bo dodan v ticket')
 				.setRequired(true)),
-	async execute(interaction) {
+	async execute(interaction:any) {
 		const client = interaction.client;
 		const locales = client.locales.commands.adduserjs;
 		const user = interaction.options.getUser('user');
@@ -20,7 +20,7 @@ module.exports = {
 	},
 };
 
-async function userCheck(interaction, client, user) {
+async function userCheck(interaction:any, client:any, user:User) {
 	const locales = client.locales.commands.adduserjs;
 	const ticketDatabaseNumber = await client.ticket.get(interaction.channelId);
 	const ticketDatabase = await client.db.table(`tt_${ticketDatabaseNumber}`).get('info');
@@ -36,7 +36,7 @@ async function userCheck(interaction, client, user) {
 	}
 }
 
-async function addUserToTicket(interaction,	user, num) {
+async function addUserToTicket(interaction:any,	user:User, num:number) {
 	const locales = interaction.client.locales.commands.adduserjs.addUserToTicket;
 	const DM = await user.createDM();
 	const hasTicket = await checkIfUserHasOpenTicket(interaction, DM);
@@ -56,7 +56,7 @@ async function addUserToTicket(interaction,	user, num) {
 		.setDisabled(true)
 		.setStyle(ButtonStyle.Secondary)
 		.setLabel(locales.button.lable);
-	const acrow = new ActionRowBuilder()
+	const acrow:any = new ActionRowBuilder()
 		.addComponents(button);
 	try {
 		await DM.send({ embeds: [embed], components: [acrow] });
@@ -71,11 +71,11 @@ async function addUserToTicket(interaction,	user, num) {
 		.replace('USERNAME', `<@${user.id}>`));
 }
 
-async function databaseSync(interaction, DM, num) {
+async function databaseSync(interaction:any, DM:DMChannel, num:number) {
 	await interaction.client.ticket.set(DM.id, num);
 	await interaction.client.db.table(`tt_${num}`).push('info.dmChannel', DM.id);
 }
-async function checkIfUserHasOpenTicket(interaction, DM) {
+async function checkIfUserHasOpenTicket(interaction:any, DM:DMChannel) {
 	const status = await interaction.client.ticket.has(DM.id);
 	if (status === true) return true;
 	if (status === false) return false;

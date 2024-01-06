@@ -1,7 +1,7 @@
-const { Events, ChannelType, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
+import { Events, ChannelType, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from 'discord.js';
 module.exports = {
 	name: Events.InteractionCreate,
-	async execute(interaction) {
+	async execute(interaction: any) {
 		if (!interaction.isStringSelectMenu()) return;
 		if (interaction.customId !== 'ticket') return;
 		await interaction.deferReply({ ephemeral: true });
@@ -10,7 +10,7 @@ module.exports = {
 		checkStatus(interaction, client, locales);
 	},
 };
-async function checkStatus(interaction, client, locales) {
+async function checkStatus(interaction: any, client: any, locales: any) {
 	const channelStatus = await client.ticket.has(interaction.channelId);
 	if (channelStatus === false) {
 		if (await client.ticket.has('users')) {
@@ -46,13 +46,13 @@ async function checkStatus(interaction, client, locales) {
 	}
 }
 
-async function createChannel(guild, interaction, client) {
+async function createChannel(guild: any, interaction: any, client: any) {
 	const data = await client.db.get(guild.id);
 	const category = await guild.channels.fetch(data.categoryId);
 	const username = await interaction.client.hasNewUsername(interaction.user, true, 'user');
 	const name = `${interaction.values[0]}-${username}`;
 	try {
-		const channel = await category.children.create({
+		const channel = await category?.children.create({
 			name: name,
 			type: ChannelType.GuildText,
 		});
@@ -63,7 +63,7 @@ async function createChannel(guild, interaction, client) {
 	}
 }
 
-async function sendInitial(x, interaction) {
+async function sendInitial(x: any, interaction: any) {
 	const locales = interaction.client.locales.events.onSelectMenuInteractionjs.initialOpening;
 	const member = await x.guild.members.fetch(interaction.user.id);
 	const num = await ticketNumberCalculation(interaction, x);
@@ -106,7 +106,7 @@ async function sendInitial(x, interaction) {
 	databaseSync(interaction, x, num);
 }
 
-async function logInteraction(x, member, num) {
+async function logInteraction(x: any, member: any, num: number) {
 	const locales = x.client.locales.events.onSelectMenuInteractionjs.initialOpening;
 	const data = await x.client.db.get(x.guildId);
 	const channel = await x.guild.channels.fetch(data.logChannel);
@@ -124,7 +124,7 @@ async function logInteraction(x, member, num) {
 	wbh.send({ embeds: [embed] });
 }
 
-async function databaseSync(interaction, x, num) {
+async function databaseSync(interaction:any, x:any, num:number) {
 	await interaction.client.ticket.pull('users', interaction.user.id);
 	const newTable = await interaction.client.db.table(`tt_${num}`);
 	await newTable.set('info', {
@@ -146,7 +146,7 @@ async function databaseSync(interaction, x, num) {
 	await interaction.client.ticket.push('tickets', num);
 }
 
-async function ticketNumberCalculation(interaction, x) {
+async function ticketNumberCalculation(interaction:any, x:any) {
 	var num = await interaction.client.db.get('ticketNumber');
 	if (num) {
 		await interaction.client.db.set('ticketNumber', num + 1);

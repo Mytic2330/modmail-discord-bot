@@ -1,16 +1,18 @@
 require('./utils/logger');
-const { hasNewUsername, getTimestamp, getDatestamp } = require('./utils/etc');
-const { webhook } = require('./utils/webhook');
-const { Client, Collection, GatewayIntentBits, ActivityType, Events, Partials } = require('discord.js');
-const jsonc = require('jsonc');
-const { QuickDB } = require('quick.db');
-const { version } = require('./package.json');
-const fs = require('fs-extra');
-const path = require('node:path');
+// import * as etc from './utils/etc';
+// import webhook from './utils/webhook';
+import { Client, Collection, GatewayIntentBits, ActivityType, Events, Partials, ClientOptions } from 'discord.js';
+import { jsonc } from 'jsonc';
+import { QuickDB } from 'quick.db';
+import version from './package.json';
+import * as fs from 'fs-extra';
+import * as path from 'node:path';
 const database = new QuickDB({ filePath: './database.sqlite' });
 const { Token } = jsonc.parse(fs.readFileSync(path.join(__dirname, 'config/settings.jsonc'), 'utf8'));
-const { lib } = require('./bridge/bridge.js');
-const debug = true;
+const settings = jsonc.parse(fs.readFileSync(path.join(__dirname, 'config/settings.jsonc'), 'utf8'));
+const { locales } = jsonc.parse(fs.readFileSync(path.join(__dirname, 'locales/locales.jsonc'), 'utf8'));
+import lib from './bridge/bridge.js';
+const debug: boolean = true;
 
 
 console.log(` \x1b[36m
@@ -32,8 +34,29 @@ console.log(` \x1b[36m
 Made by mytic2330
 Version: ${version} \x1b[0m`);
 
+const commands = new Collection<string, any>();
 
-const client = new Client({
+class ExtendedClient extends Client {
+	db:QuickDB = database;
+	lib = lib;
+	ticket = database.table('ticket');
+	settings = settings;
+	commands = commands;
+    locales = locales;
+}
+
+// client.db = database;
+// client.ticket = database.table('ticket');
+// client.settings = 
+// client.locales = jsonc.parse(fs.readFileSync(path.join(__dirname, 'locales/locales.jsonc'), 'utf8'));
+// client.hasNewUsername = hasNewUsername;
+// client.wbh = webhook;
+// client.timestamp = getTimestamp;
+// client.version = version;
+// client.datestamp = getDatestamp;
+// client.lib = lib;
+
+const client = new ExtendedClient({
 	presence: {
 		status: 'online',
 		afk: false,
@@ -70,21 +93,6 @@ const client = new Client({
 		Partials.Reaction,
 	],
 });
-
-client.discord = require('discord.js');
-client.db = database;
-client.ticket = database.table('ticket');
-client.settings = jsonc.parse(fs.readFileSync(path.join(__dirname, 'config/settings.jsonc'), 'utf8'));
-client.locales = jsonc.parse(fs.readFileSync(path.join(__dirname, 'locales/locales.jsonc'), 'utf8'));
-client.hasNewUsername = hasNewUsername;
-client.wbh = webhook;
-client.timestamp = getTimestamp;
-client.version = version;
-client.datestamp = getDatestamp;
-client.lib = lib;
-
-
-client.commands = new Collection();
 const foldersPath = path.join(__dirname, 'commands');
 const commandFolders = fs.readdirSync(foldersPath);
 
@@ -105,7 +113,7 @@ for (const folder of commandFolders) {
 
 client.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isChatInputCommand()) return;
-	const command = interaction.client.commands.get(interaction.commandName);
+	const command = commands.get(interaction.commandName);
 	if (!command) {
 		console.error(`No command matching ${interaction.commandName} was found.`);
 		return;
@@ -140,16 +148,17 @@ for (const folder of eventFolders) {
 		}
 	}
 }
-process.on('unhandledRejection', (reason, promise, a) => {
+process.on('unhandledRejection', (reason:any, promise:any, a:any) => {
 	console.log(reason, promise, a);
 });
-process.on('uncaughtException', (reason, promise, a) => {
+process.on('uncaughtException', (reason:any, promise:any, a:any) => {
 	console.log(reason, promise, a);
 });
 
 client.on('error', console.log)
 	.on('warn', console.log);
 if (debug === true) client.on('debug', console.log);
+
 client.login(Token).catch(err => {
 	console.error('[TOKEN-ERROR] Unable to connect to the BOT\'s Token');
 	console.error(err);

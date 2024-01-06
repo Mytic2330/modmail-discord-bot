@@ -1,7 +1,8 @@
+export default newTicket;
 // DEFINITION
-const { EmbedBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ActionRowBuilder } = require('discord.js');
+import { EmbedBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ActionRowBuilder } from 'discord.js';
 // FUNCTION
-async function newTicket(base) {
+async function newTicket(base: any) {
 	const client = base.client;
 	const locales = client.locales.utils.openTicketjs;
 	var type;
@@ -26,7 +27,7 @@ async function newTicket(base) {
 		.setCustomId('ticket')
 		.setPlaceholder(locales.userSelectCategory.SelectMenuPlaceholder);
 
-	client.settings.categories.forEach(x => {
+	client.settings.categories.forEach((x: string) => {
 		const options = x.split('_');
 		select.addOptions(
 			new StringSelectMenuOptionBuilder()
@@ -46,7 +47,3 @@ async function newTicket(base) {
 		console.error(e);
 	}
 }
-
-
-// EXPORT
-module.exports = newTicket;

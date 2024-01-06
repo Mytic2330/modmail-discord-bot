@@ -1,7 +1,7 @@
-const { Events, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
+import { Events, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, User, DMChannel } from 'discord.js';
 module.exports = {
 	name: Events.InteractionCreate,
-	async execute(interaction) {
+	async execute(interaction:any) {
 		if (!interaction.isStringSelectMenu()) return;
 		if (interaction.customId !== 'removeUser') return;
 		const client = interaction.client;
@@ -11,7 +11,7 @@ module.exports = {
 	},
 };
 
-async function userCheck(interaction, client, user, dm) {
+async function userCheck(interaction:any, client:any, user: User, dm: DMChannel) {
 	const locales = interaction.client.locales.events.removejs;
 	const ticketDatabaseNumber = await client.ticket.get(interaction.channelId);
 	const ticketDatabase = await client.db.table(`tt_${ticketDatabaseNumber}`).get('info');
@@ -28,7 +28,7 @@ async function userCheck(interaction, client, user, dm) {
 
 }
 
-async function removeUserFromTicket(interaction, user, num) {
+async function removeUserFromTicket(interaction:any, user: User, num: number) {
 	const locales = interaction.client.locales.events.removejs;
 	const DM = await user.createDM();
 	const embed = new EmbedBuilder()
@@ -38,7 +38,7 @@ async function removeUserFromTicket(interaction, user, num) {
 		.setCustomId('openNewTicketButtonRemoved')
 		.setLabel(locales.openNewTicket.lable)
 		.setStyle(ButtonStyle.Primary);
-	const openRow = new ActionRowBuilder()
+	const openRow: any = new ActionRowBuilder()
 		.addComponents(openNewTicket);
 	try {
 		await DM.send({ embeds: [embed], components: [openRow] });
@@ -50,7 +50,7 @@ async function removeUserFromTicket(interaction, user, num) {
 	}
 }
 
-async function databaseSync(interaction, DM, num) {
+async function databaseSync(interaction:any, DM: DMChannel, num: number) {
 	await interaction.client.ticket.delete(DM.id);
 	await interaction.client.db.table(`tt_${num}`).pull('info.dmChannel', DM.id);
 }

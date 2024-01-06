@@ -1,7 +1,8 @@
-const { Events } = require('discord.js');
+import { Events } from 'discord.js';
+import { QuickDB } from 'quick.db';
 module.exports = {
 	name: Events.MessageDelete,
-	async execute(message) {
+	async execute(message:any) {
 		const client = message.client;
 		// if (message.author.bot === true) return;
 		if (!await client.ticket.has(message.channelId)) return;
@@ -20,7 +21,7 @@ module.exports = {
 	},
 };
 
-async function handleHasMessage(client, message, table) {
+async function handleHasMessage(client:any, message:any, table:QuickDB) {
 	const dataMessage = await table.get(message.id);
 	for (const obj of dataMessage.recive) {
 		const channel = await client.channels.fetch(obj.channelId);

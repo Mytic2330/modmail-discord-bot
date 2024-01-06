@@ -1,7 +1,7 @@
-const { Events, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, EmbedBuilder } = require('discord.js');
+import { Events, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, EmbedBuilder, DMChannel } from 'discord.js';
 module.exports = {
 	name: Events.InteractionCreate,
-	async execute(interaction) {
+	async execute(interaction: any) {
 		if (interaction.isButton()) {
 			const ch_cd11 = interaction.customId.startsWith('stat');
 			if (!ch_cd11) return;
@@ -15,7 +15,7 @@ module.exports = {
 	},
 };
 
-async function switchCheck(interaction) {
+async function switchCheck(interaction:any) {
 	const id_inter = interaction.customId.split('_');
 	switch (id_inter[1]) {
 	case 'rating':
@@ -27,7 +27,7 @@ async function switchCheck(interaction) {
 	}
 }
 
-async function rateFnc(interaction) {
+async function rateFnc(interaction:any) {
 	const client = interaction.client;
 	const all_tickets = await client.ticket.get('tickets');
 	const arr = [];
@@ -38,7 +38,7 @@ async function rateFnc(interaction) {
 	}
 }
 
-async function ticketFnc(interaction) {
+async function ticketFnc(interaction:any) {
 	const modal = new ModalBuilder()
 		.setCustomId('getTicketStatsModal')
 		.setTitle('Statistični vpogled');
@@ -46,13 +46,13 @@ async function ticketFnc(interaction) {
 		.setCustomId('ticketNumber')
 		.setLabel('Številka ticketa, ki si ga želite ogledati')
 		.setStyle(TextInputStyle.Short);
-	const firstActionRow = new ActionRowBuilder().addComponents(favoriteColorInput);
+	const firstActionRow: any = new ActionRowBuilder().addComponents(favoriteColorInput);
 
 	modal.addComponents(firstActionRow);
 	await interaction.showModal(modal);
 }
 
-async function processModal(interaction) {
+async function processModal(interaction:any) {
 	const num = parseInt(interaction.fields.getTextInputValue('ticketNumber'));
 
 	const allTickets = await interaction.client.ticket.get('tickets');
@@ -74,7 +74,7 @@ async function processModal(interaction) {
 
 }
 
-async function gatherTicketInfo(client, num) {
+async function gatherTicketInfo(client:any, num:number) {
 	const table = await client.db.table(`tt_${num}`);
 	try {
 		const info = await table.get('info');
@@ -89,7 +89,7 @@ async function gatherTicketInfo(client, num) {
 	}
 }
 
-async function embedCreator(obj, client) {
+async function embedCreator(obj:any, client:any) {
 	var embed = new EmbedBuilder()
 		.setColor(await client.db.get('color.default'))
 		.setTitle(`Ticket številka ${obj.num}`)
@@ -122,7 +122,7 @@ async function embedCreator(obj, client) {
 
 // ! DOKONČAJ
 
-async function dateMaker(data) {
+async function dateMaker(data:any) {
 	const arr = data.split('_');
 
 	const day = arr[0].split(':')[1];
@@ -133,7 +133,7 @@ async function dateMaker(data) {
 	return dataToReturn;
 }
 
-async function getAllUsers(client, data) {
+async function getAllUsers(client:any, data: { dmChannel: any, creatorId: number}) {
 	const arr = [];
 	for (const id of data.dmChannel) {
 		const dm = await client.channels.fetch(id);

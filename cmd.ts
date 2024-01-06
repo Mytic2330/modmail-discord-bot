@@ -1,7 +1,7 @@
 const { REST, Routes } = require('discord.js');
-const jsonc = require('jsonc');
-const fs = require('node:fs');
-const path = require('node:path');
+import { jsonc } from 'jsonc';
+import fs from 'node:fs';
+import path from 'node:path';
 const { clientId, Token } = jsonc.parse(fs.readFileSync(path.join(__dirname, 'config/settings.jsonc'), 'utf8'));
 
 const commands = [];

@@ -1,10 +1,11 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+import { Table } from 'quick.db';
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('cinactive')
+		.setName('inactive')
 		.setDMPermission(false)
-		.setDescription('Odstrani oznako neaktivnosti'),
-	async execute(interaction) {
+		.setDescription('Oznaci kot inaktiven ticket'),
+	async execute(interaction:any) {
 		const client = interaction.client;
 		// const locales = client.locales.utils.closejs;
 		await interaction.deferReply({ ephemeral: true });
@@ -18,38 +19,38 @@ module.exports = {
 		const que_chc1 = await client.ticket.get('inaQueue');
 		if (!que_chc1) {
 			await client.ticket.set('inaQueue', []);
-			interaction.editReply('Ticket nima oznake neaktivnosti');
+			await client.ticket.push('inaQueue', number);
 		}
 		else {
 			const que_chc2 = await client.ticket.get('inaQueue');
 			if (que_chc2.includes(number)) {
-				await client.ticket.pull('inaQueue', number);
+				interaction.editReply('Ticket je že označen kot neaktiven');
+				return;
 			}
 			else {
-				interaction.editReply('Ticket nima oznake neaktivnosti');
-				return;
+				await client.ticket.push('inaQueue', number);
 			}
 		}
 		const embed = new EmbedBuilder()
 			.setColor(await client.db.get('color.default'))
-			.setTitle('Oznaka neaktivnosti odstranjena')
-			.setDescription('Ticket je bil označen kot aktiven to pomeni, \nda se ticket **ne** bo avtomatsko zaprl, če v 48ih urah ni sporočil.');
+			.setTitle('Oznaka inaktivnosti')
+			.setDescription('Vaš ticket je bil označen kot neaktiven to pomeni, \nda mora biti v vašem ticketu poslano sporočilo vsakih \n48 ur drugače se bo ticket avtomatsko zaprl.\n24 ur pred zaprtjem boste opozorjeni.');
 
 		const emb = new EmbedBuilder()
 			.setColor(await client.db.get('color.default'))
-			.setTitle('Oznaka neaktivnosti odstranjena')
-			.setDescription('Ticket je bil označen kot aktiven to pomeni, \nda se ticket **ne** bo avtomatsko zaprl, če v 48ih urah ni sporočil.');
+			.setTitle('Oznaka inaktivnosti')
+			.setDescription('Ticket je bil označen kot neaktiven to pomeni, \nda se bo ticket avtomatsko zaprl, če v 48ih urah ni sporočil.\n24 ur pred zaprtjem boste opozorjeni.');
 
 		const channels = data.dmChannel;
 		const channel = await client.channels.fetch(data.guildChannel);
 		sendEmbeds(client, channels, embed);
 		sendToServer(client, channel, emb);
 		setData(database);
-		interaction.editReply('Ticket označen kot aktiven');
+		interaction.editReply('Ticket označen kot neaktiven');
 	},
 };
 
-async function sendEmbeds(client, channels, embed) {
+async function sendEmbeds(client:any, channels:any, embed:EmbedBuilder) {
 	for (const id of channels) {
 		try {
 			const channel = await client.channels.fetch(id);
@@ -61,11 +62,17 @@ async function sendEmbeds(client, channels, embed) {
 	}
 }
 
-async function sendToServer(client, channel, emb) {
+async function sendToServer(client:any, channel:any, emb:EmbedBuilder) {
 	const wbh = await client.wbh(channel);
 	wbh.send({ embeds: [emb] });
 }
 
-async function setData(database) {
-	database.delete('inaData');
+async function setData(database:Table) {
+	const now = new Date();
+	const currentSec = now.getSeconds();
+	const currentMs = now.getMilliseconds();
+	const rej = (currentSec * 1000) + currentMs;
+	const remainingMilliseconds = (60000 - rej) + 172800000;
+
+	database.set('inaData', remainingMilliseconds);
 }

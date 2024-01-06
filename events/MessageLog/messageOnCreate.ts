@@ -1,9 +1,9 @@
 /* eslint-disable no-redeclare */
 /* eslint-disable no-undef */
-const { Events, EmbedBuilder } = require('discord.js');
+import { Events, EmbedBuilder } from 'discord.js';
 module.exports = {
 	name: Events.MessageCreate,
-	async execute(message) {
+	async execute(message:any) {
 		if (message.author.bot === true) return;
 		if (message.guildId != undefined) {
 			if (message.content.toLowerCase().startsWith('!')) {
@@ -29,7 +29,7 @@ module.exports = {
 	},
 };
 
-async function messageHandeler(message, client, locales) {
+async function messageHandeler(message:any, client:any, locales:any) {
 	const user = await client.users.fetch(message.author.id);
 	const reciveChannelEmbed = new EmbedBuilder()
 		.setAuthor({ name: user.username, iconURL: user.displayAvatarURL() })
@@ -43,7 +43,7 @@ async function messageHandeler(message, client, locales) {
 	}
 	if (message.attachments) {
 		let num = 1;
-		message.attachments.forEach((keys) => {
+		message.attachments.forEach((keys:any) => {
 			reciveChannelEmbed.addFields({ name: `${locales.messageProcessing.attachment} ${num}`, value: `[**LINK**](${keys.attachment})` });
 			num++;
 		});
@@ -51,7 +51,7 @@ async function messageHandeler(message, client, locales) {
 	messageReciverSwitch(message, reciveChannelEmbed, client);
 	resetInaStatus(message, client);
 }
-async function messageReciverSwitch(message, reciveChannelEmbed, client) {
+async function messageReciverSwitch(message:any, reciveChannelEmbed:any, client:any) {
 	const switchStatus = message.guildId === null;
 
 	switch (switchStatus) {
@@ -71,7 +71,7 @@ async function messageReciverSwitch(message, reciveChannelEmbed, client) {
 	}
 }
 
-async function afterSendErrorHandler(message, client, type, values) {
+async function afterSendErrorHandler(message:any, client:any, type:string, values:any) {
 	const locales = client.locales.events.messageOnCreatejs.errorHandler;
 	if (type === 'DM') {
 		message.react('✅');
@@ -96,9 +96,10 @@ async function afterSendErrorHandler(message, client, type, values) {
 		}
 	}
 }
-async function errorEmbedAsemblyServer(message, client, values, locales) {
+async function errorEmbedAsemblyServer(message:any, client:any, values:any, locales:any) {
 	if (values.channels.length > 1 && values.errorSender.length > 0) {
-		var one_time_warn_EMBED = new EmbedBuilder()
+		var one_time_warn_EMBED:any;
+		one_time_warn_EMBED = new EmbedBuilder()
 			.setColor(await client.db.get('color.error'))
 			.setTitle(locales.oneOrMore.title)
 			.setTimestamp()
@@ -118,7 +119,7 @@ async function errorEmbedAsemblyServer(message, client, values, locales) {
 	}
 	return one_time_warn_EMBED;
 }
-async function errorEmbedAsemblyClient(message, client, values, locales) {
+async function errorEmbedAsemblyClient(message:any, client:any, values:any, locales:any) {
 	if (values.channels.length === values.errorSender.length) {
 		const embd = new EmbedBuilder()
 			.setColor(await client.db.get('color.error'))
@@ -142,7 +143,8 @@ async function errorEmbedAsemblyClient(message, client, values, locales) {
 		return null;
 	}
 	if (values.channels.length > 1 && values.errorSender.length > 0) {
-		var one_time_warn_EMBED = new EmbedBuilder()
+		var one_time_warn_EMBED:any;
+		one_time_warn_EMBED = new EmbedBuilder()
 			.setColor(await client.db.get('color.error'))
 			.setTitle(locales.oneOrMore.title)
 			.setTimestamp()
@@ -162,7 +164,7 @@ async function errorEmbedAsemblyClient(message, client, values, locales) {
 	}
 	return one_time_warn_EMBED;
 }
-async function sendToDMChannel(message, reciveChannelEmbed) {
+async function sendToDMChannel(message:any, reciveChannelEmbed:any) {
 	const client = message.client;
 	const ticketNumberDatabse = await client.ticket.get(message.channelId);
 	const channels = await client.db.table(`tt_${ticketNumberDatabse}`).get('info.dmChannel');
@@ -181,7 +183,7 @@ async function sendToDMChannel(message, reciveChannelEmbed) {
 	return { errorSender, channels };
 }
 
-async function sendToServer(message, reciveChannelEmbed) {
+async function sendToServer(message:any, reciveChannelEmbed:any) {
 	const client = message.client;
 	const status = await sendToDMByOtherDM(message, reciveChannelEmbed);
 	const ticketNumberDatabse = await client.ticket.get(message.channelId);
@@ -198,7 +200,7 @@ async function sendToServer(message, reciveChannelEmbed) {
 	}
 }
 
-async function sendToDMByOtherDM(message, reciveChannelEmbed) {
+async function sendToDMByOtherDM(message:any, reciveChannelEmbed:any) {
 	const client = message.client;
 	const ticketNumberDatabse = await client.ticket.get(message.channelId);
 	const reciverData = await client.db.table(`tt_${ticketNumberDatabse}`).get('info');
@@ -218,12 +220,12 @@ async function sendToDMByOtherDM(message, reciveChannelEmbed) {
 	return { errorSender, channels };
 }
 
-async function errorEmbedSender(message, embed) {
+async function errorEmbedSender(message:any, embed:any) {
 	await message.channel.send({ embeds: [embed] });
 	return;
 }
 
-async function resetInaStatus(message, client) {
+async function resetInaStatus(message:any, client:any) {
 	const ticketNumberDatabse = await client.ticket.get(message.channelId);
 	const inaQueue = await client.ticket.get('inaQueue');
 	if (!inaQueue) return;
@@ -237,7 +239,7 @@ async function resetInaStatus(message, client) {
 
 }
 
-async function infoWriter(client, ticketNumberDatabse, message, x) {
+async function infoWriter(client:any, ticketNumberDatabse:any, message:any, x:any) {
 	if (x === 'toServer') {
 		await client.db.table(`tt_${ticketNumberDatabse}`).set(message.id, {
 			'mesageData': {
@@ -263,6 +265,6 @@ async function infoWriter(client, ticketNumberDatabse, message, x) {
 	}
 }
 
-async function sendDBWrite(client, ticketNumberDatabse, message, msh) {
+async function sendDBWrite(client:any, ticketNumberDatabse:any, message:any, msh:any) {
 	await client.db.table(`tt_${ticketNumberDatabse}`).push(`${message.id}.recive`, { 'channelId': msh.channelId, 'messageId': msh.id, 'guildId': msh.guildId });
 }

@@ -1,9 +1,9 @@
-const { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } = require('discord.js');
+import { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } from 'discord.js';
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('remove')
 		.setDescription('Odstrani uporabnika iz ticketa'),
-	async execute(interaction) {
+	async execute(interaction:any) {
 		const client = interaction.client;
 		const locales = interaction.client.locales.commands.removeUserjs;
 		const checkOne = await client.ticket.has(interaction.channelId);

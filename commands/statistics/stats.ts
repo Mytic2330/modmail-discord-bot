@@ -1,11 +1,11 @@
-const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, PermissionFlagsBits } = require('discord.js');
+import { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, PermissionFlagsBits } from 'discord.js';
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('stats')
 		.setDMPermission(false)
 		.setDefaultMemberPermissions(PermissionFlagsBits.MoveMembers)
 		.setDescription('Preveri statistike'),
-	async execute(interaction) {
+	async execute(interaction:any) {
 		interaction.reply({ content: 'Ta komanda trenutno ni v uporabi!', ephemeral: true });
 		return;
 		// const embed = new EmbedBuilder()

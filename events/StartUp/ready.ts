@@ -1,8 +1,8 @@
-const { Events, EmbedBuilder } = require('discord.js');
+import { Events, EmbedBuilder } from 'discord.js';
 module.exports = {
 	name: Events.ClientReady,
 	once: true,
-	async execute(client) {
+	async execute(client:any) {
 		console.log(`   \x1b[36m     
 ██████╗░░█████╗░████████╗░░██████╗░███████╗░█████╗░██████╗░██╗░░░██╗
 ██╔══██╗██╔══██╗╚══██╔══╝░░██╔══██╗██╔════╝██╔══██╗██╔══██╗╚██╗░██╔╝
@@ -39,7 +39,7 @@ Logged in as ${client.user.tag}\x1b[0m`);
 	},
 };
 
-async function readyMessage(client) {
+async function readyMessage(client:any) {
 	const data = await client.db.get(client.settings.guildId);
 	if (data) {
 		const wbh1 = await client.wbh(await client.channels.fetch(data.logChannel));

@@ -1,10 +1,10 @@
-const { Events, EmbedBuilder } = require('discord.js');
+import { Events, EmbedBuilder } from 'discord.js';
 module.exports = {
 	name: Events.ClientReady,
 	once: true,
-	execute(client) {
+	execute(client:any) {
 		inaCheck(client);
-		function waitForNextMinute(callback) {
+		function waitForNextMinute(callback:any) {
 			const now = new Date();
 			const currentSec = now.getSeconds();
 			const currentMs = now.getMilliseconds();
@@ -26,7 +26,7 @@ module.exports = {
 	},
 };
 
-async function inaCheck(client) {
+async function inaCheck(client:any) {
 	const queue = await client.ticket.get('inaQueue');
 	if (!queue) return;
 	for (const id of queue) {
@@ -52,7 +52,7 @@ async function inaCheck(client) {
 	}
 }
 
-async function sendInaWarning(data, client) {
+async function sendInaWarning(data:any, client:any) {
 	const embed = new EmbedBuilder()
 		.setColor(await client.db.get('color.default'))
 		.setTitle('Opozorilo o nekativnosti!')
@@ -68,7 +68,7 @@ async function sendInaWarning(data, client) {
 	sendEmbeds(client, data.dmChannel, embed);
 }
 
-async function sendEmbeds(client, channels, embed) {
+async function sendEmbeds(client:any, channels:any, embed: EmbedBuilder) {
 	for (const id of channels) {
 		try {
 			const channel = await client.channels.fetch(id);
@@ -80,7 +80,7 @@ async function sendEmbeds(client, channels, embed) {
 	}
 }
 
-async function sendToServer(client, channel, emb) {
+async function sendToServer(client:any, channel:any, emb: EmbedBuilder) {
 	const wbh = await client.wbh(channel);
 	wbh.send({ embeds: [emb] });
 }
