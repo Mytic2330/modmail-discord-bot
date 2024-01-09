@@ -1,6 +1,8 @@
 export default close
 const discordTranscripts = require('discord-html-transcripts');
-import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, Embed, Client, TextChannel } from 'discord.js';
+import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, Embed, Client, TextChannel, Interaction, DMChannel, CommandInteraction, ButtonInteraction } from 'discord.js';
+import lib from '../bridge/bridge';
+import { AnyARecord } from 'dns';
 
 async function close(base: any, type:string, num: number | null) {
 	// BASIC DEFINING
@@ -26,22 +28,22 @@ async function close(base: any, type:string, num: number | null) {
 	}
 	// DEFFER IF INTERACTION
 	if (!ina && interaction) { await interaction.deferReply({ ephemeral: true }); }
-	const locales = client.locales.utils.closejs;
+	const locales = lib.locales.utils.closejs;
 	// CHECK IF TICKET IS VALID
-	if (!await client.ticket.has(base.channelId) && !ina) {
+	if (!await lib.ticket.has(base.channelId) && !ina) {
 		base.editReply(locales.wrongChannel);
 		return;
 	}
 	// DATABASE DEFINING
 	if (ina) { number = num; }
-	else {number = await client.ticket.get(base.channelId); }
-	const data = await client.db.table(`tt_${number}`).get('info');
+	else {number = await lib.ticket.get(base.channelId); }
+	const data = await lib.db.table(`tt_${number}`).get('info');
 	if (ina) { channelId = data.guildChannel; }
 	else { channelId = base.channelId; }
 	// CHECK FOR DUPLICATE INTERACTIONS
-	const st = await client.ticket.get('closing');
+	const st = await lib.ticket.get('closing');
 	if (!st) {
-		await client.ticket.set('closing', []);
+		await lib.ticket.set('closing', []);
 	}
 	else if (st.includes(number)) {
 		if (!ina) { base.editReply(locales.ticketAlreadyClosing); }
@@ -50,10 +52,10 @@ async function close(base: any, type:string, num: number | null) {
 	// PREVENT DUPLICATE STARTS
 	await setClosing(client, number);
 	// INFO DEFINING
-	const guild = await client.guilds.fetch(await client.db.get('guildId'));
+	const guild = await client.guilds.fetch(await lib.db.get('guildId'));
 	const channel = await guild.channels.fetch(channelId);
 	const author = await client.users.fetch(data.creatorId);
-	const gData = await client.db.get(guild.id);
+	const gData = await lib.db.get(guild.id);
 	const logChannel = await client.channels.fetch(gData.logChannel);
 	const archive = await client.channels.fetch(gData.transcriptChannel);
 	if (ina) { closeUser = { 'username': 'Neaktivnost', 'id': '0' }; }
@@ -83,11 +85,11 @@ async function close(base: any, type:string, num: number | null) {
 		poweredBy: false,
 	});
 	// LOG WEBHOOK DEFINING
-	const wbh = await client.wbh(logChannel);
-	const wbhArchive = await client.wbh(archive);
+	const wbh = await lib.wbh(logChannel);
+	const wbhArchive = await lib.wbh(archive);
 	// TRANSCRIPT ARCHIVING
-	const message = await wbhArchive.send({ files: [attachment] });
-	const obj = message.attachments.values().next().value;
+	const message = await wbhArchive?.send({ files: [attachment] });
+	const obj = message?.attachments.values().next().value;
 	// ADDING TRANSCRIPT LINK TO LOG EMBEDS
 	closeLog?.addFields({ name: locales.transcriptField.name, value: (locales.transcriptField.value).replace('LINK', obj.url) });
 	closeEmbed?.addFields({ name: locales.transcriptField.name, value: (locales.transcriptField.value).replace('LINK', obj.url) });
@@ -260,22 +262,22 @@ async function embedBuilder(type: string, data: { 'locales': any, 'users': any, 
 	}
 }
 
-async function dataSetUpdate(number: number, data: { dmChannel: any, guildChannel: any }, client: any, obj: any, channel: TextChannel, gData: any) {
-	moveTicket(client, channel, gData);
+async function dataSetUpdate(number: number, data: { dmChannel: any, guildChannel: any }, client: Client, obj: any, channel: TextChannel, gData: any) {
+	moveTicket(channel, gData);
 	for (const id of data.dmChannel) {
-		await client.ticket.delete(id);
+		await lib.ticket.delete(id);
 	}
-	await client.ticket.delete(data.guildChannel);
-	await client.db.table(`tt_${number}`).set('info.closed', true);
-	await client.db.table(`tt_${number}`).set('info.transcript', `${obj.url}`);
-	await client.ticket.pull('closing', number);
+	await lib.ticket.delete(data.guildChannel);
+	await lib.db.table(`tt_${number}`).set('info.closed', true);
+	await lib.db.table(`tt_${number}`).set('info.transcript', `${obj.url}`);
+	await lib.ticket.pull('closing', number);
 }
 
-async function getAllUsers(client: any, data: { dmChannel: any}) {
+async function getAllUsers(client: Client, data: { dmChannel: any}) {
 	const arr = [];
 	for (const id of data.dmChannel) {
-		const dm = await client.channels.fetch(id);
-		const user = dm.recipient;
+		const dm: any = await client.channels.fetch(id);
+		const user = dm?.recipient;
 		arr.push(user);
 	}
 
@@ -284,7 +286,7 @@ async function getAllUsers(client: any, data: { dmChannel: any}) {
 	return string;
 }
 
-async function moveTicket(client: any, channel: TextChannel, gData: any) {
+async function moveTicket(channel: TextChannel, gData: any) {
 	const parent = gData.closeCategoryId;
 	await channel.setParent(parent, { lockPermissions: false });
 }

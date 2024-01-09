@@ -1,9 +1,8 @@
-/* eslint-disable no-redeclare */
-/* eslint-disable no-undef */
-import { Events, EmbedBuilder } from 'discord.js';
+import { Events, EmbedBuilder, Message, Client, DMChannel, TextChannel, Embed } from 'discord.js';
+import lib from '../../bridge/bridge';
 module.exports = {
 	name: Events.MessageCreate,
-	async execute(message:any) {
+	async execute(message: Message) {
 		if (message.author.bot === true) return;
 		if (message.guildId != undefined) {
 			if (message.content.toLowerCase().startsWith('!')) {
@@ -14,26 +13,25 @@ module.exports = {
 			}
 		}
 		const client = message.client;
-		const lib = client.lib;
-		const locales = client.locales.events.messageOnCreatejs;
-		const status = await client.ticket.has(message.channelId);
+		const locales = lib.locales.events.messageOnCreatejs;
+		const status = await lib.ticket.has(message.channelId);
 
 		switch (status) {
 		case true:
 			messageHandeler(message, client, locales);
 			break;
 		case false:
-			lib.newTicket(message);
+			lib.newTicket(message, undefined);
 			break;
 		}
 	},
 };
 
-async function messageHandeler(message:any, client:any, locales:any) {
+async function messageHandeler(message: Message, client: Client, locales:any) {
 	const user = await client.users.fetch(message.author.id);
 	const reciveChannelEmbed = new EmbedBuilder()
 		.setAuthor({ name: user.username, iconURL: user.displayAvatarURL() })
-		.setColor(await client.db.get('color.recive'))
+		.setColor(await lib.db.get('color.recive'))
 		.setTitle(locales.messageProcessing.reciveNewMessageEmbed.title)
 		.setTimestamp()
 		.setFooter({ text: `${locales.messageProcessing.reciveNewMessageEmbed.footer.text}`, iconURL: locales.messageProcessing.reciveNewMessageEmbed.footer.iconURL });
@@ -49,9 +47,8 @@ async function messageHandeler(message:any, client:any, locales:any) {
 		});
 	}
 	messageReciverSwitch(message, reciveChannelEmbed, client);
-	resetInaStatus(message, client);
 }
-async function messageReciverSwitch(message:any, reciveChannelEmbed:any, client:any) {
+async function messageReciverSwitch(message: Message, reciveChannelEmbed:any, client: Client) {
 	const switchStatus = message.guildId === null;
 
 	switch (switchStatus) {
@@ -71,8 +68,8 @@ async function messageReciverSwitch(message:any, reciveChannelEmbed:any, client:
 	}
 }
 
-async function afterSendErrorHandler(message:any, client:any, type:string, values:any) {
-	const locales = client.locales.events.messageOnCreatejs.errorHandler;
+async function afterSendErrorHandler(message: Message, client: Client, type:string, values:any) {
+	const locales = lib.locales.events.messageOnCreatejs.errorHandler;
 	if (type === 'DM') {
 		message.react('✅');
 		const embed = await errorEmbedAsemblyClient(message, client, values, locales);
@@ -87,7 +84,7 @@ async function afterSendErrorHandler(message:any, client:any, type:string, value
 
 	if (type === 'server') {
 		message.react('✅');
-		const embed = await errorEmbedAsemblyServer(message, client, values, locales);
+		const embed = await errorEmbedAsemblyServer(client, values, locales);
 		try {
 			if (embed) errorEmbedSender(message, embed);
 		}
@@ -96,19 +93,20 @@ async function afterSendErrorHandler(message:any, client:any, type:string, value
 		}
 	}
 }
-async function errorEmbedAsemblyServer(message:any, client:any, values:any, locales:any) {
+async function errorEmbedAsemblyServer(client: Client, values:any, locales:any) {
 	if (values.channels.length > 1 && values.errorSender.length > 0) {
 		var one_time_warn_EMBED:any;
 		one_time_warn_EMBED = new EmbedBuilder()
-			.setColor(await client.db.get('color.error'))
+			.setColor(await lib.db.get('color.error'))
 			.setTitle(locales.oneOrMore.title)
 			.setTimestamp()
 			.setFooter({ text: locales.oneOrMore.footer.text, iconURL: locales.oneOrMore.footer.iconURL });
 		let x = 1;
 		for (const id of values.errorSender) {
 			try {
-				const chan = await client.channels.fetch(id);
-				one_time_warn_EMBED.addFields({ name: id, value: (locales.oneOrMore.fields.user).replace('USERNAME', chan.recipient) });
+				const recivedChannel = await client.channels.fetch(id);
+				const chan = recivedChannel as DMChannel;
+				one_time_warn_EMBED.addFields({ name: id, value: (locales.oneOrMore.fields.user).replace('USERNAME', chan?.recipient) });
 			}
 			catch (e) {
 				console.error(e);
@@ -119,10 +117,10 @@ async function errorEmbedAsemblyServer(message:any, client:any, values:any, loca
 	}
 	return one_time_warn_EMBED;
 }
-async function errorEmbedAsemblyClient(message:any, client:any, values:any, locales:any) {
+async function errorEmbedAsemblyClient(message: Message, client: Client, values:any, locales:any) {
 	if (values.channels.length === values.errorSender.length) {
 		const embd = new EmbedBuilder()
-			.setColor(await client.db.get('color.error'))
+			.setColor(await lib.db.get('color.error'))
 			.setTitle(locales.messageNotDelivered.title)
 			.setDescription(locales.messageNotDelivered.description)
 			.setTimestamp()
@@ -133,7 +131,7 @@ async function errorEmbedAsemblyClient(message:any, client:any, values:any, loca
 	}
 	if (values.channels.length === 0) {
 		const embd = new EmbedBuilder()
-			.setColor(await client.db.get('color.error'))
+			.setColor(await lib.db.get('color.error'))
 			.setTitle(locales.unknownError.title)
 			.setDescription(locales.unknownError.description)
 			.setTimestamp()
@@ -145,14 +143,15 @@ async function errorEmbedAsemblyClient(message:any, client:any, values:any, loca
 	if (values.channels.length > 1 && values.errorSender.length > 0) {
 		var one_time_warn_EMBED:any;
 		one_time_warn_EMBED = new EmbedBuilder()
-			.setColor(await client.db.get('color.error'))
+			.setColor(await lib.db.get('color.error'))
 			.setTitle(locales.oneOrMore.title)
 			.setTimestamp()
 			.setFooter({ text: locales.oneOrMore.footer.text, iconURL: locales.oneOrMore.footer.iconURL });
 		let x = 1;
 		for (const id of values.errorSender) {
 			try {
-				const chan = await client.channels.fetch(id);
+				const recivedChannel = await client.channels.fetch(id);
+				const chan = recivedChannel as DMChannel;
 				one_time_warn_EMBED.addFields({ name: id, value: (locales.oneOrMore.fields.user).replace('USERNAME', chan.recipient) });
 			}
 			catch (e) {
@@ -164,15 +163,16 @@ async function errorEmbedAsemblyClient(message:any, client:any, values:any, loca
 	}
 	return one_time_warn_EMBED;
 }
-async function sendToDMChannel(message:any, reciveChannelEmbed:any) {
+async function sendToDMChannel(message: Message, reciveChannelEmbed:any) {
 	const client = message.client;
-	const ticketNumberDatabse = await client.ticket.get(message.channelId);
-	const channels = await client.db.table(`tt_${ticketNumberDatabse}`).get('info.dmChannel');
+	const ticketNumberDatabse = await lib.ticket.get(message.channelId);
+	const channels = await lib.db.table(`tt_${ticketNumberDatabse}`).get('info.dmChannel');
 	const errorSender = [];
 	infoWriter(client, ticketNumberDatabse, message, 'toDM');
 	for (const id of channels) {
 		try {
-			const channel = await client.channels.fetch(id);
+			const recivedChannel = await client.channels.fetch(id);
+			const channel = recivedChannel as DMChannel;
 			const msh = await channel.send({ embeds: [reciveChannelEmbed] });
 			sendDBWrite(client, ticketNumberDatabse, message, msh);
 		}
@@ -183,15 +183,17 @@ async function sendToDMChannel(message:any, reciveChannelEmbed:any) {
 	return { errorSender, channels };
 }
 
-async function sendToServer(message:any, reciveChannelEmbed:any) {
+async function sendToServer(message: Message, reciveChannelEmbed:any) {
+	resetInaStatus(message);
 	const client = message.client;
 	const status = await sendToDMByOtherDM(message, reciveChannelEmbed);
-	const ticketNumberDatabse = await client.ticket.get(message.channelId);
-	const reciverData = await client.db.table(`tt_${ticketNumberDatabse}`).get('info');
+	const ticketNumberDatabse = await lib.ticket.get(message.channelId);
+	const reciverData = await lib.db.table(`tt_${ticketNumberDatabse}`).get('info');
 	const reciveChannel = await client.channels.fetch(reciverData.guildChannel);
+	const channel = reciveChannel as TextChannel;
 	infoWriter(client, ticketNumberDatabse, message, 'toServer');
 	try {
-		const msh = await reciveChannel.send({ embeds: [reciveChannelEmbed] });
+		const msh = await channel.send({ embeds: [reciveChannelEmbed] });
 		sendDBWrite(client, ticketNumberDatabse, message, msh);
 		return status;
 	}
@@ -200,16 +202,17 @@ async function sendToServer(message:any, reciveChannelEmbed:any) {
 	}
 }
 
-async function sendToDMByOtherDM(message:any, reciveChannelEmbed:any) {
+async function sendToDMByOtherDM(message: Message, reciveChannelEmbed:any) {
 	const client = message.client;
-	const ticketNumberDatabse = await client.ticket.get(message.channelId);
-	const reciverData = await client.db.table(`tt_${ticketNumberDatabse}`).get('info');
+	const ticketNumberDatabse = await lib.ticket.get(message.channelId);
+	const reciverData = await lib.db.table(`tt_${ticketNumberDatabse}`).get('info');
 	const channels = reciverData.dmChannel;
 	const errorSender = [];
 	for (const id of channels) {
 		if (id === message.channelId) continue;
 		try {
-			const channel = await client.channels.fetch(id);
+			const recivedChannel = await client.channels.fetch(id);
+			const channel = recivedChannel as DMChannel
 			const msh = await channel.send({ embeds: [reciveChannelEmbed] });
 			sendDBWrite(client, ticketNumberDatabse, message, msh);
 		}
@@ -220,51 +223,51 @@ async function sendToDMByOtherDM(message:any, reciveChannelEmbed:any) {
 	return { errorSender, channels };
 }
 
-async function errorEmbedSender(message:any, embed:any) {
+async function errorEmbedSender(message: Message, embed: EmbedBuilder) {
 	await message.channel.send({ embeds: [embed] });
 	return;
 }
 
-async function resetInaStatus(message:any, client:any) {
-	const ticketNumberDatabse = await client.ticket.get(message.channelId);
-	const inaQueue = await client.ticket.get('inaQueue');
+async function resetInaStatus(message: Message) {
+	const ticketNumberDatabse = await lib.ticket.get(message.channelId);
+	const inaQueue = await lib.ticket.get('inaQueue');
 	if (!inaQueue) return;
 
 	for (const number of inaQueue) {
 		if (number == ticketNumberDatabse) {
-			const db = await client.db.table(`tt_${ticketNumberDatabse}`);
+			const db = lib.db.table(`tt_${ticketNumberDatabse}`);
 			await db.set('inaData', 172800000);
 		}
 	}
 
 }
 
-async function infoWriter(client:any, ticketNumberDatabse:any, message:any, x:any) {
+async function infoWriter(client: Client, ticketNumberDatabse: number, message: Message, x: string) {
 	if (x === 'toServer') {
-		await client.db.table(`tt_${ticketNumberDatabse}`).set(message.id, {
+		await lib.db.table(`tt_${ticketNumberDatabse}`).set(message.id, {
 			'mesageData': {
 				'channelId': message.channelId,
 				'guildId': message.guildId,
-				'author': message.authorId,
+				'author': message.author.id,
 			},
 		});
-		await client.db.table(`tt_${ticketNumberDatabse}`).add('messageAnalitys.messages.sentByDM', 1);
-		await client.db.table(`tt_${ticketNumberDatabse}`).push('messageAnalitys.messages.DMMessagesUsers', { 'user': message.author.id });
+		await lib.db.table(`tt_${ticketNumberDatabse}`).add('messageAnalitys.messages.sentByDM', 1);
+		await lib.db.table(`tt_${ticketNumberDatabse}`).push('messageAnalitys.messages.DMMessagesUsers', { 'user': message.author.id });
 		return;
 	}
 	if (x === 'toDM') {
-		await client.db.table(`tt_${ticketNumberDatabse}`).set(message.id, {
+		await lib.db.table(`tt_${ticketNumberDatabse}`).set(message.id, {
 			'mesageData': {
 				'channelId': message.channelId,
 				'guildId': message.guildId,
-				'author': message.authorId,
+				'author': message.author.id,
 			},
 		});
-		await client.db.table(`tt_${ticketNumberDatabse}`).add('messageAnalitys.messages.sentByServer', 1);
-		await client.db.table(`tt_${ticketNumberDatabse}`).push('messageAnalitys.messages.serverMessagesUsers', { 'user': message.author.id });
+		await lib.db.table(`tt_${ticketNumberDatabse}`).add('messageAnalitys.messages.sentByServer', 1);
+		await lib.db.table(`tt_${ticketNumberDatabse}`).push('messageAnalitys.messages.serverMessagesUsers', { 'user': message.author.id });
 	}
 }
 
-async function sendDBWrite(client:any, ticketNumberDatabse:any, message:any, msh:any) {
-	await client.db.table(`tt_${ticketNumberDatabse}`).push(`${message.id}.recive`, { 'channelId': msh.channelId, 'messageId': msh.id, 'guildId': msh.guildId });
+async function sendDBWrite(client: Client, ticketNumberDatabse: number, message:any, msh:any) {
+	await lib.db.table(`tt_${ticketNumberDatabse}`).push(`${message.id}.recive`, { 'channelId': msh.channelId, 'messageId': msh.id, 'guildId': msh.guildId });
 }

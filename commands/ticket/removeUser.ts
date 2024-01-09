@@ -1,18 +1,19 @@
-import { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } from 'discord.js';
+import { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, CommandInteraction, DMChannel } from 'discord.js';
+import lib from '../../bridge/bridge'
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('remove')
 		.setDescription('Odstrani uporabnika iz ticketa'),
-	async execute(interaction:any) {
+	async execute(interaction: CommandInteraction) {
 		const client = interaction.client;
-		const locales = interaction.client.locales.commands.removeUserjs;
-		const checkOne = await client.ticket.has(interaction.channelId);
+		const locales = lib.locales.commands.removeUserjs;
+		const checkOne = await lib.ticket.has(interaction.channelId);
 		if (checkOne === false) {
 			interaction.reply(locales.notActiveChannel);
 			return;
 		}
-		const number = await client.ticket.get(interaction.channelId);
-		const data = await client.db.table(`tt_${number}`).get('info');
+		const number = await lib.ticket.get(interaction.channelId);
+		const data = await lib.db.table(`tt_${number}`).get('info');
 		if (interaction.guildId || data.creatorId === interaction.user.id) {
 			if (data.dmChannel.length > 1) {
 				const select = new StringSelectMenuBuilder()
@@ -20,14 +21,15 @@ module.exports = {
 					.setPlaceholder(locales.selectMenu.placeholder);
 
 				for (const id of data.dmChannel) {
-					const dm = await client.channels.fetch(id);
-					const user = await dm.recipient;
+					const passedChannel = await client.channels.fetch(id);
+					const dm = passedChannel as DMChannel;
+					const user = dm.recipient;
 
-					if (user.id === data.creatorId) continue;
-					if (interaction.user.id === user.id) continue;
+					if (user?.id === data.creatorId) continue;
+					if (interaction.user.id === user?.id) continue;
 					select.addOptions(
 						new StringSelectMenuOptionBuilder()
-							.setLabel(user.username)
+							.setLabel(user?.username || 'ERROR')
 							.setValue(id),
 					);
 				}
@@ -35,7 +37,7 @@ module.exports = {
 					await interaction.reply({ content: locales.error.nousers, ephemeral: true });
 					return;
 				}
-				const row = new ActionRowBuilder()
+				const row: ActionRowBuilder<any> = new ActionRowBuilder()
 					.addComponents(select);
 				await interaction.reply({ components: [row], ephemeral: true });
 			}

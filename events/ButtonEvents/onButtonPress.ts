@@ -1,11 +1,11 @@
-import { Events, ButtonStyle, ButtonBuilder, ActionRowBuilder } from 'discord.js';
+import { Events, ButtonStyle, ButtonBuilder, ActionRowBuilder, ButtonInteraction } from 'discord.js';
+import lib from '../../bridge/bridge';
 module.exports = {
 	name: Events.InteractionCreate,
-	async execute(interaction:any) {
+	async execute(interaction: ButtonInteraction) {
 		if (!interaction.isButton()) return;
 		if (interaction.customId == 'closeByOpen') {
-			const lib = interaction.client.lib;
-			lib.close(interaction, 'cls');
+			lib.close(interaction, 'cls', null);
 		}
 		else if (interaction.customId.startsWith('rat')) {
 			ratingButtonPressed(interaction);
@@ -20,13 +20,11 @@ module.exports = {
 };
 
 
-async function ratingButtonPressed(interaction:any) {
+async function ratingButtonPressed(interaction: ButtonInteraction) {
 	const rating = interaction.customId.slice(3, 4);
 	const ticketNumber = interaction.customId.split('_')[1];
-
-	const client = interaction.client;
-	const locales = client.locales.events.onButtonPressjs.ratebutton;
-	const ticektDatabase = await client.db.table(`tt_${ticketNumber}`);
+	const locales = lib.locales.events.onButtonPressjs.ratebutton;
+	const ticektDatabase = lib.db.table(`tt_${ticketNumber}`);
 
 	await ticektDatabase.set('analytics.rating', rating);
 
@@ -68,7 +66,7 @@ async function ratingButtonPressed(interaction:any) {
 			x.setStyle(ButtonStyle.Success);
 		}
 	}
-	const creatorRow = new ActionRowBuilder()
+	const creatorRow: ActionRowBuilder<any> = new ActionRowBuilder()
 		.addComponents(rate5)
 		.addComponents(rate4)
 		.addComponents(rate3)
@@ -78,30 +76,28 @@ async function ratingButtonPressed(interaction:any) {
 	await interaction.update({ embeds: [interaction.message.embeds[0]], components: [creatorRow, interaction.message.components[1]] });
 }
 
-async function newTicketButtonPressed(interaction:any) {
-	const lib = interaction.client.lib;
-	lib.newTicket(interaction);
-	const locales = interaction.client.locales.events.onButtonPressjs;
+async function newTicketButtonPressed(interaction: ButtonInteraction) {
+	lib.newTicket(undefined, interaction);
+	const locales = lib.locales.events.onButtonPressjs;
 	const openNewTicket = new ButtonBuilder()
 		.setCustomId('openNewTicketButton')
 		.setLabel(locales.newTicket)
 		.setDisabled(true)
 		.setStyle(ButtonStyle.Primary);
-	const openRow = new ActionRowBuilder()
+	const openRow: ActionRowBuilder<any> = new ActionRowBuilder()
 		.addComponents(openNewTicket);
 	await interaction.update({ embeds: [interaction.message.embeds[0]], components: [interaction.message.components[0], openRow] });
 }
 
-async function openNewTicketButtonRemoved(interaction:any) {
-	const lib = interaction.client.lib;
-	lib.newTicket(interaction);
-	const locales = interaction.client.locales.events.onButtonPressjs;
+async function openNewTicketButtonRemoved(interaction: ButtonInteraction) {
+	lib.newTicket(undefined, interaction);
+	const locales = lib.locales.events.onButtonPressjs;
 	const openNewTicket = new ButtonBuilder()
 		.setCustomId('openNewTicketButton')
 		.setLabel(locales.newTicket)
 		.setDisabled(true)
 		.setStyle(ButtonStyle.Primary);
-	const openRow = new ActionRowBuilder()
+	const openRow: ActionRowBuilder<any> = new ActionRowBuilder()
 		.addComponents(openNewTicket);
 	await interaction.update({ embeds: [interaction.message.embeds[0]], components: [openRow] });
 }

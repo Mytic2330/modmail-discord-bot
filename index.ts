@@ -1,17 +1,14 @@
 require('./utils/logger');
-// import * as etc from './utils/etc';
-// import webhook from './utils/webhook';
-import { Client, Collection, GatewayIntentBits, ActivityType, Events, Partials, ClientOptions } from 'discord.js';
+import { Client, Collection, GatewayIntentBits, ActivityType, Events, Partials } from 'discord.js';
 import { jsonc } from 'jsonc';
 import { QuickDB } from 'quick.db';
 import version from './package.json';
 import * as fs from 'fs-extra';
 import * as path from 'node:path';
-const database = new QuickDB({ filePath: './database.sqlite' });
+const database: QuickDB = new QuickDB({ filePath: './database.sqlite' });
+export default database;
 const { Token } = jsonc.parse(fs.readFileSync(path.join(__dirname, 'config/settings.jsonc'), 'utf8'));
-const settings = jsonc.parse(fs.readFileSync(path.join(__dirname, 'config/settings.jsonc'), 'utf8'));
-const { locales } = jsonc.parse(fs.readFileSync(path.join(__dirname, 'locales/locales.jsonc'), 'utf8'));
-import lib from './bridge/bridge.js';
+import lib from './bridge/bridge';
 const debug: boolean = true;
 
 
@@ -34,29 +31,9 @@ console.log(` \x1b[36m
 Made by mytic2330
 Version: ${version} \x1b[0m`);
 
-const commands = new Collection<string, any>();
+console.log(lib.locales.ut);
 
-class ExtendedClient extends Client {
-	db:QuickDB = database;
-	lib = lib;
-	ticket = database.table('ticket');
-	settings = settings;
-	commands = commands;
-    locales = locales;
-}
-
-// client.db = database;
-// client.ticket = database.table('ticket');
-// client.settings = 
-// client.locales = jsonc.parse(fs.readFileSync(path.join(__dirname, 'locales/locales.jsonc'), 'utf8'));
-// client.hasNewUsername = hasNewUsername;
-// client.wbh = webhook;
-// client.timestamp = getTimestamp;
-// client.version = version;
-// client.datestamp = getDatestamp;
-// client.lib = lib;
-
-const client = new ExtendedClient({
+const client = new Client({
 	presence: {
 		status: 'online',
 		afk: false,
@@ -93,6 +70,7 @@ const client = new ExtendedClient({
 		Partials.Reaction,
 	],
 });
+const commands = new Collection<string, any>();
 const foldersPath = path.join(__dirname, 'commands');
 const commandFolders = fs.readdirSync(foldersPath);
 
@@ -103,7 +81,7 @@ for (const folder of commandFolders) {
 		const filePath = path.join(commandsPath, file);
 		const command = require(filePath);
 		if ('data' in command && 'execute' in command) {
-			client.commands.set(command.data.name, command);
+			commands.set(command.data.name, command);
 		}
 		else {
 			console.error(`\x1b[31m[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.\x1b[0m`);
@@ -148,10 +126,10 @@ for (const folder of eventFolders) {
 		}
 	}
 }
-process.on('unhandledRejection', (reason:any, promise:any, a:any) => {
+process.on('unhandledRejection', (reason:unknown, promise:unknown, a:unknown) => {
 	console.log(reason, promise, a);
 });
-process.on('uncaughtException', (reason:any, promise:any, a:any) => {
+process.on('uncaughtException', (reason:unknown, promise:unknown, a:unknown) => {
 	console.log(reason, promise, a);
 });
 

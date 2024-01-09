@@ -1,13 +1,14 @@
-import { Events } from 'discord.js';
+import { Client, DMChannel, Events, Message, TextChannel } from 'discord.js';
 import { QuickDB } from 'quick.db';
+import lib from '../../bridge/bridge';
 module.exports = {
 	name: Events.MessageDelete,
-	async execute(message:any) {
+	async execute(message: Message) {
 		const client = message.client;
 		// if (message.author.bot === true) return;
-		if (!await client.ticket.has(message.channelId)) return;
-		const num = await client.ticket.get(message.channelId);
-		const table = await client.db.table(`tt_${num}`);
+		if (!await lib.ticket.has(message.channelId)) return;
+		const num = await lib.ticket.get(message.channelId);
+		const table = lib.db.table(`tt_${num}`);
 
 		const hasMessage = await table.has(message.id);
 
@@ -21,11 +22,12 @@ module.exports = {
 	},
 };
 
-async function handleHasMessage(client:any, message:any, table:QuickDB) {
+async function handleHasMessage(client: Client, message: Message, table:QuickDB) {
 	const dataMessage = await table.get(message.id);
 	for (const obj of dataMessage.recive) {
-		const channel = await client.channels.fetch(obj.channelId);
-		const msg = await channel.messages.fetch(obj.messageId);
+		const passedChannel = await client.channels.fetch(obj.channelId);
+		const channel = passedChannel as TextChannel | DMChannel;
+		const msg = await channel?.messages.fetch(obj.messageId);
 		await msg.delete();
 	}
 }

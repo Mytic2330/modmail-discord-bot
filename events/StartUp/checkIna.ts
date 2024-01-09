@@ -1,10 +1,11 @@
-import { Events, EmbedBuilder } from 'discord.js';
+import { Events, EmbedBuilder, Client } from 'discord.js';
+import lib from '../../bridge/bridge';
 module.exports = {
 	name: Events.ClientReady,
 	once: true,
-	execute(client:any) {
+	execute(client: Client) {
 		inaCheck(client);
-		function waitForNextMinute(callback:any) {
+		function waitForNextMinute(callback: any) {
 			const now = new Date();
 			const currentSec = now.getSeconds();
 			const currentMs = now.getMilliseconds();
@@ -26,16 +27,15 @@ module.exports = {
 	},
 };
 
-async function inaCheck(client:any) {
-	const queue = await client.ticket.get('inaQueue');
+async function inaCheck(client: Client) {
+	const queue = await lib.ticket.get('inaQueue');
 	if (!queue) return;
 	for (const id of queue) {
-		const ticket = await client.db.table(`tt_${id}`);
+		const ticket = lib.db.table(`tt_${id}`);
 		const data = await ticket.get('info');
 		if (data.closed === true) continue;
 		const currentTime = await ticket.get('inaData');
 		if (currentTime <= 0) {
-			const lib = client.lib;
 			lib.close(client, 'ina', id);
 			continue;
 		}
@@ -52,14 +52,14 @@ async function inaCheck(client:any) {
 	}
 }
 
-async function sendInaWarning(data:any, client:any) {
+async function sendInaWarning(data:any, client: Client) {
 	const embed = new EmbedBuilder()
-		.setColor(await client.db.get('color.default'))
+		.setColor(await lib.db.get('color.default'))
 		.setTitle('Opozorilo o nekativnosti!')
 		.setDescription('Vaš ticket se bo zaprl čez 24 ur, če ne bo nobenega sporočila!');
 
 	const emb = new EmbedBuilder()
-		.setColor(await client.db.get('color.default'))
+		.setColor(await lib.db.get('color.default'))
 		.setTitle('Opozorilo o nekativnosti!')
 		.setDescription('Ticket se bo zaprl čez 24 ur, če ne bo nobenega sporočila!');
 
@@ -68,11 +68,11 @@ async function sendInaWarning(data:any, client:any) {
 	sendEmbeds(client, data.dmChannel, embed);
 }
 
-async function sendEmbeds(client:any, channels:any, embed: EmbedBuilder) {
+async function sendEmbeds(client: Client, channels:any, embed: EmbedBuilder) {
 	for (const id of channels) {
 		try {
-			const channel = await client.channels.fetch(id);
-			await channel.send({ embeds: [embed] });
+			const channel: any = await client.channels.fetch(id);
+			await channel?.send({ embeds: [embed] });
 		}
 		catch (e) {
 			console.error(e);

@@ -1,4 +1,4 @@
-const { REST, Routes } = require('discord.js');
+import { REST, Routes } from 'discord.js';
 import { jsonc } from 'jsonc';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -13,6 +13,7 @@ for (const folder of commandFolders) {
 	const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 	for (const file of commandFiles) {
 		const filePath = path.join(commandsPath, file);
+		// eslint-disable-next-line @typescript-eslint/no-var-requires
 		const command = require(filePath);
 		if ('data' in command && 'execute' in command) {
 			commands.push(command.data.toJSON());

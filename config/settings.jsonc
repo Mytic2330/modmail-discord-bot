@@ -28,7 +28,8 @@
 		"close": "Red",
 		"open": "Aqua",
 		"delete": "Orange",
-		"error": "Red"
+		"error": "Red",
+		"info": "Aqua"
 	},
 	// Delay between user closing a ticket and being able to open another one (in milliseconds)
 	"DMClose": 60000,

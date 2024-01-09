@@ -1,12 +1,6 @@
 import { GuildMember, User } from "discord.js";
 
-const etc = {
-	hasNewUsername,
-	getTimestamp,
-	getDatestamp
-}
-
-async function hasNewUsername(x: User|GuildMember, returnUsername: boolean, type:string) {
+export async function hasNewUsername(x: User|GuildMember, returnUsername: boolean, type:string): Promise<boolean | string | undefined> {
 	if (type == 'member') {
 		const guildMember = x as GuildMember;
 		const discriminator = guildMember.user.discriminator;
@@ -40,7 +34,7 @@ async function hasNewUsername(x: User|GuildMember, returnUsername: boolean, type
 	return;
 }
 
-function getTimestamp() {
+export function getTimestamp(): string {
 	const date = new Date();
 	const hours = String(date.getHours()).padStart(2, '0');
 	const minutes = String(date.getMinutes()).padStart(2, '0');
@@ -48,7 +42,7 @@ function getTimestamp() {
 	return `${hours}:${minutes}:${seconds}`;
 }
 
-function getDatestamp() {
+export function getDatestamp(): string {
 	const date = new Date();
 	const year = date.getFullYear();
 	const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -58,12 +52,10 @@ function getDatestamp() {
 	return `D:${day}_W:${week}_M:${month}_Y:${year}`;
 }
 
-function getWeekNumber(date: any) {
+function getWeekNumber(date: Date): number {
 	const d:any = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
 	d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
 	const yearStart: any = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
 	const weekNumber = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
 	return weekNumber;
 }
-
-export default etc;

@@ -1,4 +1,5 @@
-import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
+import { SlashCommandBuilder, PermissionFlagsBits, CommandInteraction, User } from 'discord.js';
+import lib from '../../bridge/bridge'
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('screenshare')
@@ -10,14 +11,15 @@ module.exports = {
 				.setDescription('Uporabnik, ki bo dobil callperm')
 				.setRequired(true))
 		.setDescription('Daj rolo za screenshare'),
-	async execute(interaction:any) {
+	async execute(interaction: CommandInteraction) {
 		const client = interaction.client;
-		const target = interaction.options.getUser('target');
-		const member = await interaction.guild.members.fetch(target);
-		const role = await client.db.get('screenshareRole');
-		const usersWithRole = await client.db.get('uWsr');
+		const recivedTarget = interaction.options.getUser('target');
+		const target = recivedTarget as User;
+		const member = await interaction?.guild?.members.fetch(target);
+		const role = await lib.db.get('screenshareRole');
+		const usersWithRole = await lib.db.get('uWsr');
 
-		if (!member.voice.channel) {
+		if (!member?.voice.channel) {
 			interaction.reply({ content: 'Uporabnik ni povezan v kanal!', ephemeral: true });
 			return;
 		}
@@ -38,7 +40,7 @@ module.exports = {
 
 		try {
 			await member.roles.add(role);
-			await client.db.push('uWsr', member.id);
+			await lib.db.push('uWsr', member.id);
 		}
 		catch (e) {
 			console.error(e);

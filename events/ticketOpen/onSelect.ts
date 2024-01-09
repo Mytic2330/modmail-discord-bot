@@ -1,44 +1,47 @@
-import { Events, ChannelType, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from 'discord.js';
+import { Events, ChannelType, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, Client, StringSelectMenuInteraction, Guild, CategoryChannel, TextChannel, DMChannel, GuildMember } from 'discord.js';
+import lib from '../../bridge/bridge';
+import { Channel } from 'diagnostics_channel';
 module.exports = {
 	name: Events.InteractionCreate,
-	async execute(interaction: any) {
+	async execute(interaction: StringSelectMenuInteraction) {
 		if (!interaction.isStringSelectMenu()) return;
 		if (interaction.customId !== 'ticket') return;
 		await interaction.deferReply({ ephemeral: true });
 		const client = interaction.client;
-		const locales = client.locales.events.onSelectMenuInteractionjs;
+		const locales = lib.locales.events.onSelectMenuInteractionjs;
 		checkStatus(interaction, client, locales);
 	},
 };
-async function checkStatus(interaction: any, client: any, locales: any) {
-	const channelStatus = await client.ticket.has(interaction.channelId);
+async function checkStatus(interaction: StringSelectMenuInteraction, client: Client, locales: any) {
+	const channelStatus = await lib.ticket.has(interaction.channelId);
 	if (channelStatus === false) {
-		if (await client.ticket.has('users')) {
-			const userAlreadyProcessing = await client.ticket.get('users');
+		if (await lib.ticket.has('users')) {
+			const userAlreadyProcessing = await lib.ticket.get('users');
 			if (userAlreadyProcessing.includes(interaction.user.id) === true) {
 				const embed = new EmbedBuilder()
-					.setColor(await client.db.get('color.default'))
+					.setColor(await lib.db.get('color.default'))
 					.setTitle(locales.ticketAlreadyInMakingEmbed.title)
 					.setTimestamp();
 				await interaction.editReply({ embeds: [embed] });
 				return;
 			}
 		}
-		await client.ticket.push('users', interaction.user.id);
+		await lib.ticket.push('users', interaction.user.id);
 
 		const preparing = new EmbedBuilder()
-			.setColor(await client.db.get('color.default'))
+			.setColor(await lib.db.get('color.default'))
 			.setTitle(locales.ticketNowInMaking.title)
 			.setDescription(locales.ticketNowInMaking.description)
 			.setTimestamp();
 
 		await interaction.message.edit({ embeds: [preparing], components: [] });
-		const guild = await client.guilds.fetch(await client.db.get('guildId'));
-		createChannel(guild, interaction, client);
+		const guildId = await lib.db.get('guildId')
+		const guild = await client.guilds.fetch(guildId);
+		createChannel(guild, interaction);
 	}
 	if (channelStatus === true) {
 		const embed = new EmbedBuilder()
-			.setColor(await client.db.get('color.default'))
+			.setColor(await lib.db.get('color.default'))
 			.setTitle(locales.ticketAlreadyOpen.title)
 			.setTimestamp();
 		await interaction.editReply({ embeds: [embed] });
@@ -46,10 +49,11 @@ async function checkStatus(interaction: any, client: any, locales: any) {
 	}
 }
 
-async function createChannel(guild: any, interaction: any, client: any) {
-	const data = await client.db.get(guild.id);
-	const category = await guild.channels.fetch(data.categoryId);
-	const username = await interaction.client.hasNewUsername(interaction.user, true, 'user');
+async function createChannel(guild: Guild, interaction: StringSelectMenuInteraction) {
+	const data = await lib.db.get(guild.id);
+	const passedCategory = await guild.channels.fetch(data.categoryId);
+	const category = passedCategory as CategoryChannel;
+	const username = await lib.hasNewUsername(interaction.user, true, 'user');
 	const name = `${interaction.values[0]}-${username}`;
 	try {
 		const channel = await category?.children.create({
@@ -63,8 +67,8 @@ async function createChannel(guild: any, interaction: any, client: any) {
 	}
 }
 
-async function sendInitial(x: any, interaction: any) {
-	const locales = interaction.client.locales.events.onSelectMenuInteractionjs.initialOpening;
+async function sendInitial(x: TextChannel, interaction: StringSelectMenuInteraction) {
+	const locales = lib.locales.events.onSelectMenuInteractionjs.initialOpening;
 	const member = await x.guild.members.fetch(interaction.user.id);
 	const num = await ticketNumberCalculation(interaction, x);
 
@@ -72,22 +76,22 @@ async function sendInitial(x: any, interaction: any) {
 	const client = x.client;
 	const embed = new EmbedBuilder()
 		.setAuthor({ name: interaction.user.username, iconURL: member.user.displayAvatarURL() })
-		.setColor(await client.db.get('color.default'))
+		.setColor(await lib.db.get('color.default'))
 		.setTitle((locales.logEmbed.title)
 			.replace('CATEGORY', interaction.values[0]))
 		.setTimestamp()
 		.addFields({ name: locales.logEmbed.ticketNumber, value: `${num}`, inline: true }, { name: locales.logEmbed.userProfile, value: `${member.user}`, inline: true })
 		.setFooter({ text: (locales.logEmbed.footer.text)
 			.replace('USERID', interaction.user.id) });
-	if (await client.db.get('vactarCommunityID')) {
-		embed.addFields({ name: locales.logEmbed.vactar, value: (locales.logEmbed.openHere).replace('LINK', `https://app.vactar.io/communities/${await client.db.get('vactarCommunityID')}/players/identifiers?search=${member.user.id}`), inline: true });
+	if (await lib.db.get('vactarCommunityID')) {
+		embed.addFields({ name: locales.logEmbed.vactar, value: (locales.logEmbed.openHere).replace('LINK', `https://app.vactar.io/communities/${await lib.db.get('vactarCommunityID')}/players/identifiers?search=${member.user.id}`), inline: true });
 	}
 	const select = new ButtonBuilder()
 		.setCustomId('closeByOpen')
 		.setLabel(locales.button.lable)
 		.setStyle(ButtonStyle.Danger);
 
-	const row = new ActionRowBuilder()
+	const row: ActionRowBuilder<any> = new ActionRowBuilder()
 		.addComponents(select);
 	try {
 		const mes = await x.send({ embeds: [embed], components: [row] });
@@ -99,61 +103,62 @@ async function sendInitial(x: any, interaction: any) {
 	}
 
 	const embed2 = new EmbedBuilder()
-		.setColor(await client.db.get('color.default'))
+		.setColor(await lib.db.get('color.default'))
 		.setTitle(locales.channelEmbed.title)
 		.setTimestamp();
 	await interaction.editReply({ embeds: [embed2] });
 	databaseSync(interaction, x, num);
 }
 
-async function logInteraction(x: any, member: any, num: number) {
-	const locales = x.client.locales.events.onSelectMenuInteractionjs.initialOpening;
-	const data = await x.client.db.get(x.guildId);
-	const channel = await x.guild.channels.fetch(data.logChannel);
-	const wbh = await x.client.wbh(channel);
+async function logInteraction(x: TextChannel, member: GuildMember, num: number) {
+	const locales = lib.locales.events.onSelectMenuInteractionjs.initialOpening;
+	const data = await lib.db.get(x.guildId);
+	const passedChannel = await x.guild.channels.fetch(data.logChannel);
+	const channel = passedChannel as TextChannel;
+	const wbh = await lib.wbh(channel);
 
 	const embed = new EmbedBuilder()
 		.setAuthor({ name: member.user.username, iconURL: member.user.displayAvatarURL() })
-		.setColor(await x.client.db.get('color.default'))
+		.setColor(await lib.db.get('color.default'))
 		.setTitle((locales.otherLogEmbed.title)
 			.replace('USERNAME', member.user.username))
 		.setTimestamp()
 		.addFields({ name: locales.otherLogEmbed.ticketNumber, value: `${num}`, inline: true }, { name: locales.otherLogEmbed.userProfile, value: `${member.user}`, inline: true })
 		.setFooter({ text: (locales.otherLogEmbed.footer.text) });
 
-	wbh.send({ embeds: [embed] });
+	wbh?.send({ embeds: [embed] });
 }
 
-async function databaseSync(interaction:any, x:any, num:number) {
-	await interaction.client.ticket.pull('users', interaction.user.id);
-	const newTable = await interaction.client.db.table(`tt_${num}`);
+async function databaseSync(interaction: StringSelectMenuInteraction, x: TextChannel, num:number) {
+	await lib.ticket.pull('users', interaction.user.id);
+	const newTable = await lib.db.table(`tt_${num}`);
 	await newTable.set('info', {
 		'guildChannel': x.id,
 		'dmChannel': [interaction.channelId],
 		'creatorId': interaction.user.id,
 		'closed': false,
 	});
-	await interaction.client.ticket.set(x.id, num);
-	await interaction.client.ticket.set(interaction.channelId, num);
+	await lib.ticket.set(x.id, num);
+	await lib.ticket.set(interaction.channelId, num);
 	await newTable.set('analytics', {
-		'date': await interaction.client.datestamp(),
-		'time': await interaction.client.timestamp(),
+		'date': await lib.datestamp(),
+		'time': await lib.timestamp(),
 		'rating': null,
 	});
 	await newTable.set('messageAnalitys', {
 		'messages': { 'sentByDM': 0, 'sentByServer': 0, 'serverMessagesUsers': [], 'DMMessagesUsers': [] },
 	});
-	await interaction.client.ticket.push('tickets', num);
+	await lib.ticket.push('tickets', num);
 }
 
-async function ticketNumberCalculation(interaction:any, x:any) {
-	var num = await interaction.client.db.get('ticketNumber');
+async function ticketNumberCalculation(interaction: StringSelectMenuInteraction, x: TextChannel) {
+	var num = await lib.db.get('ticketNumber');
 	if (num) {
-		await interaction.client.db.set('ticketNumber', num + 1);
+		await lib.db.set('ticketNumber', num + 1);
 	}
 	else {
 		num = interaction.channelId + x.id;
-		await interaction.client.db.set('ticketNumber', 1);
+		await lib.db.set('ticketNumber', 1);
 	}
 	return num;
 }

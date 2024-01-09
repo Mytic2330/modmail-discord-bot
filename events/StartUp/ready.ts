@@ -1,9 +1,11 @@
-import { Events, EmbedBuilder } from 'discord.js';
+import { Events, EmbedBuilder, Client } from 'discord.js';
+import lib from '../../bridge/bridge';
 module.exports = {
 	name: Events.ClientReady,
 	once: true,
-	async execute(client:any) {
-		console.log(`   \x1b[36m     
+	async execute(client: Client) {
+		if (client) {
+console.log(`   \x1b[36m     
 ██████╗░░█████╗░████████╗░░██████╗░███████╗░█████╗░██████╗░██╗░░░██╗
 ██╔══██╗██╔══██╗╚══██╔══╝░░██╔══██╗██╔════╝██╔══██╗██╔══██╗╚██╗░██╔╝
 ██████╦╝██║░░██║░░░██║░░░░░██████╔╝█████╗░░███████║██║░░██║░╚████╔╝░
@@ -11,48 +13,54 @@ module.exports = {
 ██████╦╝╚█████╔╝░░░██║░░░░░██║░░██║███████╗██║░░██║██████╔╝░░░██║░░░
 ╚═════╝░░╚════╝░░░░╚═╝░░░░░╚═╝░░╚═╝╚══════╝╚═╝░░╚═╝╚═════╝░░░░╚═╝░░░
 
-Logged in as ${client.user.tag}\x1b[0m`);
-		// readyMessage(client);
-		const colorSettings = client.settings.colors;
-		await client.db.set('color', { 'default': colorSettings.default,
-			'recive': colorSettings.recive,
-			'close': colorSettings.close,
-			'open': colorSettings.open,
-			'delete': colorSettings.delete,
-			'error': colorSettings.error,
-		});
-		await client.db.set('screenshareRole', client.settings.screenshareRole);
-		await client.db.set('screenshareChannels', client.settings.screenshareChannels);
-		if (client.settings.vactarCommunityID.length > 1) {
-			await client.db.set('vactarCommunityID', client.settings.vactarCommunityID);
-		}
-		await client.db.set('guildId', client.settings.guildId);
-		await client.db.set('botID', client.user.id);
-		await client.db.set('ApplicationID', client.application.id);
-		await client.db.set('ApplicationID', client.application.id);
-		if (!await client.db.has('ticketNumber')) {
-			await client.db.set('ticketNumber', 1);
-		}
-		if (!await client.db.has('uWsr')) {
-			await client.db.set('uWsr', []);
+Logged in as ${client?.user?.tag}\x1b[0m`);
+						// readyMessage(client);
+						const colorSettings = lib.settings.colors;
+						await lib.db.set('color', {
+							'default': colorSettings.default,
+							'recive': colorSettings.recive,
+							'close': colorSettings.close,
+							'open': colorSettings.open,
+							'delete': colorSettings.delete,
+							'error': colorSettings.error,
+							'info': colorSettings.info,
+						});
+						await lib.db.set('screenshareRole', lib.settings.screenshareRole);
+						await lib.db.set('screenshareChannels', lib.settings.screenshareChannels);
+						if (lib.settings.vactarCommunityID.length > 1) {
+							await lib.db.set('vactarCommunityID', lib.settings.vactarCommunityID);
+						}
+						await lib.db.set('guildId', lib.settings.guildId);
+						await lib.db.set('botID', client?.user?.id);
+						await lib.db.set('ApplicationID', client?.application?.id);
+						await lib.db.set('ApplicationID', client?.application?.id);
+						if (!await lib.db.has('ticketNumber')) {
+							await lib.db.set('ticketNumber', 1);
+						}
+						if (!await lib.db.has('uWsr')) {
+							await lib.db.set('uWsr', []);
+						}
 		}
 	},
 };
 
-async function readyMessage(client:any) {
-	const data = await client.db.get(client.settings.guildId);
+async function readyMessage(client: Client) {
+	const data = await lib.db.get(lib.settings.guildId);
 	if (data) {
-		const wbh1 = await client.wbh(await client.channels.fetch(data.logChannel));
-		const wbh2 = await client.wbh(await client.channels.fetch(data.transcriptChannel));
+		const idOfLog: any = await client.channels.fetch(data.logChannel)
+		const idOfTranscript: any = await client.channels.fetch(data.transcriptChannel)
+		
+		const wbh1 = await lib.wbh(idOfLog);
+		const wbh2 = await lib.wbh(idOfTranscript);
 
 		const embed = new EmbedBuilder()
 			.setColor('Aqua')
 			.setTitle('Program zagnan')
-			.setDescription(`Program se je uspešno zagnal.\n **Ustvarjalec:** mytic2330\n**Verzija:** ${client.version}`);
+			.setDescription(`Program se je uspešno zagnal.\n **Ustvarjalec:** mytic2330\n**Verzija:** ${lib.version}`);
 
 		try {
-			await wbh1.send({ embeds: [embed] });
-			await wbh2.send({ embeds: [embed] });
+			await wbh1?.send({ embeds: [embed] });
+			await wbh2?.send({ embeds: [embed] });
 		}
 		catch (e) {
 			console.error(e);

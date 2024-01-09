@@ -1,7 +1,8 @@
-import { Events, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, EmbedBuilder, DMChannel } from 'discord.js';
+import { Events, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, EmbedBuilder, Interaction, ButtonInteraction, ModalSubmitInteraction, Client, DMChannel, Snowflake } from 'discord.js';
+import lib from '../../bridge/bridge';
 module.exports = {
 	name: Events.InteractionCreate,
-	async execute(interaction: any) {
+	async execute(interaction: Interaction) {
 		if (interaction.isButton()) {
 			const ch_cd11 = interaction.customId.startsWith('stat');
 			if (!ch_cd11) return;
@@ -15,7 +16,8 @@ module.exports = {
 	},
 };
 
-async function switchCheck(interaction:any) {
+async function switchCheck(passedInteraction: any) {
+	const interaction = passedInteraction as ButtonInteraction
 	const id_inter = interaction.customId.split('_');
 	switch (id_inter[1]) {
 	case 'rating':
@@ -27,18 +29,17 @@ async function switchCheck(interaction:any) {
 	}
 }
 
-async function rateFnc(interaction:any) {
-	const client = interaction.client;
-	const all_tickets = await client.ticket.get('tickets');
+async function rateFnc(interaction:Interaction) {
+	const all_tickets = await lib.ticket.get('tickets');
 	const arr = [];
 
 	for (const ticket of all_tickets) {
-		const data = await gatherTicketInfo(client, ticket);
+		const data = await gatherTicketInfo(ticket);
 		if (data != null) arr.push(data);
 	}
 }
 
-async function ticketFnc(interaction:any) {
+async function ticketFnc(interaction: ButtonInteraction) {
 	const modal = new ModalBuilder()
 		.setCustomId('getTicketStatsModal')
 		.setTitle('Statistični vpogled');
@@ -52,17 +53,18 @@ async function ticketFnc(interaction:any) {
 	await interaction.showModal(modal);
 }
 
-async function processModal(interaction:any) {
+async function processModal(passedInteraction: any) {
+	const interaction = passedInteraction as ModalSubmitInteraction;
 	const num = parseInt(interaction.fields.getTextInputValue('ticketNumber'));
 
-	const allTickets = await interaction.client.ticket.get('tickets');
+	const allTickets = await lib.ticket.get('tickets');
 	const chc = allTickets.includes(num);
 	if (!chc) {
 		await interaction.reply({ content: 'Neveljavna številka ticketa!', ephemeral: true });
 		return;
 	}
 
-	const info = await gatherTicketInfo(interaction.client, num);
+	const info = await gatherTicketInfo(num);
 	if (!info) {
 		interaction.reply({ content: 'Ni uspelo pridobiti podatkov!', ephemeral: true });
 		return;
@@ -74,8 +76,8 @@ async function processModal(interaction:any) {
 
 }
 
-async function gatherTicketInfo(client:any, num:number) {
-	const table = await client.db.table(`tt_${num}`);
+async function gatherTicketInfo(num: number): Promise<{info: any, analytics: any,messageAnalitys: any,num: number} | null> {
+	const table = await lib.db.table(`tt_${num}`);
 	try {
 		const info = await table.get('info');
 		const analytics = await table.get('analytics');
@@ -89,9 +91,9 @@ async function gatherTicketInfo(client:any, num:number) {
 	}
 }
 
-async function embedCreator(obj:any, client:any) {
+async function embedCreator(obj: {info: any, analytics: any,messageAnalitys: any,num: number}, client: Client) {
 	var embed = new EmbedBuilder()
-		.setColor(await client.db.get('color.default'))
+		.setColor(await lib.db.get('color.default'))
 		.setTitle(`Ticket številka ${obj.num}`)
 		.setTimestamp()
 		.setFooter({ text: 'BCRP podatki' });
@@ -133,12 +135,13 @@ async function dateMaker(data:any) {
 	return dataToReturn;
 }
 
-async function getAllUsers(client:any, data: { dmChannel: any, creatorId: number}) {
+async function getAllUsers(client: Client, data: { dmChannel: any, creatorId: Snowflake}) {
 	const arr = [];
 	for (const id of data.dmChannel) {
-		const dm = await client.channels.fetch(id);
+		const x = await client.channels.fetch(id);
+		const dm = x as DMChannel;
 		const user = dm.recipient;
-		if (data.creatorId != user.id)	arr.push(user);
+		if (data.creatorId != user?.id)	arr.push(user);
 	}
 
 	if (arr.length === 0) return null;
