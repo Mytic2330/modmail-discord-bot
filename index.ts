@@ -8,7 +8,6 @@ import * as path from 'node:path';
 const database: QuickDB = new QuickDB({ filePath: './database.sqlite' });
 export default database;
 const { Token } = jsonc.parse(fs.readFileSync(path.join(__dirname, 'config/settings.jsonc'), 'utf8'));
-import lib from './bridge/bridge';
 const debug: boolean = true;
 
 
@@ -30,8 +29,6 @@ console.log(` \x1b[36m
 
 Made by mytic2330
 Version: ${version} \x1b[0m`);
-
-console.log(lib.locales.ut);
 
 const client = new Client({
 	presence: {

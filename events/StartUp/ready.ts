@@ -4,6 +4,7 @@ module.exports = {
 	name: Events.ClientReady,
 	once: true,
 	async execute(client: Client) {
+		await lib.db.init();
 		if (client) {
 console.log(`   \x1b[36m     
 ██████╗░░█████╗░████████╗░░██████╗░███████╗░█████╗░██████╗░██╗░░░██╗
@@ -39,6 +40,13 @@ Logged in as ${client?.user?.tag}\x1b[0m`);
 						}
 						if (!await lib.db.has('uWsr')) {
 							await lib.db.set('uWsr', []);
+						}
+						if (lib.settings.enableRanks) {
+							await lib.db.set('enableRanks', true);
+							await lib.db.set('ranks', lib.settings.ranks);
+						} else {
+							lib.db.delete('ranks');
+							lib.db.set('enableRanks', false);
 						}
 		}
 	},

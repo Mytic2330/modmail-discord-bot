@@ -1,10 +1,10 @@
-import { Events, EmbedBuilder, Message, Client, DMChannel, TextChannel, Embed } from 'discord.js';
+import { Events, EmbedBuilder, Message, Client, DMChannel, TextChannel, Embed, GuildMember, ReactionManager, MessageReaction } from 'discord.js';
 import lib from '../../bridge/bridge';
 module.exports = {
 	name: Events.MessageCreate,
 	async execute(message: Message) {
 		if (message.author.bot === true) return;
-		if (message.guildId != undefined) {
+		if (message.guildId != undefined || message.guildId != null) {
 			if (message.content.toLowerCase().startsWith('!')) {
 				const check = message.content.substring(1, 4);
 				if (check.toLowerCase().startsWith('adm')) {
@@ -12,13 +12,14 @@ module.exports = {
 				}
 			}
 		}
+		if (message.guildId != undefined) {var processing: MessageReaction | undefined = await message.react('🔵');} else {processing = undefined;}
 		const client = message.client;
 		const locales = lib.locales.events.messageOnCreatejs;
 		const status = await lib.ticket.has(message.channelId);
 
 		switch (status) {
 		case true:
-			messageHandeler(message, client, locales);
+			messageHandeler(message, client, locales, processing);
 			break;
 		case false:
 			lib.newTicket(message, undefined);
@@ -27,14 +28,64 @@ module.exports = {
 	},
 };
 
-async function messageHandeler(message: Message, client: Client, locales:any) {
-	const user = await client.users.fetch(message.author.id);
-	const reciveChannelEmbed = new EmbedBuilder()
-		.setAuthor({ name: user.username, iconURL: user.displayAvatarURL() })
+async function getName(member: GuildMember): Promise<{ username: string, rank: string }> {
+	const userId = member.user.id;
+	const userRankCache = lib.cache.userRanks;
+	if (userRankCache.has(userId)) {
+		return userRankCache.get(userId)!;
+	}
+    const username = member.user.username;
+    const enableRanks = await lib.db.get('enableRanks');
+    if (!enableRanks) {
+		const result = { username, rank: "Unknown" };
+		userRankCache.set(userId, result);
+        return result;
+    }
+    const roles = await lib.db.get('ranks');
+    if (!roles) {
+		const result = { username, rank: "Unknown" };
+		userRankCache.set(userId, result);
+        return result;
+    }
+
+    const memberRoles = member.roles.cache;
+
+    for (const roleID in roles) {
+        if (roleID !== 'enable' && memberRoles.has(roleID)) {
+            const rank: string = roles[roleID];
+			const result = { username, rank };
+			userRankCache.set(userId, result);
+            return result;
+        }
+    }
+	const result = { username, rank: "Unknown" };
+    userRankCache.set(userId, result);
+    return result;
+}
+async function messageHandeler(message: Message, client: Client, locales:any, processing: MessageReaction | undefined) {
+	var reciveChannelEmbed: EmbedBuilder;
+	if (message.guildId != undefined || message.guildId != null) {
+		const guild = await client.guilds.fetch(message.guildId);
+		const member = await guild.members.fetch(message.author.id);
+		const returned = await getName(member);
+
+		reciveChannelEmbed = new EmbedBuilder()
+		.setAuthor({ name: returned.username, iconURL: member.displayAvatarURL() })
 		.setColor(await lib.db.get('color.recive'))
-		.setTitle(locales.messageProcessing.reciveNewMessageEmbed.title)
+		//.setTitle(locales.messageProcessing.reciveNewMessageEmbed.title)
+		.setTimestamp()
+		// ${locales.messageProcessing.reciveNewMessageEmbed.footer.text} | 
+		.setFooter({ text: `Rank: ${returned.rank}`, iconURL: locales.messageProcessing.reciveNewMessageEmbed.footer.iconURL });
+	}
+	else {
+		const user = await client.users.fetch(message.author.id);
+		reciveChannelEmbed = new EmbedBuilder()
+		.setAuthor({ name: user.displayName, iconURL: user.displayAvatarURL() })
+		.setColor(await lib.db.get('color.recive'))
+		//.setTitle(locales.messageProcessing.reciveNewMessageEmbed.title)
 		.setTimestamp()
 		.setFooter({ text: `${locales.messageProcessing.reciveNewMessageEmbed.footer.text}`, iconURL: locales.messageProcessing.reciveNewMessageEmbed.footer.iconURL });
+	}
 
 	if (message.content) {
 		reciveChannelEmbed.setDescription(message.content);
@@ -46,20 +97,20 @@ async function messageHandeler(message: Message, client: Client, locales:any) {
 			num++;
 		});
 	}
-	messageReciverSwitch(message, reciveChannelEmbed, client);
+	messageReciverSwitch(message, reciveChannelEmbed, client, processing);
 }
-async function messageReciverSwitch(message: Message, reciveChannelEmbed:any, client: Client) {
+async function messageReciverSwitch(message: Message, reciveChannelEmbed:any, client: Client, processing: MessageReaction | undefined) {
 	const switchStatus = message.guildId === null;
 
 	switch (switchStatus) {
 	case true: {
 		const sts = await sendToServer(message, reciveChannelEmbed);
-		afterSendErrorHandler(message, client, 'server', sts);
+		afterSendErrorHandler(message, client, 'server', sts, processing);
 		break;
 	}
 	case false: {
 		const sts = await sendToDMChannel(message, reciveChannelEmbed);
-		afterSendErrorHandler(message, client, 'DM', sts);
+		afterSendErrorHandler(message, client, 'DM', sts, processing);
 		break;
 	}
 	default: {
@@ -68,10 +119,11 @@ async function messageReciverSwitch(message: Message, reciveChannelEmbed:any, cl
 	}
 }
 
-async function afterSendErrorHandler(message: Message, client: Client, type:string, values:any) {
+async function afterSendErrorHandler(message: Message, client: Client, type:string, values:any, processing: MessageReaction | undefined) {
 	const locales = lib.locales.events.messageOnCreatejs.errorHandler;
 	if (type === 'DM') {
 		message.react('✅');
+		processing?.remove();
 		const embed = await errorEmbedAsemblyClient(message, client, values, locales);
 		try {
 			if (embed) errorEmbedSender(message, embed);
@@ -271,3 +323,10 @@ async function infoWriter(client: Client, ticketNumberDatabse: number, message: 
 async function sendDBWrite(client: Client, ticketNumberDatabse: number, message:any, msh:any) {
 	await lib.db.table(`tt_${ticketNumberDatabse}`).push(`${message.id}.recive`, { 'channelId': msh.channelId, 'messageId': msh.id, 'guildId': msh.guildId });
 }
+
+function clearCache() {
+	console.info('CLEARED RANK CACHE')
+	lib.cache.userRanks.clear()
+}
+
+setInterval(clearCache, 3600000);

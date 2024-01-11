@@ -28,6 +28,10 @@ async function handleHasMessage(client: Client, message: Message, table:QuickDB)
 		const passedChannel = await client.channels.fetch(obj.channelId);
 		const channel = passedChannel as TextChannel | DMChannel;
 		const msg = await channel?.messages.fetch(obj.messageId);
-		await msg.delete();
+		if (channel.hasOwnProperty('guildId')) {
+			await msg.react('❌')
+		} else {
+			await msg.delete();
+		}
 	}
 }

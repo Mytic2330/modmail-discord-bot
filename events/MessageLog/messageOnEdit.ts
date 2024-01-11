@@ -14,11 +14,11 @@ module.exports = {
 		if (newMessage.author.bot === true) return;
 		if (!await lib.ticket.has(newMessage.channelId)) return;
 		const num = await lib.ticket.get(newMessage.channelId);
-		const table = await lib.db.table(`tt_${num}`);
+		const table = lib.db.table(`tt_${num}`);
 		const hasMessage = await table.has(newMessage.id);
 		switch (hasMessage) {
 		case true:
-			handleHasMessage(client, newMessage, table);
+			handleHasMessage(client, newMessage, oldMessage, table);
 			break;
 		case false:
 			handleNoMessage(newMessage);
@@ -27,14 +27,17 @@ module.exports = {
 	},
 };
 
-async function handleHasMessage(client: Client, message: Message, table:QuickDB) {
+async function handleHasMessage(client: Client, message: Message, oldMessage: Message, table:QuickDB) {
 	const dataMessage = await table.get(message.id);
 	const arr = [];
 	for (const obj of dataMessage.recive) {
 		const resolvingChannel = await client.channels.fetch(obj.channelId);
 		const channel = resolvingChannel as DMChannel | TextChannel
 		const msg = await channel.messages.fetch(obj.messageId);
-		const embed = await createEmbedToSend(client, message);
+		const embed = await createEmbedToSend(client, message, oldMessage);
+		if (msg.guildId) {
+			embed.addFields({ name: 'Before:', value: oldMessage.content || "Prazno" })
+		}
 		try {
 			await msg.edit({ embeds: [embed] });
 		}
@@ -59,7 +62,7 @@ async function handleNoMessage(message:Message) {
 	await message.reply({ content: 'Ni mogoče poslati spremenjenega sporočila' });
 }
 
-async function createEmbedToSend(client: Client, message: Message): Promise<EmbedBuilder> {
+async function createEmbedToSend(client: Client, message: Message, oldMessage: Message): Promise<EmbedBuilder> {
 	const user = await client.users.fetch(message.author.id);
 	const reciveChannelEmbed = new EmbedBuilder()
 		.setAuthor({ name: user.username, iconURL: user.displayAvatarURL() })
@@ -86,9 +89,7 @@ async function createEditedEmbed(client: Client, message: Message): Promise<Embe
 	const reciveChannelEmbed = new EmbedBuilder()
 		.setColor(await lib.db.get('color.info'))
 		.setTitle('Uspešno urejeno sporočilo')
-		.setTimestamp()
-		.setFooter({ text: (message.id).toString(), iconURL: 'https://cdn.discordapp.com/attachments/1012850899980394557/1138546219640176851/097e89ede70464edaf570046b6b3f7b8.png' });
-
+		.setFooter({ text: `Message ID: ${(message.id).toString()}` });
 
 	return reciveChannelEmbed;
 }

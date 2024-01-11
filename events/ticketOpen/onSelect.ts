@@ -1,6 +1,5 @@
 import { Events, ChannelType, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, Client, StringSelectMenuInteraction, Guild, CategoryChannel, TextChannel, DMChannel, GuildMember } from 'discord.js';
 import lib from '../../bridge/bridge';
-import { Channel } from 'diagnostics_channel';
 module.exports = {
 	name: Events.InteractionCreate,
 	async execute(interaction: StringSelectMenuInteraction) {
@@ -73,7 +72,6 @@ async function sendInitial(x: TextChannel, interaction: StringSelectMenuInteract
 	const num = await ticketNumberCalculation(interaction, x);
 
 	logInteraction(x, member, num);
-	const client = x.client;
 	const embed = new EmbedBuilder()
 		.setAuthor({ name: interaction.user.username, iconURL: member.user.displayAvatarURL() })
 		.setColor(await lib.db.get('color.default'))

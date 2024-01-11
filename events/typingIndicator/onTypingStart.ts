@@ -1,4 +1,5 @@
 import { Events } from 'discord.js';
+import lib from '../../bridge/bridge';
 module.exports = {
 	name: Events.TypingStart,
 	async execute(typingRefrence: any) {
@@ -8,11 +9,11 @@ module.exports = {
 
 		if (user.bot) return;
 
-		const status = await client.ticket.has(channelId);
+		const status = await lib.ticket.has(channelId);
 		if (!status) return;
 
-		const x = await client.ticket.get(channelId);
-		const data = await client.db.table(`tt_${x}`).get('info');
+		const x = await lib.ticket.get(channelId);
+		const data = await lib.db.table(`tt_${x}`).get('info');
 
 
 		if (await typingRefrence.channel.isDMBased()) {

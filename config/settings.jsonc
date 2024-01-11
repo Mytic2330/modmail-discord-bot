@@ -9,9 +9,21 @@
 	],
 	// IDs of roles that get access to tickets
 	"allowedRoles": [
-		"1122603209299603576",
+		"1122603209278636085",
 		"1122603209278636085"
 	],
+	"enableRanks": "true",
+	"ranks": {
+		"1122603209278636086": "P - Osebje",
+		"1122603209278636087": "J - Mod",
+		"1122603209278636088": "Mod",
+		"1122603209278636089": "S - Mod",
+		"1122603209278636090": "J - Admin",
+		//"": "Admin",
+		//"": "S - Admin",
+		"1122603209278636091": "H - Staff",
+		"1122603209299603576": "Owner"
+	},
 	// ID of your guild/server
 	"guildId": "1122603209035362385",
 	// Catagorys of help => channelname_name_description

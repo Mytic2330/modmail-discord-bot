@@ -4,3 +4,4 @@ logs
 .eslintrc.json
 database.sqlite
 dist
+notes

@@ -2,7 +2,6 @@ export default close
 const discordTranscripts = require('discord-html-transcripts');
 import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, Embed, Client, TextChannel, Interaction, DMChannel, CommandInteraction, ButtonInteraction } from 'discord.js';
 import lib from '../bridge/bridge';
-import { AnyARecord } from 'dns';
 
 async function close(base: any, type:string, num: number | null) {
 	// BASIC DEFINING
@@ -135,12 +134,12 @@ async function sendSwitch(embeds: any, rows: any, compactData: any) {
 	}
 }
 
-async function setClosing(client: any, number: number) {
-	await client.ticket.push('closing', number);
+async function setClosing(client: Client, number: number) {
+	await lib.ticket.push('closing', number);
 }
 
-async function unsetClosing(client: any, number: number) {
-	await client.ticket.pull('inaQueue', number);
+async function unsetClosing(client: Client, number: number) {
+	await lib.ticket.pull('closing', number);
 }
 
 async function buildRow(type: string, data: { locales: any, number: number | null}) {
@@ -216,8 +215,7 @@ async function buildRow(type: string, data: { locales: any, number: number | nul
 
 async function embedBuilder(type: string, data: { 'locales': any, 'users': any, 'closeUser': any, 'client': any, 'number': number, 'author': string }) {
 	const locales = data.locales;
-	const client = data.client;
-	const color = await client.db.get('color.close');
+	const color = await lib.db.get('color.close');
 	const users = data.users;
 	const number = data.number;
 	const closeUser = data.closeUser;
@@ -270,7 +268,7 @@ async function dataSetUpdate(number: number, data: { dmChannel: any, guildChanne
 	await lib.ticket.delete(data.guildChannel);
 	await lib.db.table(`tt_${number}`).set('info.closed', true);
 	await lib.db.table(`tt_${number}`).set('info.transcript', `${obj.url}`);
-	await lib.ticket.pull('closing', number);
+	await unsetClosing(client, number)
 }
 
 async function getAllUsers(client: Client, data: { dmChannel: any}) {

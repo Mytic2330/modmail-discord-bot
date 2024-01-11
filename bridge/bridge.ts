@@ -20,6 +20,12 @@ import newTicket from '../utils/openTicket';
 import {getDatestamp, getTimestamp, hasNewUsername} from '../utils/etc'
 import { webhook } from '../utils/webhook';
 
+// CACHE //
+const userRanks = new Map<string, { username: string, rank: string }>();
+const cache = {
+	userRanks: userRanks
+}
+
 // TESTING FEATURE //
 const test = function(): boolean {
 	return true;
@@ -39,6 +45,8 @@ const lib = {
 	wbh: webhook,
 	version: version,
 
+	// CACHE //
+	cache: cache,
 	//TEST FUNCTION//
 	test: test
 };
