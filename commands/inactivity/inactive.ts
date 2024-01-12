@@ -96,7 +96,7 @@ async function setData(database: QuickDB) {
 	const currentSec = now.getSeconds();
 	const currentMs = now.getMilliseconds();
 	const rej = currentSec * 1000 + currentMs;
-	const remainingMilliseconds = 60000 - rej + 172800000;
+	const remainingMilliseconds = 60000 - rej + 86400000;
 
 	database.set('inaData', remainingMilliseconds);
 }

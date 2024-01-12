@@ -11,6 +11,7 @@ import {
 	Channel,
 	Snowflake,
 	StringSelectMenuInteraction,
+	ChannelType,
 } from 'discord.js';
 import lib from '../../bridge/bridge';
 module.exports = {
@@ -22,15 +23,16 @@ module.exports = {
 		const chan: Channel | null = await client.channels.fetch(
 			interaction.values[0],
 		);
+		interaction.deferReply({ ephemeral: true });
 		const dm = chan as DMChannel;
 		const user = dm?.recipient;
-		userCheck(interaction, user, dm);
+		userCheck(interaction, user!, dm);
 	},
 };
 
 async function userCheck(
 	passedInteraction: Interaction,
-	user: User | null,
+	user: User,
 	dm: DMChannel,
 ) {
 	const interaction = passedInteraction as StringSelectMenuInteraction;
@@ -45,7 +47,7 @@ async function userCheck(
 
 	switch (status) {
 	case false:
-		interaction.reply({ content: locales.userNotInTicket, ephemeral: true });
+		interaction.editReply({ content: locales.userNotInTicket });
 		break;
 	case true:
 		removeUserFromTicket(interaction, user, ticketDatabaseNumber);
@@ -55,7 +57,7 @@ async function userCheck(
 
 async function removeUserFromTicket(
 	interaction: StringSelectMenuInteraction,
-	user: User | null,
+	user: User,
 	num: number,
 ) {
 	const locales = lib.locales.events.removejs;
@@ -75,13 +77,49 @@ async function removeUserFromTicket(
 	catch (e) {
 		console.error(e);
 	}
+	await sendToAllChannels(interaction, user, num);
 	databaseSync(DM, num);
-	interaction.reply({ content: locales.userRemoved, ephemeral: true });
+	interaction.editReply({ content: locales.userRemoved });
 }
 
 async function databaseSync(dm: DMChannel | undefined, num: number) {
 	if (dm) {
 		await lib.ticket.delete(dm.id);
 		await lib.db.table(`tt_${num}`).pull('info.dmChannel', dm.id);
+	}
+}
+
+async function sendToAllChannels(interaction: StringSelectMenuInteraction, user: User, number: number) {
+	const locales = lib.locales.events.removejs.sentToAllChannels;
+	const client = interaction.client;
+	const embed = new EmbedBuilder()
+		.setColor(await lib.db.get('color.default'))
+		.setTitle(locales.title)
+		.setDescription((locales.description).replace('USER', user))
+		.setFooter({ text: (locales.footer.text).replace('USERNAME', interaction.user.username).replace('USERID', interaction.user.id) });
+
+	const allUsers = await lib.db.table(`tt_${number}`).get('info');
+
+	const guildChannel = await client.channels.fetch(allUsers.guildChannel);
+
+	if (guildChannel && guildChannel.type === ChannelType.GuildText) {
+		guildChannel.send({ embeds: [embed] });
+	}
+
+	for (const id of allUsers.dmChannel) {
+		try {
+			const channel = await client.channels.fetch(id);
+			if (channel && channel.type === ChannelType.DM) {
+				try {
+					channel.send({ embeds: [embed] });
+				}
+				catch (e) {
+					continue;
+				}
+			}
+		}
+		catch (e) {
+			console.error(e);
+		}
 	}
 }

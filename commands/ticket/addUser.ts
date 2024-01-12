@@ -7,7 +7,7 @@ import {
 	User,
 	DMChannel,
 	CommandInteraction,
-	Client,
+	ChannelType,
 } from 'discord.js';
 import lib from '../../bridge/bridge';
 module.exports = {
@@ -21,23 +21,21 @@ module.exports = {
 				.setRequired(true),
 		),
 	async execute(interaction: CommandInteraction) {
-		const client = interaction.client;
 		const locales = lib.locales.commands.adduserjs;
 		const user = interaction.options.getUser('user');
 		if (user) {
 			const checkOne = await lib.ticket.has(interaction.channelId);
 			if (checkOne === false) {
-				interaction.reply(locales.notActiveChannel);
+				interaction.reply({ ephemeral: true, content: locales.notActiveChannel });
 				return;
 			}
-			userCheck(interaction, client, user);
+			userCheck(interaction, user);
 		}
 	},
 };
 
 async function userCheck(
 	interaction: CommandInteraction,
-	client: Client,
 	user: User,
 ) {
 	const locales = lib.locales.commands.adduserjs;
@@ -49,7 +47,7 @@ async function userCheck(
 
 	switch (status) {
 	case true:
-		interaction.reply(locales.userCheck.userInTicket);
+		interaction.reply({ ephemeral: true, content: locales.userCheck.userInTicket });
 		break;
 	case false:
 		addUserToTicket(interaction, user, ticketDatabaseNumber);
@@ -64,12 +62,12 @@ async function addUserToTicket(
 ) {
 	const locales = lib.locales.commands.adduserjs.addUserToTicket;
 	const DM = await user.createDM();
-	const hasTicket = await checkIfUserHasOpenTicket(interaction, DM);
+	const hasTicket = await checkIfUserHasOpenTicket(DM);
 	const ticketCreator = await lib.db.table(`tt_${num}`).get('info.creatorId');
 	const creator = await interaction.client.users.fetch(ticketCreator);
 	const username = await lib.hasNewUsername(creator, true, 'user');
 	if (hasTicket === true) {
-		interaction.reply(locales.userHasTicket);
+		interaction.reply({ ephemeral: true, content: locales.userHasTicket });
 		return;
 	}
 	const embed = new EmbedBuilder()
@@ -86,15 +84,15 @@ async function addUserToTicket(
 	}
 	catch (e) {
 		console.error(e);
-		interaction.reply(locales.error);
+		interaction.reply({ ephemeral: true, content: locales.error });
 		return;
 	}
-	await databaseSync(interaction, DM, num);
-	interaction.reply(locales.added.replace('USERNAME', `<@${user.id}>`));
+	await sendToAllChannels(interaction, user, num);
+	await databaseSync(DM, num);
+	interaction.reply({ ephemeral: true, content: locales.added.replace('USERNAME', `<@${user.id}>`) });
 }
 
 async function databaseSync(
-	interaction: CommandInteraction,
 	DM: DMChannel,
 	num: number,
 ) {
@@ -102,11 +100,45 @@ async function databaseSync(
 	await lib.db.table(`tt_${num}`).push('info.dmChannel', DM.id);
 }
 async function checkIfUserHasOpenTicket(
-	interaction: CommandInteraction,
 	DM: DMChannel,
 ) {
 	const status = await lib.ticket.has(DM.id);
 	if (status === true) return true;
 	if (status === false) return false;
 	return undefined;
+}
+
+async function sendToAllChannels(interaction: CommandInteraction, user: User, number: number) {
+	const locales = lib.locales.commands.adduserjs.addUserToTicket.sendToEveryChannel;
+	const client = interaction.client;
+	const embed = new EmbedBuilder()
+		.setColor(await lib.db.get('color.default'))
+		.setTitle(locales.title)
+		.setDescription((locales.description.replace('USER', user)))
+		.setFooter({ text: (locales.footer.text).replace('USERNAME', interaction.user.username).replace('USERID', interaction.user.id) });
+
+	const allUsers = await lib.db.table(`tt_${number}`).get('info');
+
+	const guildChannel = await client.channels.fetch(allUsers.guildChannel);
+
+	if (guildChannel && guildChannel.type === ChannelType.GuildText) {
+		guildChannel.send({ embeds: [embed] });
+	}
+
+	for (const id of allUsers.dmChannel) {
+		try {
+			const channel = await client.channels.fetch(id);
+			if (channel && channel.type === ChannelType.DM) {
+				try {
+					channel.send({ embeds: [embed] });
+				}
+				catch (e) {
+					continue;
+				}
+			}
+		}
+		catch (e) {
+			console.error(e);
+		}
+	}
 }

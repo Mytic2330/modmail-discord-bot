@@ -19,6 +19,13 @@
           "title": "Pozdrav!",
           "description": "Dodani ste bili v ticket, od **USERNAME**"
         },
+        "sendToEveryChannel": {
+          "title": "Uporabnik dodan!",
+          "description": "Uporabnik: USER je bil dodan v ticekt!",
+          "footer": {
+            "text": "Dodal: USERNAME | ID: USERID"
+          }
+        },
         "button": {
           "lable": "From: BlueCityRP"
         },
@@ -136,7 +143,14 @@
       "openNewTicket": {
         "lable": "Odpri nov ticket"
       },
-      "userRemoved": "Uporabnik odstranjen!"
+      "userRemoved": "Uporabnik odstranjen!",
+      "sentToAllChannels": {
+        "title": "Uporabnik odstranjen!",
+        "description": "Uporabnik: USER je bil odstranjen iz ticekta!",
+        "footer": {
+          "text": "Odstranil: USERNAME | ID: USERID"
+        }
+      }
     },
     "readyjs": {
       //NIMA PREVODOV
