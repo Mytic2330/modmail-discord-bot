@@ -59,3 +59,8 @@ function getWeekNumber(date: Date): number {
 	const weekNumber = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
 	return weekNumber;
 }
+
+export function unixTimestamp(): number {
+	const timestamp = Math.floor(new Date().getTime()/1000.0)
+	return timestamp;
+}

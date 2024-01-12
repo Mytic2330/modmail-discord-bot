@@ -40,7 +40,7 @@ async function close(base: any, type:string, num: number | null) {
 	if (ina) { channelId = data.guildChannel; }
 	else { channelId = base.channelId; }
 	// CHECK FOR DUPLICATE INTERACTIONS
-	const st = await lib.ticket.get('closing');
+	const st: Array<number> | null = await lib.ticket.get('closing');
 	if (!st) {
 		await lib.ticket.set('closing', []);
 	}
@@ -268,6 +268,7 @@ async function dataSetUpdate(number: number, data: { dmChannel: any, guildChanne
 	await lib.ticket.delete(data.guildChannel);
 	await lib.db.table(`tt_${number}`).set('info.closed', true);
 	await lib.db.table(`tt_${number}`).set('info.transcript', `${obj.url}`);
+	await lib.ticket.pull('openTickets', number);
 	await unsetClosing(client, number)
 }
 

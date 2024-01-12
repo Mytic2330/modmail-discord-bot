@@ -12,13 +12,13 @@ module.exports = {
 				}
 			}
 		}
-		if (message.guildId != undefined) {var processing: MessageReaction | undefined = await message.react('🔵');} else {processing = undefined;}
 		const client = message.client;
 		const locales = lib.locales.events.messageOnCreatejs;
 		const status = await lib.ticket.has(message.channelId);
 
 		switch (status) {
 		case true:
+			if (message.guildId != undefined) {var processing: MessageReaction | undefined = await message.react('🔵');} else {processing = undefined;}
 			messageHandeler(message, client, locales, processing);
 			break;
 		case false:
@@ -305,6 +305,7 @@ async function infoWriter(client: Client, ticketNumberDatabse: number, message: 
 		});
 		await lib.db.table(`tt_${ticketNumberDatabse}`).add('messageAnalitys.messages.sentByDM', 1);
 		await lib.db.table(`tt_${ticketNumberDatabse}`).push('messageAnalitys.messages.DMMessagesUsers', { 'user': message.author.id });
+		await lib.db.table(`tt_${ticketNumberDatabse}`).set('activity.lastDMMessage', lib.unixTimestamp());
 		return;
 	}
 	if (x === 'toDM') {
@@ -317,6 +318,7 @@ async function infoWriter(client: Client, ticketNumberDatabse: number, message: 
 		});
 		await lib.db.table(`tt_${ticketNumberDatabse}`).add('messageAnalitys.messages.sentByServer', 1);
 		await lib.db.table(`tt_${ticketNumberDatabse}`).push('messageAnalitys.messages.serverMessagesUsers', { 'user': message.author.id });
+		await lib.db.table(`tt_${ticketNumberDatabse}`).set('activity.lastServerMessage', lib.unixTimestamp());
 	}
 }
 

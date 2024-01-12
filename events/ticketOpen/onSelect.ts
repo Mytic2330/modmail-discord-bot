@@ -8,6 +8,16 @@ module.exports = {
 		await interaction.deferReply({ ephemeral: true });
 		const client = interaction.client;
 		const locales = lib.locales.events.onSelectMenuInteractionjs;
+		const blacklist: Array<string> | null = await lib.ticket.get('blacklist');
+		if (blacklist!.includes(interaction.user.id)) {
+			const embed = new EmbedBuilder()
+				.setColor(await lib.db.get('color.default'))
+				.setTitle('Blacklist')
+				.setDescription('Bili ste blacklistani.\n Torej možnosti odpiranja ticketa nimate!')
+				.setTimestamp();
+			await interaction.editReply({ embeds: [embed] });
+			return;
+		}
 		checkStatus(interaction, client, locales);
 	},
 };
@@ -71,10 +81,11 @@ async function sendInitial(x: TextChannel, interaction: StringSelectMenuInteract
 	const member = await x.guild.members.fetch(interaction.user.id);
 	const num = await ticketNumberCalculation(interaction, x);
 
+	const color = await lib.db.get('color.default')
 	logInteraction(x, member, num);
 	const embed = new EmbedBuilder()
 		.setAuthor({ name: interaction.user.username, iconURL: member.user.displayAvatarURL() })
-		.setColor(await lib.db.get('color.default'))
+		.setColor(color)
 		.setTitle((locales.logEmbed.title)
 			.replace('CATEGORY', interaction.values[0]))
 		.setTimestamp()
@@ -101,7 +112,7 @@ async function sendInitial(x: TextChannel, interaction: StringSelectMenuInteract
 	}
 
 	const embed2 = new EmbedBuilder()
-		.setColor(await lib.db.get('color.default'))
+		.setColor(color)
 		.setTitle(locales.channelEmbed.title)
 		.setTimestamp();
 	await interaction.editReply({ embeds: [embed2] });
@@ -129,7 +140,7 @@ async function logInteraction(x: TextChannel, member: GuildMember, num: number) 
 
 async function databaseSync(interaction: StringSelectMenuInteraction, x: TextChannel, num:number) {
 	await lib.ticket.pull('users', interaction.user.id);
-	const newTable = await lib.db.table(`tt_${num}`);
+	const newTable = lib.db.table(`tt_${num}`);
 	await newTable.set('info', {
 		'guildChannel': x.id,
 		'dmChannel': [interaction.channelId],
@@ -139,14 +150,18 @@ async function databaseSync(interaction: StringSelectMenuInteraction, x: TextCha
 	await lib.ticket.set(x.id, num);
 	await lib.ticket.set(interaction.channelId, num);
 	await newTable.set('analytics', {
-		'date': await lib.datestamp(),
-		'time': await lib.timestamp(),
+		'date': lib.datestamp(),
+		'time': lib.timestamp(),
 		'rating': null,
 	});
 	await newTable.set('messageAnalitys', {
 		'messages': { 'sentByDM': 0, 'sentByServer': 0, 'serverMessagesUsers': [], 'DMMessagesUsers': [] },
 	});
+	await newTable.set('activity', {
+		'lastServerMessage': null, 'lastDMMessage': null
+	})
 	await lib.ticket.push('tickets', num);
+	await lib.ticket.push('openTickets', num);
 }
 
 async function ticketNumberCalculation(interaction: StringSelectMenuInteraction, x: TextChannel) {

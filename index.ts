@@ -2,7 +2,7 @@ require('./utils/logger');
 import { Client, Collection, GatewayIntentBits, ActivityType, Events, Partials } from 'discord.js';
 import { jsonc } from 'jsonc';
 import { QuickDB } from 'quick.db';
-import version from './package.json';
+import { version } from './package.json';
 import * as fs from 'fs-extra';
 import * as path from 'node:path';
 const database: QuickDB = new QuickDB({ filePath: './database.sqlite' });

@@ -39,13 +39,13 @@ async function inaCheck(client: Client) {
 			lib.close(client, 'ina', id);
 			continue;
 		}
-		if (currentTime == 86400000) {
+		if (currentTime == 43200000) {
 			sendInaWarning(data, client);
 		}
-		if (currentTime > 172800000) {
-			await ticket.set('inaData', 172800000);
+		if (currentTime > 86400000) {
+			await ticket.set('inaData', 86400000);
 		}
-		else if (currentTime <= 172800000) {
+		else if (currentTime <= 86400000) {
 			const time = currentTime - 60000;
 			await ticket.set('inaData', time);
 		}
@@ -53,18 +53,19 @@ async function inaCheck(client: Client) {
 }
 
 async function sendInaWarning(data:any, client: Client) {
+	const color = await lib.db.get('color.default')
 	const embed = new EmbedBuilder()
-		.setColor(await lib.db.get('color.default'))
+		.setColor(color)
 		.setTitle('Opozorilo o nekativnosti!')
 		.setDescription('Vaš ticket se bo zaprl čez 24 ur, če ne bo nobenega sporočila!');
 
 	const emb = new EmbedBuilder()
-		.setColor(await lib.db.get('color.default'))
+		.setColor(color)
 		.setTitle('Opozorilo o nekativnosti!')
 		.setDescription('Ticket se bo zaprl čez 24 ur, če ne bo nobenega sporočila!');
 
 	const channel = await client.channels.fetch(data.guildChannel);
-	sendToServer(client, channel, emb);
+	sendToServer(channel, emb);
 	sendEmbeds(client, data.dmChannel, embed);
 }
 
@@ -80,7 +81,6 @@ async function sendEmbeds(client: Client, channels:any, embed: EmbedBuilder) {
 	}
 }
 
-async function sendToServer(client:any, channel:any, emb: EmbedBuilder) {
-	const wbh = await client.wbh(channel);
-	wbh.send({ embeds: [emb] });
+async function sendToServer(channel:any, emb: EmbedBuilder) {
+	channel.send({ embeds: [emb] });
 }

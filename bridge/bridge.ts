@@ -17,7 +17,7 @@ import { version } from '../package.json';
 // FUNCTIONS //
 import close from '../utils/close';
 import newTicket from '../utils/openTicket';
-import {getDatestamp, getTimestamp, hasNewUsername} from '../utils/etc'
+import { getDatestamp, getTimestamp, hasNewUsername, unixTimestamp } from '../utils/etc'
 import { webhook } from '../utils/webhook';
 
 // CACHE //
@@ -36,15 +36,15 @@ const lib = {
 	db: database,
 	ticket: ticket,
 	settings: settings,
+	version: version,
 	// FUNCTIONS //
 	close: close,
 	newTicket: newTicket,
 	hasNewUsername: hasNewUsername,
+	unixTimestamp: unixTimestamp,
 	timestamp: getTimestamp,
 	datestamp: getDatestamp,
 	wbh: webhook,
-	version: version,
-
 	// CACHE //
 	cache: cache,
 	//TEST FUNCTION//
