@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, CommandInteraction } from 'discord.js';
-import lib from '../../bridge/bridge'
+import lib from '../../bridge/bridge';
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('close')

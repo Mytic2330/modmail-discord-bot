@@ -1,4 +1,13 @@
-import { Events, ChannelType, EmbedBuilder, TextChannel, CategoryChannel, Client, Guild, BaseGuild, Role, Snowflake } from 'discord.js';
+import {
+	Events,
+	ChannelType,
+	EmbedBuilder,
+	TextChannel,
+	CategoryChannel,
+	Client,
+	Guild,
+	Role,
+} from 'discord.js';
 import lib from '../../bridge/bridge';
 module.exports = {
 	name: Events.ClientReady,
@@ -27,10 +36,18 @@ module.exports = {
 					type: ChannelType.GuildText,
 				});
 
-				await category.permissionOverwrites.create(guild.roles.everyone, { ViewChannel: false });
-				await categoryClosed.permissionOverwrites.create(guild.roles.everyone, { ViewChannel: false });
-				await log.permissionOverwrites.create(guild.roles.everyone, { ViewChannel: false });
-				await archive.permissionOverwrites.create(guild.roles.everyone, { ViewChannel: false });
+				await category.permissionOverwrites.create(guild.roles.everyone, {
+					ViewChannel: false,
+				});
+				await categoryClosed.permissionOverwrites.create(guild.roles.everyone, {
+					ViewChannel: false,
+				});
+				await log.permissionOverwrites.create(guild.roles.everyone, {
+					ViewChannel: false,
+				});
+				await archive.permissionOverwrites.create(guild.roles.everyone, {
+					ViewChannel: false,
+				});
 
 				permissionSet(category, log, archive, categoryClosed, guild);
 			}
@@ -38,11 +55,16 @@ module.exports = {
 				console.error(e);
 			}
 		}
-
 	},
 };
 
-async function permissionSet(category: CategoryChannel, log:TextChannel, archive:TextChannel, categoryClosed:CategoryChannel, guild: Guild) {
+async function permissionSet(
+	category: CategoryChannel,
+	log: TextChannel,
+	archive: TextChannel,
+	categoryClosed: CategoryChannel,
+	guild: Guild,
+) {
 	const roles = lib.settings.allowedRoles;
 	for (const roleLoop of roles) {
 		const x = guild.roles.cache.get(roleLoop);
@@ -50,12 +72,19 @@ async function permissionSet(category: CategoryChannel, log:TextChannel, archive
 		await category.permissionOverwrites.create(role, { ViewChannel: true });
 		await log.permissionOverwrites.create(role, { ViewChannel: true });
 		await archive.permissionOverwrites.create(role, { ViewChannel: true });
-		await categoryClosed.permissionOverwrites.create(role, { ViewChannel: true });
+		await categoryClosed.permissionOverwrites.create(role, {
+			ViewChannel: true,
+		});
 	}
 	const wbh = await lib.wbh(log);
 	const wbh2 = await lib.wbh(archive);
 
-	await lib.db.set(guild.id, { 'logChannel': log.id, 'transcriptChannel': archive.id, 'categoryId': category.id, 'closeCategoryId': categoryClosed.id });
+	await lib.db.set(guild.id, {
+		logChannel: log.id,
+		transcriptChannel: archive.id,
+		categoryId: category.id,
+		closeCategoryId: categoryClosed.id,
+	});
 
 	const embed = new EmbedBuilder()
 		.setColor(await lib.db.get('color.default'))

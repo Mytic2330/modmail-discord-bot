@@ -1,6 +1,13 @@
-import { SlashCommandBuilder, EmbedBuilder, CommandInteraction, Client, TextChannel, DMChannel } from 'discord.js';
+import {
+	SlashCommandBuilder,
+	EmbedBuilder,
+	CommandInteraction,
+	Client,
+	TextChannel,
+	DMChannel,
+} from 'discord.js';
 import { QuickDB } from 'quick.db';
-import lib from '../../bridge/bridge'
+import lib from '../../bridge/bridge';
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('inactive')
@@ -10,7 +17,7 @@ module.exports = {
 		const client = interaction.client;
 		// const locales = client.locales.utils.closejs;
 		await interaction.deferReply({ ephemeral: true });
-		if (!await lib.ticket.has(interaction.channelId)) {
+		if (!(await lib.ticket.has(interaction.channelId))) {
 			interaction.editReply('Ta kanal ni aktiven ticket');
 			return;
 		}
@@ -35,16 +42,20 @@ module.exports = {
 		const embed = new EmbedBuilder()
 			.setColor(await lib.db.get('color.default'))
 			.setTitle('Oznaka inaktivnosti')
-			.setDescription('Vaš ticket je bil označen kot neaktiven to pomeni, \nda mora biti v vašem ticketu poslano sporočilo vsakih \n48 ur drugače se bo ticket avtomatsko zaprl.\n24 ur pred zaprtjem boste opozorjeni.');
+			.setDescription(
+				'Vaš ticket je bil označen kot neaktiven to pomeni, \nda mora biti v vašem ticketu poslano sporočilo vsakih \n48 ur drugače se bo ticket avtomatsko zaprl.\n24 ur pred zaprtjem boste opozorjeni.',
+			);
 
 		const emb = new EmbedBuilder()
 			.setColor(await lib.db.get('color.default'))
 			.setTitle('Oznaka inaktivnosti')
-			.setDescription('Ticket je bil označen kot neaktiven to pomeni, \nda se bo ticket avtomatsko zaprl, če v 48ih urah ni sporočil.\n24 ur pred zaprtjem boste opozorjeni.');
+			.setDescription(
+				'Ticket je bil označen kot neaktiven to pomeni, \nda se bo ticket avtomatsko zaprl, če v 48ih urah ni sporočil.\n24 ur pred zaprtjem boste opozorjeni.',
+			);
 
 		const channels = data.dmChannel;
 		const passedChannel = await client.channels.fetch(data.guildChannel);
-		const channel = passedChannel as TextChannel
+		const channel = passedChannel as TextChannel;
 		sendEmbeds(client, channels, embed);
 		sendToServer(client, channel, emb);
 		setData(database);
@@ -52,7 +63,11 @@ module.exports = {
 	},
 };
 
-async function sendEmbeds(client: Client, channels: Array<any>, embed:EmbedBuilder) {
+async function sendEmbeds(
+	client: Client,
+	channels: Array<any>,
+	embed: EmbedBuilder,
+) {
 	for (const id of channels) {
 		try {
 			const passedChannel = await client.channels.fetch(id);
@@ -65,19 +80,23 @@ async function sendEmbeds(client: Client, channels: Array<any>, embed:EmbedBuild
 	}
 }
 
-async function sendToServer(client: Client, channel: TextChannel | null, emb:EmbedBuilder) {
+async function sendToServer(
+	client: Client,
+	channel: TextChannel | null,
+	emb: EmbedBuilder,
+) {
 	if (channel) {
 		const wbh = await lib.wbh(channel);
 		wbh?.send({ embeds: [emb] });
 	}
 }
 
-async function setData(database:QuickDB) {
+async function setData(database: QuickDB) {
 	const now = new Date();
 	const currentSec = now.getSeconds();
 	const currentMs = now.getMilliseconds();
-	const rej = (currentSec * 1000) + currentMs;
-	const remainingMilliseconds = (60000 - rej) + 172800000;
+	const rej = currentSec * 1000 + currentMs;
+	const remainingMilliseconds = 60000 - rej + 172800000;
 
 	database.set('inaData', remainingMilliseconds);
 }

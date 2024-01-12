@@ -1,5 +1,12 @@
 require('./utils/logger');
-import { Client, Collection, GatewayIntentBits, ActivityType, Events, Partials } from 'discord.js';
+import {
+	Client,
+	Collection,
+	GatewayIntentBits,
+	ActivityType,
+	Events,
+	Partials,
+} from 'discord.js';
 import { jsonc } from 'jsonc';
 import { QuickDB } from 'quick.db';
 import { version } from './package.json';
@@ -7,9 +14,10 @@ import * as fs from 'fs-extra';
 import * as path from 'node:path';
 const database: QuickDB = new QuickDB({ filePath: './database.sqlite' });
 export default database;
-const { Token } = jsonc.parse(fs.readFileSync(path.join(__dirname, 'config/settings.jsonc'), 'utf8'));
+const { Token } = jsonc.parse(
+	fs.readFileSync(path.join(__dirname, 'config/settings.jsonc'), 'utf8'),
+);
 const debug: boolean = true;
-
 
 console.log(` \x1b[36m
 
@@ -34,10 +42,12 @@ const client = new Client({
 	presence: {
 		status: 'online',
 		afk: false,
-		activities: [{
-			name: 'Tickets',
-			type: ActivityType.Watching,
-		}],
+		activities: [
+			{
+				name: 'Tickets',
+				type: ActivityType.Watching,
+			},
+		],
 	},
 	intents: [
 		GatewayIntentBits.MessageContent,
@@ -61,11 +71,7 @@ const client = new Client({
 		// SCREENSHARE COMMAND
 		GatewayIntentBits.GuildVoiceStates,
 	],
-	partials: [
-		Partials.Message,
-		Partials.Channel,
-		Partials.Reaction,
-	],
+	partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 });
 const commands = new Collection<string, any>();
 const foldersPath = path.join(__dirname, 'commands');
@@ -73,7 +79,9 @@ const commandFolders = fs.readdirSync(foldersPath);
 
 for (const folder of commandFolders) {
 	const commandsPath = path.join(foldersPath, folder);
-	const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+	const commandFiles = fs
+		.readdirSync(commandsPath)
+		.filter((file) => file.endsWith('.js'));
 	for (const file of commandFiles) {
 		const filePath = path.join(commandsPath, file);
 		const command = require(filePath);
@@ -81,12 +89,14 @@ for (const folder of commandFolders) {
 			commands.set(command.data.name, command);
 		}
 		else {
-			console.error(`\x1b[31m[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.\x1b[0m`);
+			console.error(
+				`\x1b[31m[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.\x1b[0m`,
+			);
 		}
 	}
 }
 
-client.on(Events.InteractionCreate, async interaction => {
+client.on(Events.InteractionCreate, async (interaction) => {
 	if (!interaction.isChatInputCommand()) return;
 	const command = commands.get(interaction.commandName);
 	if (!command) {
@@ -99,10 +109,16 @@ client.on(Events.InteractionCreate, async interaction => {
 	catch (error) {
 		console.error(error);
 		if (interaction.replied || interaction.deferred) {
-			await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+			await interaction.followUp({
+				content: 'There was an error while executing this command!',
+				ephemeral: true,
+			});
 		}
 		else {
-			await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+			await interaction.reply({
+				content: 'There was an error while executing this command!',
+				ephemeral: true,
+			});
 		}
 	}
 });
@@ -111,7 +127,9 @@ const evnetPath = path.join(__dirname, 'events');
 const eventFolders = fs.readdirSync(evnetPath);
 for (const folder of eventFolders) {
 	const eventPath = path.join(evnetPath, folder);
-	const commandFiles = fs.readdirSync(eventPath).filter(file => file.endsWith('.js'));
+	const commandFiles = fs
+		.readdirSync(eventPath)
+		.filter((file) => file.endsWith('.js'));
 	for (const file of commandFiles) {
 		const filePath = path.join(eventPath, file);
 		const event = require(filePath);
@@ -123,18 +141,23 @@ for (const folder of eventFolders) {
 		}
 	}
 }
-process.on('unhandledRejection', (reason:unknown, promise:unknown, a:unknown) => {
-	console.log(reason, promise, a);
-});
-process.on('uncaughtException', (reason:unknown, promise:unknown, a:unknown) => {
-	console.log(reason, promise, a);
-});
+process.on(
+	'unhandledRejection',
+	(reason: unknown, promise: unknown, a: unknown) => {
+		console.log(reason, promise, a);
+	},
+);
+process.on(
+	'uncaughtException',
+	(reason: unknown, promise: unknown, a: unknown) => {
+		console.log(reason, promise, a);
+	},
+);
 
-client.on('error', console.log)
-	.on('warn', console.log);
+client.on('error', console.log).on('warn', console.log);
 if (debug === true) client.on('debug', console.log);
 
-client.login(Token).catch(err => {
+client.login(Token).catch((err) => {
 	console.error('[TOKEN-ERROR] Unable to connect to the BOT\'s Token');
 	console.error(err);
 });

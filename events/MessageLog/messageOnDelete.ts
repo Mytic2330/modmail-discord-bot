@@ -6,7 +6,7 @@ module.exports = {
 	async execute(message: Message) {
 		const client = message.client;
 		// if (message.author.bot === true) return;
-		if (!await lib.ticket.has(message.channelId)) return;
+		if (!(await lib.ticket.has(message.channelId))) return;
 		const num = await lib.ticket.get(message.channelId);
 		const table = lib.db.table(`tt_${num}`);
 
@@ -22,15 +22,20 @@ module.exports = {
 	},
 };
 
-async function handleHasMessage(client: Client, message: Message, table:QuickDB) {
+async function handleHasMessage(
+	client: Client,
+	message: Message,
+	table: QuickDB,
+) {
 	const dataMessage = await table.get(message.id);
 	for (const obj of dataMessage.recive) {
 		const passedChannel = await client.channels.fetch(obj.channelId);
 		const channel = passedChannel as TextChannel | DMChannel;
 		const msg = await channel?.messages.fetch(obj.messageId);
-		if (channel.hasOwnProperty('guildId')) {
-			await msg.react('❌')
-		} else {
+		if (Object.prototype.hasOwnProperty.call(channel, 'guildId')) {
+			await msg.react('❌');
+		}
+		else {
 			await msg.delete();
 		}
 	}

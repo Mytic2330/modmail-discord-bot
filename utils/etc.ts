@@ -1,6 +1,11 @@
-import { GuildMember, User } from "discord.js";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { GuildMember, User } from 'discord.js';
 
-export async function hasNewUsername(x: User|GuildMember, returnUsername: boolean, type:string): Promise<boolean | string | undefined> {
+export async function hasNewUsername(
+	x: User | GuildMember,
+	returnUsername: boolean,
+	type: string,
+): Promise<boolean | string | undefined> {
 	if (type == 'member') {
 		const guildMember = x as GuildMember;
 		const discriminator = guildMember.user.discriminator;
@@ -53,7 +58,9 @@ export function getDatestamp(): string {
 }
 
 function getWeekNumber(date: Date): number {
-	const d:any = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+	const d: any = new Date(
+		Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()),
+	);
 	d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
 	const yearStart: any = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
 	const weekNumber = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
@@ -61,6 +68,6 @@ function getWeekNumber(date: Date): number {
 }
 
 export function unixTimestamp(): number {
-	const timestamp = Math.floor(new Date().getTime()/1000.0)
+	const timestamp = Math.floor(new Date().getTime() / 1000.0);
 	return timestamp;
 }

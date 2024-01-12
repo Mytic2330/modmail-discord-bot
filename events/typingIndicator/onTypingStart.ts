@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Events } from 'discord.js';
 import lib from '../../bridge/bridge';
 module.exports = {
@@ -14,7 +15,6 @@ module.exports = {
 
 		const x = await lib.ticket.get(channelId);
 		const data = await lib.db.table(`tt_${x}`).get('info');
-
 
 		if (await typingRefrence.channel.isDMBased()) {
 			const guildChannel = await client.channels.fetch(data.guildChannel);

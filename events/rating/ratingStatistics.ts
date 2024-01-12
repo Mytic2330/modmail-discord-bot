@@ -1,4 +1,18 @@
-import { Events, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, EmbedBuilder, Interaction, ButtonInteraction, ModalSubmitInteraction, Client, DMChannel, Snowflake } from 'discord.js';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import {
+	Events,
+	ModalBuilder,
+	TextInputBuilder,
+	TextInputStyle,
+	ActionRowBuilder,
+	EmbedBuilder,
+	Interaction,
+	ButtonInteraction,
+	ModalSubmitInteraction,
+	Client,
+	DMChannel,
+	Snowflake,
+} from 'discord.js';
 import lib from '../../bridge/bridge';
 module.exports = {
 	name: Events.InteractionCreate,
@@ -16,8 +30,8 @@ module.exports = {
 	},
 };
 
-async function switchCheck(passedInteraction: any) {
-	const interaction = passedInteraction as ButtonInteraction
+async function switchCheck(passedInteraction: ButtonInteraction) {
+	const interaction = passedInteraction as ButtonInteraction;
 	const id_inter = interaction.customId.split('_');
 	switch (id_inter[1]) {
 	case 'rating':
@@ -29,7 +43,7 @@ async function switchCheck(passedInteraction: any) {
 	}
 }
 
-async function rateFnc(interaction:Interaction) {
+async function rateFnc(interaction: Interaction) {
 	const all_tickets = await lib.ticket.get('tickets');
 	const arr = [];
 
@@ -47,42 +61,61 @@ async function ticketFnc(interaction: ButtonInteraction) {
 		.setCustomId('ticketNumber')
 		.setLabel('Številka ticketa, ki si ga želite ogledati')
 		.setStyle(TextInputStyle.Short);
-	const firstActionRow: any = new ActionRowBuilder().addComponents(favoriteColorInput);
+	const firstActionRow: any = new ActionRowBuilder().addComponents(
+		favoriteColorInput,
+	);
 
 	modal.addComponents(firstActionRow);
 	await interaction.showModal(modal);
 }
 
-async function processModal(passedInteraction: any) {
-	const interaction = passedInteraction as ModalSubmitInteraction;
+async function processModal(interaction: ModalSubmitInteraction) {
 	const num = parseInt(interaction.fields.getTextInputValue('ticketNumber'));
 
 	const allTickets = await lib.ticket.get('tickets');
 	const chc = allTickets.includes(num);
 	if (!chc) {
-		await interaction.reply({ content: 'Neveljavna številka ticketa!', ephemeral: true });
+		await interaction.reply({
+			content: 'Neveljavna številka ticketa!',
+			ephemeral: true,
+		});
 		return;
 	}
 
 	const info = await gatherTicketInfo(num);
 	if (!info) {
-		interaction.reply({ content: 'Ni uspelo pridobiti podatkov!', ephemeral: true });
+		interaction.reply({
+			content: 'Ni uspelo pridobiti podatkov!',
+			ephemeral: true,
+		});
 		return;
 	}
 
 	const embed = await embedCreator(info, interaction.client);
 
 	interaction.reply({ embeds: [embed], ephemeral: true });
-
 }
 
-async function gatherTicketInfo(num: number): Promise<{info: any, analytics: any,messageAnalitys: any,num: number} | null> {
+async function gatherTicketInfo(
+	num: number,
+): Promise<{
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  info: any;
+  analytics: any;
+  messageAnalitys: any;
+  num: number;
+} | null> {
 	const table = await lib.db.table(`tt_${num}`);
 	try {
 		const info = await table.get('info');
 		const analytics = await table.get('analytics');
 		const messageAnalitys = await table.get('messageAnalitys');
-		const obj = { 'info': info, 'analytics': analytics, 'messageAnalitys': messageAnalitys, 'num': num };
+		const obj = {
+			info: info,
+			analytics: analytics,
+			messageAnalitys: messageAnalitys,
+			num: num,
+		};
 		return obj;
 	}
 	catch (e) {
@@ -91,8 +124,12 @@ async function gatherTicketInfo(num: number): Promise<{info: any, analytics: any
 	}
 }
 
-async function embedCreator(obj: {info: any, analytics: any,messageAnalitys: any,num: number}, client: Client) {
-	var embed = new EmbedBuilder()
+async function embedCreator(
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	obj: { info: any; analytics: any; messageAnalitys: any; num: number },
+	client: Client,
+) {
+	const embed = new EmbedBuilder()
 		.setColor(await lib.db.get('color.default'))
 		.setTitle(`Ticket številka ${obj.num}`)
 		.setTimestamp()
@@ -100,7 +137,9 @@ async function embedCreator(obj: {info: any, analytics: any,messageAnalitys: any
 
 	embed.addFields({
 		name: 'Podatki o ticketu',
-		value: `Datum odprjta: ${await dateMaker(obj.analytics.date)}\nUra odprtja: **${obj.analytics.time}**`,
+		value: `Datum odprjta: ${await dateMaker(
+			obj.analytics.date,
+		)}\nUra odprtja: **${obj.analytics.time}**`,
 		inline: true,
 	});
 
@@ -124,7 +163,8 @@ async function embedCreator(obj: {info: any, analytics: any,messageAnalitys: any
 
 // ! DOKONČAJ
 
-async function dateMaker(data:any) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function dateMaker(data: any) {
 	const arr = data.split('_');
 
 	const day = arr[0].split(':')[1];
@@ -135,13 +175,17 @@ async function dateMaker(data:any) {
 	return dataToReturn;
 }
 
-async function getAllUsers(client: Client, data: { dmChannel: any, creatorId: Snowflake}) {
+async function getAllUsers(
+	client: Client,
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	data: { dmChannel: any; creatorId: Snowflake },
+) {
 	const arr = [];
 	for (const id of data.dmChannel) {
 		const x = await client.channels.fetch(id);
 		const dm = x as DMChannel;
 		const user = dm.recipient;
-		if (data.creatorId != user?.id)	arr.push(user);
+		if (data.creatorId != user?.id) arr.push(user);
 	}
 
 	if (arr.length === 0) return null;

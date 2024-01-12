@@ -1,51 +1,72 @@
-export default close
-const discordTranscripts = require('discord-html-transcripts');
-import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, Embed, Client, TextChannel, Interaction, DMChannel, CommandInteraction, ButtonInteraction } from 'discord.js';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export default close;
+import discordTranscripts, { ExportReturnType } from 'discord-html-transcripts';
+import {
+	EmbedBuilder,
+	ButtonBuilder,
+	ButtonStyle,
+	ActionRowBuilder,
+	Client,
+	TextChannel,
+} from 'discord.js';
 import lib from '../bridge/bridge';
 
-async function close(base: any, type:string, num: number | null) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function close(base: any, type: string, num: number | null) {
 	// BASIC DEFINING
-	var ina;
-	var client;
-	var interaction;
-	var number;
-	var channelId;
-	var closeUser;
+	let ina;
+	let client;
+	let interaction;
+	let number;
+	let channelId;
+	let closeUser;
 	// CHECK TYPE
 	if (type == 'ina') {
-		//ina = true;
-		client = base
-		interaction = null
+		// ina = true;
+		client = base;
+		interaction = null;
 	}
 	else if (type == 'cls') {
-		//ina = false;
-		interaction = base
-		client = interaction.client
+		// ina = false;
+		interaction = base;
+		client = interaction.client;
 	}
 	else {
 		return;
 	}
 	// DEFFER IF INTERACTION
-	if (!ina && interaction) { await interaction.deferReply({ ephemeral: true }); }
+	if (!ina && interaction) {
+		await interaction.deferReply({ ephemeral: true });
+	}
 	const locales = lib.locales.utils.closejs;
 	// CHECK IF TICKET IS VALID
-	if (!await lib.ticket.has(base.channelId) && !ina) {
+	if (!(await lib.ticket.has(base.channelId)) && !ina) {
 		base.editReply(locales.wrongChannel);
 		return;
 	}
 	// DATABASE DEFINING
-	if (ina) { number = num; }
-	else {number = await lib.ticket.get(base.channelId); }
+	if (ina) {
+		number = num;
+	}
+	else {
+		number = await lib.ticket.get(base.channelId);
+	}
 	const data = await lib.db.table(`tt_${number}`).get('info');
-	if (ina) { channelId = data.guildChannel; }
-	else { channelId = base.channelId; }
+	if (ina) {
+		channelId = data.guildChannel;
+	}
+	else {
+		channelId = base.channelId;
+	}
 	// CHECK FOR DUPLICATE INTERACTIONS
 	const st: Array<number> | null = await lib.ticket.get('closing');
 	if (!st) {
 		await lib.ticket.set('closing', []);
 	}
 	else if (st.includes(number)) {
-		if (!ina) { base.editReply(locales.ticketAlreadyClosing); }
+		if (!ina) {
+			base.editReply(locales.ticketAlreadyClosing);
+		}
 		return;
 	}
 	// PREVENT DUPLICATE STARTS
@@ -57,19 +78,30 @@ async function close(base: any, type:string, num: number | null) {
 	const gData = await lib.db.get(guild.id);
 	const logChannel = await client.channels.fetch(gData.logChannel);
 	const archive = await client.channels.fetch(gData.transcriptChannel);
-	if (ina) { closeUser = { 'username': 'Neaktivnost', 'id': '0' }; }
-	else { closeUser = { 'username': base.user.username, 'id': base.user.id }; }
+	if (ina) {
+		closeUser = { username: 'Neaktivnost', id: '0' };
+	}
+	else {
+		closeUser = { username: base.user.username, id: base.user.id };
+	}
 	// GET ALL USERS IN TICKET
 	const users = await getAllUsers(client, data);
 
 	// ROW BUILDING
-	const RowData = { 'locales': locales, 'number': number }
+	const RowData = { locales: locales, number: number };
 	const creatorRow = await buildRow('rate', RowData);
 	const deleteRow = await buildRow('delete', RowData);
 	const openRow = await buildRow('new', RowData);
 	const openRowRemoved = await buildRow('newremoved', RowData);
 	// EMBED BUILDING
-	const embedData = { 'locales': locales, 'users': users, 'closeUser': closeUser, 'client': client, 'number': number, 'author': author.username };
+	const embedData = {
+		locales: locales,
+		users: users,
+		closeUser: closeUser,
+		client: client,
+		number: number,
+		author: author.username,
+	};
 	const closeLog = await embedBuilder('log', embedData);
 	const closeEmbed = await embedBuilder('close', embedData);
 	const creatorClose = await embedBuilder('creator', embedData);
@@ -77,7 +109,7 @@ async function close(base: any, type:string, num: number | null) {
 	// TRANSCRIPT BULDING
 	const attachment = await discordTranscripts.createTranscript(channel, {
 		limit: -1,
-		returnType: 'attachment',
+		returnType: ExportReturnType.Attachment,
 		filename: `${author.username}.htm`,
 		saveImages: true,
 		footerText: 'Made by mytic2330',
@@ -90,19 +122,43 @@ async function close(base: any, type:string, num: number | null) {
 	const message = await wbhArchive?.send({ files: [attachment] });
 	const obj = message?.attachments.values().next().value;
 	// ADDING TRANSCRIPT LINK TO LOG EMBEDS
-	closeLog?.addFields({ name: locales.transcriptField.name, value: (locales.transcriptField.value).replace('LINK', obj.url) });
-	closeEmbed?.addFields({ name: locales.transcriptField.name, value: (locales.transcriptField.value).replace('LINK', obj.url) });
+	closeLog?.addFields({
+		name: locales.transcriptField.name,
+		value: locales.transcriptField.value.replace('LINK', obj.url),
+	});
+	closeEmbed?.addFields({
+		name: locales.transcriptField.name,
+		value: locales.transcriptField.value.replace('LINK', obj.url),
+	});
 	// COMPACTING STRUCTURE
-	const embeds = { 'closeLog': closeLog, 'closeEmbed': closeEmbed, 'creatorClose': creatorClose, 'closeDmEmbed': closeDmEmbed };
-	const rows = { 'creatorRow': creatorRow, 'deleteRow': deleteRow, 'openRow': openRow, 'openRowRemoved': openRowRemoved };
-	const compactData = { 'channel': channel, 'wbh': wbh, 'dmChannels': data.dmChannel, 'client': client, 'creatorId': data.creatorId };
+	const embeds = {
+		closeLog: closeLog,
+		closeEmbed: closeEmbed,
+		creatorClose: creatorClose,
+		closeDmEmbed: closeDmEmbed,
+	};
+	const rows = {
+		creatorRow: creatorRow,
+		deleteRow: deleteRow,
+		openRow: openRow,
+		openRowRemoved: openRowRemoved,
+	};
+	const compactData = {
+		channel: channel,
+		wbh: wbh,
+		dmChannels: data.dmChannel,
+		client: client,
+		creatorId: data.creatorId,
+	};
 	// SEND ALL CLOSE EMBEDS
 	await sendSwitch(embeds, rows, compactData);
 	// UPDATE DATABASE
 	dataSetUpdate(number, data, client, obj, channel, gData);
 	// FINISHING
 	unsetClosing(client, number);
-	if (!ina) {base.editReply('Ticket closed!');}
+	if (!ina) {
+		base.editReply('Ticket closed!');
+	}
 }
 
 async function sendSwitch(embeds: any, rows: any, compactData: any) {
@@ -113,7 +169,10 @@ async function sendSwitch(embeds: any, rows: any, compactData: any) {
 		console.error(e);
 	}
 	try {
-		compactData.channel.send({ embeds: [embeds.closeEmbed], components: [rows.deleteRow] });
+		compactData.channel.send({
+			embeds: [embeds.closeEmbed],
+			components: [rows.deleteRow],
+		});
 	}
 	catch (e) {
 		console.error(e);
@@ -122,10 +181,16 @@ async function sendSwitch(embeds: any, rows: any, compactData: any) {
 		const dm = await compactData.client.channels.fetch(id);
 		try {
 			if (dm.recipientId === compactData.creatorId) {
-				await dm.send({ embeds: [embeds.creatorClose], components: [rows.creatorRow, rows.openRow] });
+				await dm.send({
+					embeds: [embeds.creatorClose],
+					components: [rows.creatorRow, rows.openRow],
+				});
 			}
 			else {
-				await dm.send({ embeds: [embeds.closeDmEmbed], components: [rows.openRowRemoved] });
+				await dm.send({
+					embeds: [embeds.closeDmEmbed],
+					components: [rows.openRowRemoved],
+				});
 			}
 		}
 		catch (e) {
@@ -142,7 +207,10 @@ async function unsetClosing(client: Client, number: number) {
 	await lib.ticket.pull('closing', number);
 }
 
-async function buildRow(type: string, data: { locales: any, number: number | null}) {
+async function buildRow(
+	type: string,
+	data: { locales: any; number: number | null },
+) {
 	const locales = data.locales;
 	const number = data.number;
 	if (type == 'delete') {
@@ -151,8 +219,7 @@ async function buildRow(type: string, data: { locales: any, number: number | nul
 			.setLabel(locales.deleteButton.lable)
 			.setEmoji(locales.deleteButton.emoji)
 			.setStyle(ButtonStyle.Danger);
-		const row = new ActionRowBuilder()
-			.addComponents(deleteButton);
+		const row = new ActionRowBuilder().addComponents(deleteButton);
 
 		return row;
 	}
@@ -196,8 +263,7 @@ async function buildRow(type: string, data: { locales: any, number: number | nul
 			.setCustomId('openNewTicketButton')
 			.setLabel(locales.newTicketButton.lable)
 			.setStyle(ButtonStyle.Primary);
-		const row = new ActionRowBuilder()
-			.addComponents(openNewTicket);
+		const row = new ActionRowBuilder().addComponents(openNewTicket);
 
 		return row;
 	}
@@ -206,14 +272,23 @@ async function buildRow(type: string, data: { locales: any, number: number | nul
 			.setCustomId('openNewTicketButtonRemoved')
 			.setLabel(locales.newTicketButtonRemoved.lable)
 			.setStyle(ButtonStyle.Primary);
-		const row = new ActionRowBuilder()
-			.addComponents(openNewTicketRemoved);
+		const row = new ActionRowBuilder().addComponents(openNewTicketRemoved);
 
 		return row;
 	}
 }
 
-async function embedBuilder(type: string, data: { 'locales': any, 'users': any, 'closeUser': any, 'client': any, 'number': number, 'author': string }) {
+async function embedBuilder(
+	type: string,
+	data: {
+    locales: any;
+    users: any;
+    closeUser: any;
+    client: any;
+    number: number;
+    author: string;
+  },
+) {
 	const locales = data.locales;
 	const color = await lib.db.get('color.close');
 	const users = data.users;
@@ -225,29 +300,59 @@ async function embedBuilder(type: string, data: { 'locales': any, 'users': any, 
 		const embed = new EmbedBuilder()
 			.setColor(color)
 			.setTitle(locales.closeEmbed.title)
-			.addFields({ name: ' ', value: locales.closeEmbed.field.value }, { name: 'Ticket ID', value: `${number}`, inline: true })
-			.addFields({ name: 'Uporabniki v ticketu', value: `${users}`, inline: true })
+			.addFields(
+				{ name: ' ', value: locales.closeEmbed.field.value },
+				{ name: 'Ticket ID', value: `${number}`, inline: true },
+			)
+			.addFields({
+				name: 'Uporabniki v ticketu',
+				value: `${users}`,
+				inline: true,
+			})
 			.setTimestamp()
-			.setFooter({ text: (locales.closeEmbed.footer.text).replace('USERNAME', closeUser.username).replace('ID', closeUser.id) });
+			.setFooter({
+				text: locales.closeEmbed.footer.text
+					.replace('USERNAME', closeUser.username)
+					.replace('ID', closeUser.id),
+			});
 		return embed;
 	}
 	if (type == 'log') {
 		const embed = new EmbedBuilder()
 			.setColor(color)
-			.setTitle((locales.closeLog.title).replace('CHANNELNAME', author))
-			.addFields({ name: ' ', value: locales.closeLog.field.value }, { name: 'Ticket ID', value: `${number}`, inline: true })
-			.addFields({ name: 'Uporabniki v ticketu', value: `${users}`, inline: true })
+			.setTitle(locales.closeLog.title.replace('CHANNELNAME', author))
+			.addFields(
+				{ name: ' ', value: locales.closeLog.field.value },
+				{ name: 'Ticket ID', value: `${number}`, inline: true },
+			)
+			.addFields({
+				name: 'Uporabniki v ticketu',
+				value: `${users}`,
+				inline: true,
+			})
 			.setTimestamp()
-			.setFooter({ text: (locales.closeLog.footer.text).replace('USERNAME', closeUser.username).replace('ID', closeUser.id) });
+			.setFooter({
+				text: locales.closeLog.footer.text
+					.replace('USERNAME', closeUser.username)
+					.replace('ID', closeUser.id),
+			});
 		return embed;
 	}
 	if (type == 'creator') {
 		const embed = new EmbedBuilder()
 			.setColor(color)
 			.setTitle(locales.creatorClose.title)
-			.addFields({ name: ' ', value: locales.creatorClose.field.value, inline: true })
+			.addFields({
+				name: ' ',
+				value: locales.creatorClose.field.value,
+				inline: true,
+			})
 			.setTimestamp()
-			.setFooter({ text: (locales.creatorClose.footer.text).replace('USERNAME', closeUser.username).replace('ID', closeUser.id) });
+			.setFooter({
+				text: locales.creatorClose.footer.text
+					.replace('USERNAME', closeUser.username)
+					.replace('ID', closeUser.id),
+			});
 		return embed;
 	}
 	if (type == 'dm') {
@@ -260,7 +365,14 @@ async function embedBuilder(type: string, data: { 'locales': any, 'users': any, 
 	}
 }
 
-async function dataSetUpdate(number: number, data: { dmChannel: any, guildChannel: any }, client: Client, obj: any, channel: TextChannel, gData: any) {
+async function dataSetUpdate(
+	number: number,
+	data: { dmChannel: any; guildChannel: any },
+	client: Client,
+	obj: any,
+	channel: TextChannel,
+	gData: any,
+) {
 	moveTicket(channel, gData);
 	for (const id of data.dmChannel) {
 		await lib.ticket.delete(id);
@@ -269,10 +381,10 @@ async function dataSetUpdate(number: number, data: { dmChannel: any, guildChanne
 	await lib.db.table(`tt_${number}`).set('info.closed', true);
 	await lib.db.table(`tt_${number}`).set('info.transcript', `${obj.url}`);
 	await lib.ticket.pull('openTickets', number);
-	await unsetClosing(client, number)
+	await unsetClosing(client, number);
 }
 
-async function getAllUsers(client: Client, data: { dmChannel: any}) {
+async function getAllUsers(client: Client, data: { dmChannel: any }) {
 	const arr = [];
 	for (const id of data.dmChannel) {
 		const dm: any = await client.channels.fetch(id);

@@ -1,6 +1,13 @@
-import { SlashCommandBuilder, EmbedBuilder, CommandInteraction, Client, TextChannel, DMChannel } from 'discord.js';
+import {
+	SlashCommandBuilder,
+	EmbedBuilder,
+	CommandInteraction,
+	Client,
+	TextChannel,
+	DMChannel,
+} from 'discord.js';
 import { QuickDB } from 'quick.db';
-import lib from '../../bridge/bridge'
+import lib from '../../bridge/bridge';
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('cinactive')
@@ -9,7 +16,7 @@ module.exports = {
 	async execute(interaction: CommandInteraction) {
 		const client = interaction.client;
 		await interaction.deferReply({ ephemeral: true });
-		if (!await lib.ticket.has(interaction.channelId)) {
+		if (!(await lib.ticket.has(interaction.channelId))) {
 			interaction.editReply('Ta kanal ni aktiven ticket');
 			return;
 		}
@@ -34,16 +41,20 @@ module.exports = {
 		const embed = new EmbedBuilder()
 			.setColor(await lib.db.get('color.default'))
 			.setTitle('Oznaka neaktivnosti odstranjena')
-			.setDescription('Ticket je bil označen kot aktiven to pomeni, \nda se ticket **ne** bo avtomatsko zaprl, če v 48ih urah ni sporočil.');
+			.setDescription(
+				'Ticket je bil označen kot aktiven to pomeni, \nda se ticket **ne** bo avtomatsko zaprl, če v 48ih urah ni sporočil.',
+			);
 
 		const emb = new EmbedBuilder()
 			.setColor(await lib.db.get('color.default'))
 			.setTitle('Oznaka neaktivnosti odstranjena')
-			.setDescription('Ticket je bil označen kot aktiven to pomeni, \nda se ticket **ne** bo avtomatsko zaprl, če v 48ih urah ni sporočil.');
+			.setDescription(
+				'Ticket je bil označen kot aktiven to pomeni, \nda se ticket **ne** bo avtomatsko zaprl, če v 48ih urah ni sporočil.',
+			);
 
 		const channels = data.dmChannel;
 		const passedChannel = await client.channels.fetch(data.guildChannel);
-		const channel = passedChannel as TextChannel
+		const channel = passedChannel as TextChannel;
 		sendEmbeds(client, channels, embed);
 		sendToServer(client, channel, emb);
 		setData(database);
@@ -51,11 +62,15 @@ module.exports = {
 	},
 };
 
-async function sendEmbeds(client: Client, channels: Array<any>, embed:EmbedBuilder) {
+async function sendEmbeds(
+	client: Client,
+	channels: Array<any>,
+	embed: EmbedBuilder,
+) {
 	for (const id of channels) {
 		try {
 			const passedChannel = await client.channels.fetch(id);
-			const channel = passedChannel as TextChannel | DMChannel
+			const channel = passedChannel as TextChannel | DMChannel;
 			await channel.send({ embeds: [embed] });
 		}
 		catch (e) {
@@ -64,7 +79,11 @@ async function sendEmbeds(client: Client, channels: Array<any>, embed:EmbedBuild
 	}
 }
 
-async function sendToServer(client: Client, channel: TextChannel, emb:EmbedBuilder) {
+async function sendToServer(
+	client: Client,
+	channel: TextChannel,
+	emb: EmbedBuilder,
+) {
 	const wbh = await lib.wbh(channel);
 	wbh?.send({ embeds: [emb] });
 }

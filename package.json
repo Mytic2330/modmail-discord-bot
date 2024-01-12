@@ -17,7 +17,11 @@
     "dev": "nodemon index.ts",
     "compile": "tsc -w",
     "register": "node register.js",
-    "start": "node index.js"
+    "start": "node index.js",
+    "format:fix": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint:fix": "eslint --fix . --ext .ts",
+    "lint:check": "eslint . --ext .ts"
   },
   "author": "mytic2330",
   "license": "ISC",
@@ -31,7 +35,7 @@
     "@types/node": "^20.10.6",
     "@typescript-eslint/eslint-plugin": "^6.18.0",
     "@typescript-eslint/parser": "^6.18.0",
-    "eslint": "^8.56.0",
+    "eslint": "^8.51.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-import": "^2.28.1",

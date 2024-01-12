@@ -1,49 +1,43 @@
 {
-	// BOT TOKEN => https://discord.com/developers/applications
-	"Token": "MTA4MTM0NTQyMjgzNDAxMjI0MA.GDiiBt.a-Km_f9DGpOi0y-XlvGoe7mttwpB5PLeePqS80",
-	"clientId": "1081345422834012240",
-	"screenshareRole": "1122603209215713290",
-	"screenshareChannels": [
-		"1182785238993215599",
-		"1181274033694720030"
-	],
-	// IDs of roles that get access to tickets
-	"allowedRoles": [
-		"1122603209278636085",
-		"1122603209278636085"
-	],
-	"enableRanks": "true",
-	"ranks": {
-		"1122603209278636086": "P - Osebje",
-		"1122603209278636087": "J - Mod",
-		"1122603209278636088": "Mod",
-		"1122603209278636089": "S - Mod",
-		"1122603209278636090": "J - Admin",
-		//"": "Admin",
-		//"": "S - Admin",
-		"1122603209278636091": "H - Staff",
-		"1122603209299603576": "Owner"
-	},
-	// ID of your guild/server
-	"guildId": "1122603209035362385",
-	// Catagorys of help => channelname_name_description
-	"categories": [
-		"pomoc_Pomoč_Vprašanja in pomoč",
-		"ban_Bani_Pomoč glede banov, opozoril...",
-		"donacija_Donacije_Donacije",
-		"ostalo_Ostalo_Ostala pomoč"
-	],
-	// Colors
-	"colors": {
-		"default": "Aqua",
-		"recive": "Green",
-		"close": "Red",
-		"open": "Aqua",
-		"delete": "Orange",
-		"error": "Red",
-		"info": "Aqua"
-	},
-	// Delay between user closing a ticket and being able to open another one (in milliseconds)
-	"DMClose": 60000,
-	"vactarCommunityID": "61a151532b0b55369034aaf0" // LEAVE EMPTY IF YOU DON'T USE VACTAR
+  // BOT TOKEN => https://discord.com/developers/applications
+  "Token": "MTA4MTM0NTQyMjgzNDAxMjI0MA.GDiiBt.a-Km_f9DGpOi0y-XlvGoe7mttwpB5PLeePqS80",
+  "clientId": "1081345422834012240",
+  "screenshareRole": "1122603209215713290",
+  "screenshareChannels": ["1182785238993215599", "1181274033694720030"],
+  // IDs of roles that get access to tickets
+  "allowedRoles": ["1122603209278636085", "1122603209278636085"],
+  "enableRanks": "true",
+  "ranks": {
+    "1122603209278636086": "P - Osebje",
+    "1122603209278636087": "J - Mod",
+    "1122603209278636088": "Mod",
+    "1122603209278636089": "S - Mod",
+    "1122603209278636090": "J - Admin",
+    //"": "Admin",
+    //"": "S - Admin",
+    "1122603209278636091": "H - Staff",
+    "1122603209299603576": "Owner"
+  },
+  // ID of your guild/server
+  "guildId": "1122603209035362385",
+  // Catagorys of help => channelname_name_description
+  "categories": [
+    "pomoc_Pomoč_Vprašanja in pomoč",
+    "ban_Bani_Pomoč glede banov, opozoril...",
+    "donacija_Donacije_Donacije",
+    "ostalo_Ostalo_Ostala pomoč"
+  ],
+  // Colors
+  "colors": {
+    "default": "Aqua",
+    "recive": "Green",
+    "close": "Red",
+    "open": "Aqua",
+    "delete": "Orange",
+    "error": "Red",
+    "info": "Aqua"
+  },
+  // Delay between user closing a ticket and being able to open another one (in milliseconds)
+  "DMClose": 60000,
+  "vactarCommunityID": "61a151532b0b55369034aaf0" // LEAVE EMPTY IF YOU DON'T USE VACTAR
 }

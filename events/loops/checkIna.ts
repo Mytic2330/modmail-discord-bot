@@ -9,18 +9,18 @@ module.exports = {
 			const now = new Date();
 			const currentSec = now.getSeconds();
 			const currentMs = now.getMilliseconds();
-			const rej = (currentSec * 1000) + currentMs;
-			const remainingMilliseconds = (60000 - rej);
+			const rej = currentSec * 1000 + currentMs;
+			const remainingMilliseconds = 60000 - rej;
 			setTimeout(callback, remainingMilliseconds);
 		}
 		let x = 0;
 		waitForNextMinute(() => {
 			inaCheck(client);
-			if (x >= 172800) console.info('\x1b[31m BOT RESTART IS ADVISED ⚠️\x1b[0m');
+			if (x >= 172800) {console.info('\x1b[31m BOT RESTART IS ADVISED ⚠️\x1b[0m');}
 			x = x + 1;
 			setInterval(() => {
 				inaCheck(client);
-				if (x >= 172800) console.info('\x1b[31m BOT RESTART IS ADVISED ⚠️\x1b[0m');
+				if (x >= 172800) {console.info('\x1b[31m BOT RESTART IS ADVISED ⚠️\x1b[0m');}
 				x = x + 1;
 			}, 60000);
 		});
@@ -52,24 +52,28 @@ async function inaCheck(client: Client) {
 	}
 }
 
-async function sendInaWarning(data:any, client: Client) {
-	const color = await lib.db.get('color.default')
+async function sendInaWarning(data: any, client: Client) {
+	const color = await lib.db.get('color.default');
 	const embed = new EmbedBuilder()
 		.setColor(color)
 		.setTitle('Opozorilo o nekativnosti!')
-		.setDescription('Vaš ticket se bo zaprl čez 24 ur, če ne bo nobenega sporočila!');
+		.setDescription(
+			'Vaš ticket se bo zaprl čez 24 ur, če ne bo nobenega sporočila!',
+		);
 
 	const emb = new EmbedBuilder()
 		.setColor(color)
 		.setTitle('Opozorilo o nekativnosti!')
-		.setDescription('Ticket se bo zaprl čez 24 ur, če ne bo nobenega sporočila!');
+		.setDescription(
+			'Ticket se bo zaprl čez 24 ur, če ne bo nobenega sporočila!',
+		);
 
 	const channel = await client.channels.fetch(data.guildChannel);
 	sendToServer(channel, emb);
 	sendEmbeds(client, data.dmChannel, embed);
 }
 
-async function sendEmbeds(client: Client, channels:any, embed: EmbedBuilder) {
+async function sendEmbeds(client: Client, channels: any, embed: EmbedBuilder) {
 	for (const id of channels) {
 		try {
 			const channel: any = await client.channels.fetch(id);
@@ -81,6 +85,6 @@ async function sendEmbeds(client: Client, channels:any, embed: EmbedBuilder) {
 	}
 }
 
-async function sendToServer(channel:any, emb: EmbedBuilder) {
+async function sendToServer(channel: any, emb: EmbedBuilder) {
 	channel.send({ embeds: [emb] });
 }

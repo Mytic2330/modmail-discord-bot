@@ -1,5 +1,12 @@
-import { SlashCommandBuilder, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, CommandInteraction, DMChannel } from 'discord.js';
-import lib from '../../bridge/bridge'
+import {
+	SlashCommandBuilder,
+	ActionRowBuilder,
+	StringSelectMenuBuilder,
+	StringSelectMenuOptionBuilder,
+	CommandInteraction,
+	DMChannel,
+} from 'discord.js';
+import lib from '../../bridge/bridge';
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('remove')
@@ -34,19 +41,29 @@ module.exports = {
 					);
 				}
 				if (select.options.length === 0) {
-					await interaction.reply({ content: locales.error.nousers, ephemeral: true });
+					await interaction.reply({
+						content: locales.error.nousers,
+						ephemeral: true,
+					});
 					return;
 				}
-				const row: ActionRowBuilder<any> = new ActionRowBuilder()
-					.addComponents(select);
+				const row: ActionRowBuilder<any> = new ActionRowBuilder().addComponents(
+					select,
+				);
 				await interaction.reply({ components: [row], ephemeral: true });
 			}
 			else {
-				await interaction.reply({ content: locales.error.nousers, ephemeral: true });
+				await interaction.reply({
+					content: locales.error.nousers,
+					ephemeral: true,
+				});
 			}
 		}
 		else {
-			await interaction.reply({ content: locales.error.nopremission, ephemeral: true });
+			await interaction.reply({
+				content: locales.error.nopremission,
+				ephemeral: true,
+			});
 		}
 	},
 };

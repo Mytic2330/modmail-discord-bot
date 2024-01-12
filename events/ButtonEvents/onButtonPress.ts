@@ -1,4 +1,10 @@
-import { Events, ButtonStyle, ButtonBuilder, ActionRowBuilder, ButtonInteraction } from 'discord.js';
+import {
+	Events,
+	ButtonStyle,
+	ButtonBuilder,
+	ActionRowBuilder,
+	ButtonInteraction,
+} from 'discord.js';
 import lib from '../../bridge/bridge';
 module.exports = {
 	name: Events.InteractionCreate,
@@ -18,7 +24,6 @@ module.exports = {
 		}
 	},
 };
-
 
 async function ratingButtonPressed(interaction: ButtonInteraction) {
 	const rating = interaction.customId.slice(3, 4);
@@ -73,7 +78,10 @@ async function ratingButtonPressed(interaction: ButtonInteraction) {
 		.addComponents(rate2)
 		.addComponents(rate1);
 
-	await interaction.update({ embeds: [interaction.message.embeds[0]], components: [creatorRow, interaction.message.components[1]] });
+	await interaction.update({
+		embeds: [interaction.message.embeds[0]],
+		components: [creatorRow, interaction.message.components[1]],
+	});
 }
 
 async function newTicketButtonPressed(interaction: ButtonInteraction) {
@@ -84,9 +92,13 @@ async function newTicketButtonPressed(interaction: ButtonInteraction) {
 		.setLabel(locales.newTicket)
 		.setDisabled(true)
 		.setStyle(ButtonStyle.Primary);
-	const openRow: ActionRowBuilder<any> = new ActionRowBuilder()
-		.addComponents(openNewTicket);
-	await interaction.update({ embeds: [interaction.message.embeds[0]], components: [interaction.message.components[0], openRow] });
+	const openRow: ActionRowBuilder<any> = new ActionRowBuilder().addComponents(
+		openNewTicket,
+	);
+	await interaction.update({
+		embeds: [interaction.message.embeds[0]],
+		components: [interaction.message.components[0], openRow],
+	});
 }
 
 async function openNewTicketButtonRemoved(interaction: ButtonInteraction) {
@@ -97,7 +109,11 @@ async function openNewTicketButtonRemoved(interaction: ButtonInteraction) {
 		.setLabel(locales.newTicket)
 		.setDisabled(true)
 		.setStyle(ButtonStyle.Primary);
-	const openRow: ActionRowBuilder<any> = new ActionRowBuilder()
-		.addComponents(openNewTicket);
-	await interaction.update({ embeds: [interaction.message.embeds[0]], components: [openRow] });
+	const openRow: ActionRowBuilder<any> = new ActionRowBuilder().addComponents(
+		openNewTicket,
+	);
+	await interaction.update({
+		embeds: [interaction.message.embeds[0]],
+		components: [openRow],
+	});
 }

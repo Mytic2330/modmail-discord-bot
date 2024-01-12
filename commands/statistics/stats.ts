@@ -1,4 +1,12 @@
-import { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, PermissionFlagsBits, CommandInteraction } from 'discord.js';
+import {
+	SlashCommandBuilder,
+	EmbedBuilder,
+	ButtonBuilder,
+	ActionRowBuilder,
+	ButtonStyle,
+	PermissionFlagsBits,
+	CommandInteraction,
+} from 'discord.js';
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('stats')
@@ -6,7 +14,10 @@ module.exports = {
 		.setDefaultMemberPermissions(PermissionFlagsBits.MoveMembers)
 		.setDescription('Preveri statistike'),
 	async execute(interaction: CommandInteraction) {
-		interaction.reply({ content: 'Ta komanda trenutno ni v uporabi!', ephemeral: true });
+		interaction.reply({
+			content: 'Ta komanda trenutno ni v uporabi!',
+			ephemeral: true,
+		});
 		return;
 		// const embed = new EmbedBuilder()
 		// 	.setTitle('Pregled statistik')

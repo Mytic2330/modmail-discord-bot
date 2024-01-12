@@ -1,12 +1,25 @@
 export default newTicket;
 // DEFINITION
-import { EmbedBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ActionRowBuilder, Message, Interaction } from 'discord.js';
+import {
+	EmbedBuilder,
+	StringSelectMenuBuilder,
+	StringSelectMenuOptionBuilder,
+	ActionRowBuilder,
+	Message,
+	Interaction,
+	Snowflake,
+	Channel,
+	DMChannel,
+} from 'discord.js';
 import lib from '../bridge/bridge';
 // FUNCTION
-async function newTicket(passedMessage: Message | undefined, passedInteraction: Interaction | undefined) {
+async function newTicket(
+	passedMessage: Message | undefined,
+	passedInteraction: Interaction | undefined,
+) {
 	if (passedMessage || passedInteraction) {
-		var interaction;
-		var message;
+		let interaction;
+		let message;
 		if (passedMessage) {
 			message = passedMessage as Message;
 		}
@@ -15,29 +28,47 @@ async function newTicket(passedMessage: Message | undefined, passedInteraction: 
 		}
 		const client = message?.client || interaction?.client;
 		const locales = lib.locales.utils.openTicketjs;
-		var type;
-	
+		let type;
+
 		// If is button -- True
-		if (message) {type = false;} else {type = true}
-	
-		if (!type && message) {if (message.guildId !== null) return;}
-	
-		if (type && interaction) {if (await lib.ticket.has(interaction.user.id)) return;}
-		else if (message) {if (await lib.ticket.has(message.author.id)) {return;}}
-	
-		var channelId: any = message?.channelId
-		if (!channelId) {channelId = interaction?.channelId}
-		const channel: any = await client?.channels.fetch(channelId);
+		if (message) {
+			type = false;
+		}
+		else {
+			type = true;
+		}
+
+		if (!type && message) {
+			if (message.guildId !== null) return;
+		}
+
+		if (type && interaction) {
+			if (await lib.ticket.has(interaction.user.id)) return;
+		}
+		else if (message) {
+			if (await lib.ticket.has(message.author.id)) {
+				return;
+			}
+		}
+
+		let channelId: Snowflake | null | undefined = message?.channelId;
+		if (!channelId) {
+			channelId = interaction!.channelId;
+		}
+		const channel: Channel | undefined | null = await client?.channels.fetch(channelId!);
 		const embed = new EmbedBuilder()
 			.setTitle(locales.userSelectCategory.embed.title)
 			.setDescription(locales.userSelectCategory.embed.description)
-			.setFooter({ text: locales.userSelectCategory.embed.footer.text, iconURL: locales.userSelectCategory.embed.footer.iconURL })
+			.setFooter({
+				text: locales.userSelectCategory.embed.footer.text,
+				iconURL: locales.userSelectCategory.embed.footer.iconURL,
+			})
 			.setTimestamp();
-	
+
 		const select = new StringSelectMenuBuilder()
 			.setCustomId('ticket')
 			.setPlaceholder(locales.userSelectCategory.SelectMenuPlaceholder);
-	
+
 		lib.settings.categories.forEach((x: string) => {
 			const options = x.split('_');
 			select.addOptions(
@@ -47,16 +78,16 @@ async function newTicket(passedMessage: Message | undefined, passedInteraction: 
 					.setValue(options[0]),
 			);
 		});
-	
-		const row = new ActionRowBuilder()
-			.addComponents(select);
-	
+
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const row: ActionRowBuilder<any> = new ActionRowBuilder().addComponents(select);
+
 		try {
-			channel?.send({ embeds: [embed], components: [row] });
+			const x = channel as DMChannel;
+			x?.send({ embeds: [embed], components: [row] });
 		}
 		catch (e) {
 			console.error(e);
 		}
 	}
-
 }

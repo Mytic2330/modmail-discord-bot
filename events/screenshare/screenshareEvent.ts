@@ -11,7 +11,7 @@ module.exports = {
 			if (interaction.id != id1) continue;
 			const member = await interaction?.guild?.members.fetch(id1);
 			const status = member?.voice;
-			const memberRoles = member?.roles.cache || []
+			const memberRoles = member?.roles.cache || [];
 
 			for (const id2 of memberRoles) {
 				if (id2[0] === role) {
@@ -23,15 +23,16 @@ module.exports = {
 	},
 };
 
-
-async function userMatch(role: Role, member: GuildMember | undefined, status: VoiceState | undefined) {
+async function userMatch(
+	role: Role,
+	member: GuildMember | undefined,
+	status: VoiceState | undefined,
+) {
 	if (GuildMember && status) {
 		if (!status.channelId) {
-			await member?.roles.remove(role)
-				.then(function() {
-					lib.db.pull('uWsr', member?.id);
-				},
-				);
+			await member?.roles.remove(role).then(function() {
+				lib.db.pull('uWsr', member?.id);
+			});
 		}
 	}
 }
