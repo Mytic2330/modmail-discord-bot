@@ -306,6 +306,7 @@ async function errorEmbedAsemblyClient(
 	return one_time_warn_EMBED;
 }
 async function sendToDMChannel(message: Message, reciveChannelEmbed: any) {
+	resetInaStatus(message);
 	const client = message.client;
 	const ticketNumberDatabse = await lib.ticket.get(message.channelId);
 	const channels = await lib.db
@@ -378,15 +379,16 @@ async function errorEmbedSender(message: Message, embed: EmbedBuilder) {
 
 async function resetInaStatus(message: Message) {
 	const ticketNumberDatabse = await lib.ticket.get(message.channelId);
-	const inaQueue = await lib.ticket.get('inaQueue');
-	if (!inaQueue) return;
+	await lib.ticket.pull('inaQueue', ticketNumberDatabse);
+	// const inaQueue = await lib.ticket.get('inaQueue');
+	// if (!inaQueue) return;
 
-	for (const number of inaQueue) {
-		if (number == ticketNumberDatabse) {
-			const db = lib.db.table(`tt_${ticketNumberDatabse}`);
-			await db.set('inaData', 172800000);
-		}
-	}
+	// for (const number of inaQueue) {
+	// 	if (number == ticketNumberDatabse) {
+	// 		const db = lib.db.table(`tt_${ticketNumberDatabse}`);
+	// 		await db.set('inaData', 86400000);
+	// 	}
+	// }
 }
 
 async function infoWriter(

@@ -22,12 +22,12 @@ async function close(base: any, type: string, num: number | null) {
 	let closeUser;
 	// CHECK TYPE
 	if (type == 'ina') {
-		// ina = true;
+		ina = true;
 		client = base;
 		interaction = null;
 	}
 	else if (type == 'cls') {
-		// ina = false;
+		ina = false;
 		interaction = base;
 		client = interaction.client;
 	}
@@ -40,7 +40,7 @@ async function close(base: any, type: string, num: number | null) {
 	}
 	const locales = lib.locales.utils.closejs;
 	// CHECK IF TICKET IS VALID
-	if (!(await lib.ticket.has(base.channelId)) && !ina) {
+	if (!(await lib.ticket.has(`${base.channelId}`)) && !ina) {
 		base.editReply(locales.wrongChannel);
 		return;
 	}
@@ -381,6 +381,7 @@ async function dataSetUpdate(
 	await lib.db.table(`tt_${number}`).set('info.closed', true);
 	await lib.db.table(`tt_${number}`).set('info.transcript', `${obj.url}`);
 	await lib.ticket.pull('openTickets', number);
+	await lib.ticket.pull('inaQueue', number);
 	await unsetClosing(client, number);
 }
 

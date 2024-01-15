@@ -29,6 +29,7 @@ module.exports = {
 
 async function checkAllOpendTickets(client: Client) {
 	const opendTickets = await lib.ticket.get('openTickets');
+	if (!opendTickets) return;
 	for (const ticNum of opendTickets) {
 		const data: { lastServerMessage:number, lastDMMessage: number } | null = await lib.db.table(`tt_${ticNum}`).get('activity');
 		if (data) {

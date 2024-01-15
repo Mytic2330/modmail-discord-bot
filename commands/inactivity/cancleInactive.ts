@@ -42,14 +42,14 @@ module.exports = {
 			.setColor(await lib.db.get('color.default'))
 			.setTitle('Oznaka neaktivnosti odstranjena')
 			.setDescription(
-				'Ticket je bil označen kot aktiven to pomeni, \nda se ticket **ne** bo avtomatsko zaprl, če v 48ih urah ni sporočil.',
+				'Ticket je bil označen kot aktiven to pomeni, \nda se ticket **ne** bo avtomatsko zaprl, če v 24ih urah ni sporočil.',
 			);
 
 		const emb = new EmbedBuilder()
 			.setColor(await lib.db.get('color.default'))
 			.setTitle('Oznaka neaktivnosti odstranjena')
 			.setDescription(
-				'Ticket je bil označen kot aktiven to pomeni, \nda se ticket **ne** bo avtomatsko zaprl, če v 48ih urah ni sporočil.',
+				'Ticket je bil označen kot aktiven to pomeni, \nda se ticket **ne** bo avtomatsko zaprl, če v 24ih urah ni sporočil.',
 			);
 
 		const channels = data.dmChannel;

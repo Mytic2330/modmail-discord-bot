@@ -75,7 +75,7 @@ async function removeUserFromTicket(
 		await DM?.send({ embeds: [embed], components: [openRow] });
 	}
 	catch (e) {
-		console.error(e);
+		console.log('');
 	}
 	await sendToAllChannels(interaction, user, num);
 	databaseSync(DM, num);

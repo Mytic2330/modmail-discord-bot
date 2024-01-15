@@ -58,14 +58,14 @@ async function sendInaWarning(data: any, client: Client) {
 		.setColor(color)
 		.setTitle('Opozorilo o nekativnosti!')
 		.setDescription(
-			'Vaš ticket se bo zaprl čez 24 ur, če ne bo nobenega sporočila!',
+			'Vaš ticket se bo zaprl čez 12 ur, če ne bo nobenega sporočila!',
 		);
 
 	const emb = new EmbedBuilder()
 		.setColor(color)
 		.setTitle('Opozorilo o nekativnosti!')
 		.setDescription(
-			'Ticket se bo zaprl čez 24 ur, če ne bo nobenega sporočila!',
+			'Ticket se bo zaprl čez 12 ur, če ne bo nobenega sporočila!',
 		);
 
 	const channel = await client.channels.fetch(data.guildChannel);
