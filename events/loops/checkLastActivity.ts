@@ -33,6 +33,7 @@ async function checkAllOpendTickets(client: Client) {
 	for (const ticNum of opendTickets) {
 		const data: { lastServerMessage:number, lastDMMessage: number } | null = await lib.db.table(`tt_${ticNum}`).get('activity');
 		if (data) {
+			console.log(data);
 			if (!data.lastDMMessage && !data.lastServerMessage) {
 				return;
 			}
@@ -43,6 +44,7 @@ async function checkAllOpendTickets(client: Client) {
 				if (ServerDifference >= 86400000) {
 					await lib.db.table(`tt_${ticNum}`).set('activity', { 'lastServerMessage':null, 'lastDMMessage': null });
 					sendWarnings(ticNum, client);
+					return;
 				}
 			}
 			if (!data.lastServerMessage) {
@@ -52,6 +54,7 @@ async function checkAllOpendTickets(client: Client) {
 				if (ServerDifference >= 86400000) {
 					await lib.db.table(`tt_${ticNum}`).set('activity', { 'lastServerMessage':null, 'lastDMMessage': null });
 					sendWarnings(ticNum, client);
+					return;
 				}
 			}
 			const lastServerUnix: number = data.lastServerMessage;
@@ -59,7 +62,7 @@ async function checkAllOpendTickets(client: Client) {
 			const currentTime = lib.unixTimestamp();
 			const ServerDifference1 = currentTime - lastServerUnix;
 			const ServerDifference2 = currentTime - lastDMUnix;
-			if (ServerDifference1 >= 86400000 && ServerDifference2 <= 86400000) {
+			if (ServerDifference1 >= 86400000 && ServerDifference2 >= 86400000) {
 				await lib.db.table(`tt_${ticNum}`).set('activity', { 'lastServerMessage':null, 'lastDMMessage': null });
 				sendWarnings(ticNum, client);
 			}

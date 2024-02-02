@@ -6,7 +6,8 @@
     "fs-extra": "^11.2.0",
     "jsonc": "^2.0.0",
     "quick.db": "^9.1.7",
-    "utf-8-validate": "^6.0.3"
+    "utf-8-validate": "^6.0.3",
+    "bufferutil": "^4.0.8"
   },
   "name": "bluecity-modmail",
   "version": "1.2.8",
@@ -26,9 +27,6 @@
   "author": "mytic2330",
   "license": "ISC",
   "description": "",
-  "optionalDependencies": {
-    "bufferutil": "^4.0.8"
-  },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.8",
     "@types/fs-extra": "^11.0.4",

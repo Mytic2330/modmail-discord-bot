@@ -59,11 +59,8 @@ async function close(base: any, type: string, num: number | null) {
 		channelId = base.channelId;
 	}
 	// CHECK FOR DUPLICATE INTERACTIONS
-	const st: Array<number> | null = await lib.ticket.get('closing');
-	if (!st) {
-		await lib.ticket.set('closing', []);
-	}
-	else if (st.includes(number)) {
+	const st: Map<number, { time: number }> = lib.cache.closingTickets;
+	if (st.has(number)) {
 		if (!ina) {
 			base.editReply(locales.ticketAlreadyClosing);
 		}
@@ -200,11 +197,13 @@ async function sendSwitch(embeds: any, rows: any, compactData: any) {
 }
 
 async function setClosing(client: Client, number: number) {
-	await lib.ticket.push('closing', number);
+	const time: number = lib.unixTimestamp();
+	lib.cache.closingTickets.set(number, { time });
 }
 
 async function unsetClosing(client: Client, number: number) {
 	await lib.ticket.pull('closing', number);
+	lib.cache.closingTickets.delete(number);
 }
 
 async function buildRow(

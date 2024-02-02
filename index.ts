@@ -1,4 +1,4 @@
-require('./utils/logger');
+// require('./utils/logger');
 import {
 	Client,
 	Collection,

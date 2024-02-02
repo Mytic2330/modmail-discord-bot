@@ -232,8 +232,8 @@ async function databaseSync(
 		},
 	});
 	await newTable.set('activity', {
-		lastServerMessage: null,
-		lastDMMessage: null,
+		lastServerMessage: lib.unixTimestamp(),
+		lastDMMessage: lib.unixTimestamp(),
 	});
 	await lib.ticket.push('tickets', num);
 	await lib.ticket.push('openTickets', num);

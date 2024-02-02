@@ -1,4 +1,4 @@
-import { Events, EmbedBuilder, Client, Channel, TextChannel } from 'discord.js';
+import { Events, EmbedBuilder, Client, Channel, TextChannel, BaseGuildTextChannel, ButtonBuilder, ButtonStyle, ActionRowBuilder } from 'discord.js';
 import lib from '../../bridge/bridge';
 module.exports = {
 	name: Events.ClientReady,
@@ -6,6 +6,7 @@ module.exports = {
 	async execute(client: Client) {
 		await lib.db.init();
 		if (client) {
+			openTicketMessage(client);
 			// readyMessage(client);
 			const colorSettings = lib.settings.colors;
 			await lib.db.set('color', {
@@ -83,5 +84,68 @@ async function readyMessage(client: Client) {
 		catch (e) {
 			console.error(e);
 		}
+	}
+}
+
+async function openTicketMessage(client: Client) {
+	const databaseRecived: { messageID: string, channelID: string } | null = await lib.db.get('openMessage');
+	const channelidRecived: string | undefined = lib.settings.openTicketMessageChannel;
+	if (databaseRecived) {
+		if (databaseRecived.channelID && databaseRecived.messageID == null) {
+			if (channelidRecived) {
+				sendEmbed(client, channelidRecived);
+			}
+			return;
+		}
+		const channel = await client.channels.fetch(databaseRecived.channelID);
+		if (channel instanceof BaseGuildTextChannel) {
+			try {
+				const msg = await channel.messages.fetch(databaseRecived.messageID);
+				msg.delete();
+			}
+			catch (e) {
+				console.error(e);
+			}
+			if (channelidRecived) {
+				sendEmbed(client, channelidRecived);
+			}
+		}
+	}
+	else if (channelidRecived) {
+		sendEmbed(client, channelidRecived);
+	}
+}
+
+async function sendEmbed(client: Client, channelidRecived: string) {
+	try {
+		const channel = await client.channels.fetch(channelidRecived);
+		if (channel instanceof BaseGuildTextChannel) {
+			const embed = new EmbedBuilder()
+				.setAuthor({ name: 'BCRP Ticket' })
+				.setColor('Aqua')
+				.setFields({ name: '1. Odprti DM', value: 'Da lahko začneš pogovor z našo ekipo,\nmoraš imeti odprete DMe za ta server.' },
+					{ name: '2. Nimaš blokiranega bota', value: 'Mene, od katerega bereš sporočilo, ne smeš imeti blokirangea.' },
+					{ name: '3. Nisi blacklistan', value: 'Upam, da se nisi zameril komu od staffov. Namreč, lahko so te blacklistali...' })
+				.setDescription('Pozdravljen! \n Malo bolj nenavaden način odpiranja ticketa...\n Tukaj lahko pritisneš spodnji gumb, da začneš pogovor z našo ekipo.\n Moraš pa izpolnjevati naslednje pogoje:');
+			const button = new ButtonBuilder()
+				.setCustomId('openTicketInGuild')
+				.setLabel('Začni pogovor')
+				.setStyle(ButtonStyle.Success);
+			const row: any = new ActionRowBuilder()
+				.addComponents(button);
+			try {
+				const message = await channel.send({ embeds: [embed], components: [row] });
+				await lib.db.set('openMessage', { messageID: message.id, channelID: message.channelId });
+			}
+			catch (e) {
+				console.error(e);
+			}
+		}
+		else {
+			console.log('The channel is not a guild text channel');
+		}
+	}
+	catch (e) {
+		console.error(e);
 	}
 }

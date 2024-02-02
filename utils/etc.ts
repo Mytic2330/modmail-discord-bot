@@ -68,6 +68,6 @@ function getWeekNumber(date: Date): number {
 }
 
 export function unixTimestamp(): number {
-	const timestamp = Math.floor(new Date().getTime() / 1000.0);
+	const timestamp = Math.floor(new Date().getTime());
 	return timestamp;
 }

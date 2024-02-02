@@ -39,5 +39,6 @@
   },
   // Delay between user closing a ticket and being able to open another one (in milliseconds)
   "DMClose": 60000,
-  "vactarCommunityID": "61a151532b0b55369034aaf0" // LEAVE EMPTY IF YOU DON'T USE VACTAR
+  "vactarCommunityID": "61a151532b0b55369034aaf0", // LEAVE EMPTY IF YOU DON'T USE VACTAR
+  "openTicketMessageChannel": "1202327747469508638" // LEAVE EMPTY IF YOU DON'T WANT TO USE IT
 }
