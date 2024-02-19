@@ -119,14 +119,16 @@ async function close(base: any, type: string, num: number | null) {
 	const message = await wbhArchive?.send({ files: [attachment] });
 	const obj = message?.attachments.values().next().value;
 	// ADDING TRANSCRIPT LINK TO LOG EMBEDS
-	closeLog?.addFields({
-		name: locales.transcriptField.name,
-		value: locales.transcriptField.value.replace('LINK', obj.url),
-	});
-	closeEmbed?.addFields({
-		name: locales.transcriptField.name,
-		value: locales.transcriptField.value.replace('LINK', obj.url),
-	});
+	if (obj) {
+		closeLog?.addFields({
+			name: locales.transcriptField.name,
+			value: locales.transcriptField.value.replace('LINK', obj.url),
+		});
+		closeEmbed?.addFields({
+			name: locales.transcriptField.name,
+			value: locales.transcriptField.value.replace('LINK', obj.url),
+		});
+	}
 	// COMPACTING STRUCTURE
 	const embeds = {
 		closeLog: closeLog,
@@ -202,7 +204,6 @@ async function setClosing(client: Client, number: number) {
 }
 
 async function unsetClosing(client: Client, number: number) {
-	await lib.ticket.pull('closing', number);
 	lib.cache.closingTickets.delete(number);
 }
 
@@ -305,7 +306,7 @@ async function embedBuilder(
 			)
 			.addFields({
 				name: 'Uporabniki v ticketu',
-				value: `${users}`,
+				value: `\n${users}`,
 				inline: true,
 			})
 			.setTimestamp()
@@ -326,7 +327,7 @@ async function embedBuilder(
 			)
 			.addFields({
 				name: 'Uporabniki v ticketu',
-				value: `${users}`,
+				value: `\n${users}`,
 				inline: true,
 			})
 			.setTimestamp()

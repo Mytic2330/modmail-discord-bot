@@ -33,7 +33,6 @@ async function checkAllOpendTickets(client: Client) {
 	for (const ticNum of opendTickets) {
 		const data: { lastServerMessage:number, lastDMMessage: number } | null = await lib.db.table(`tt_${ticNum}`).get('activity');
 		if (data) {
-			console.log(data);
 			if (!data.lastDMMessage && !data.lastServerMessage) {
 				return;
 			}

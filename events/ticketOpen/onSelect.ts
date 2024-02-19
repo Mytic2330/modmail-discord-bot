@@ -45,8 +45,7 @@ async function checkStatus(
 	const channelStatus = await lib.ticket.has(interaction.channelId);
 	if (channelStatus === false) {
 		if (await lib.ticket.has('users')) {
-			const userAlreadyProcessing = await lib.ticket.get('users');
-			if (userAlreadyProcessing.includes(interaction.user.id) === true) {
+			if (lib.cache.usersOpeningTicket.has(interaction.user.id)) {
 				const embed = new EmbedBuilder()
 					.setColor(await lib.db.get('color.default'))
 					.setTitle(locales.ticketAlreadyInMakingEmbed.title)
@@ -55,7 +54,8 @@ async function checkStatus(
 				return;
 			}
 		}
-		await lib.ticket.push('users', interaction.user.id);
+		const time: number = lib.unixTimestamp();
+		lib.cache.usersOpeningTicket.set(interaction.user.id, { time });
 
 		const preparing = new EmbedBuilder()
 			.setColor(await lib.db.get('color.default'))

@@ -454,10 +454,3 @@ async function sendDBWrite(
 			guildId: msh.guildId,
 		});
 }
-
-function clearCache() {
-	console.info('CLEARED RANK CACHE');
-	lib.cache.userRanks.clear();
-}
-
-setInterval(clearCache, 3600000);

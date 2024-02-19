@@ -1,15 +1,25 @@
-import { Events, ButtonInteraction, DMChannel } from 'discord.js';
+import { Events, ButtonInteraction, DMChannel, ButtonBuilder, ButtonStyle, ActionRowBuilder, EmbedBuilder } from 'discord.js';
 module.exports = {
 	name: Events.InteractionCreate,
 	async execute(interaction: ButtonInteraction) {
 		if (!interaction.isButton) return;
 		if (interaction.customId !== 'openTicketInGuild') return;
-		interaction.deferReply({ ephemeral: true });
+		await interaction.deferReply({ ephemeral: true });
 		const user = interaction.user;
 		const dm = await user.createDM();
 		if (dm instanceof DMChannel) {
+			const embed = new EmbedBuilder()
+				.setColor('Aqua')
+				.setTitle('Odpri ticket')
+				.setDescription('Pošlji sporočilo ali pritisni gumb spodaj,\nda odpreš nov ticket.');
+			const button = new ButtonBuilder()
+				.setCustomId('openNewTicketButtonRemoved')
+				.setLabel('Odpri ticket')
+				.setStyle(ButtonStyle.Success);
+			const row: any = new ActionRowBuilder()
+				.addComponents(button);
 			try {
-				await dm.send('Pošlji sporočilo, da boš lahko odprl ticket.');
+				await dm.send({ embeds: [ embed ], components: [ row ] });
 				interaction.editReply({ content: `Prejel si sporočilo <#${dm.id}>` });
 			}
 			catch (e) {
