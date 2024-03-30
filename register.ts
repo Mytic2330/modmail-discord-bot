@@ -2,6 +2,10 @@ import { REST, Routes } from 'discord.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import lib from './bridge/bridge';
+import { jsonc } from 'jsonc';
+const { Token } = jsonc.parse(
+	fs.readFileSync(path.join(__dirname, 'config/token.jsonc'), 'utf8')
+);
 
 const deployCommands = async () => {
 	const commands = [];
@@ -26,7 +30,7 @@ const deployCommands = async () => {
 			}
 		}
 	}
-	const rest = new REST().setToken(lib.settings.Token);
+	const rest = new REST().setToken(Token);
 
 	try {
 		console.log(

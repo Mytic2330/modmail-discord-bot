@@ -16,7 +16,7 @@ import * as path from 'node:path';
 const database: QuickDB = new QuickDB({ filePath: './database.sqlite' });
 export default database;
 const { Token } = jsonc.parse(
-	fs.readFileSync(path.join(__dirname, 'config/settings.jsonc'), 'utf8')
+	fs.readFileSync(path.join(__dirname, 'config/token.jsonc'), 'utf8')
 );
 const debug: boolean = true;
 

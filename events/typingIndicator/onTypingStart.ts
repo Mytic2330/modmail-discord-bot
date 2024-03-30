@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { DMChannel, Events, TextChannel, Typing } from 'discord.js';
 import lib from '../../bridge/bridge';
 module.exports = {

@@ -1,9 +1,7 @@
 {
 	// BOT TOKEN => https://discord.com/developers/applications
-	"Token": "MTA4MTM0NTQyMjgzNDAxMjI0MA.GDiiBt.a-Km_f9DGpOi0y-XlvGoe7mttwpB5PLeePqS80",
+	"useAPI": true,
 	"clientId": "1081345422834012240",
-	"screenshareRole": "1122603209215713290",
-	"screenshareChannels": ["1182785238993215599", "1181274033694720030"],
 	// IDs of roles that get access to tickets
 	"allowedRoles": ["1122603209278636085", "1122603209278636085"],
 	"enableRanks": "true",

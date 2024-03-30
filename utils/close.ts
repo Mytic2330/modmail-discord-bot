@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 export default close;
 import discordTranscripts, { ExportReturnType } from 'discord-html-transcripts';
 import {
@@ -11,7 +10,6 @@ import {
 } from 'discord.js';
 import lib from '../bridge/bridge';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function close(base: any, type: string, num: number | null) {
 	// BASIC DEFINING
 	let ina;

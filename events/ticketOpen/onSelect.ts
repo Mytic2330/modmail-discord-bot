@@ -17,6 +17,7 @@ import {
 	ModalSubmitInteraction
 } from 'discord.js';
 import lib from '../../bridge/bridge';
+import settings from '../../interfaces/settings';
 module.exports = {
 	name: Events.InteractionCreate,
 	async execute(
@@ -58,8 +59,9 @@ async function checksAndPass(
 }
 
 async function stringSelect(interaction: StringSelectMenuInteraction) {
-	const indexOfType = interaction.values[0];
-	const typeOfHelp = lib.settings.categories[indexOfType];
+	const indexOfType: string = interaction.values[0];
+	const typeOfHelp: settings['categories'][0] =
+		lib.settings.categories[Number(indexOfType)];
 	if (typeOfHelp.modal.enable == false) {
 		openNewTicket(interaction, indexOfType);
 		return;
@@ -134,7 +136,8 @@ async function openNewTicket(
 	}
 	const guildId = await lib.db.get('guildId');
 	const guild = await interaction.client.guilds.fetch(guildId);
-	const ticketPrefix = lib.settings.categories[indexOfType].channelprefix;
+	const ticketPrefix =
+		lib.settings.categories[Number(indexOfType)].channelprefix;
 	createChannel(guild, interaction, ticketPrefix);
 }
 
@@ -324,7 +327,7 @@ async function sendInitial(
 
 	if (interaction instanceof ModalSubmitInteraction) {
 		const indexOfType = interaction.customId.split('_')[1];
-		const typeOfHelp = lib.settings.categories[indexOfType];
+		const typeOfHelp = lib.settings.categories[Number(indexOfType)];
 		const sendEmbed = new EmbedBuilder()
 			.setColor(color)
 			.setTitle('Odgovori');

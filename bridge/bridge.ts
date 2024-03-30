@@ -2,6 +2,7 @@
 import { jsonc } from 'jsonc';
 import fs from 'fs';
 import path from 'path';
+import settings from '../interfaces/settings';
 
 // LOCALES DEFINITION //
 const locales: any = jsonc.parse(
@@ -12,7 +13,7 @@ import database from '../index';
 // TICKET TABLE DEFINITION //
 const ticket = database.table('ticket');
 // SETTINGS DEFINITION //
-const settings: any = jsonc.parse(
+const settings: settings = jsonc.parse(
 	fs.readFileSync(path.join(__dirname, '../config/settings.jsonc'), 'utf8')
 );
 // VERSION //

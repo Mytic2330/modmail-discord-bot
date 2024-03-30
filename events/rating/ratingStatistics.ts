@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
 	Events,
 	ModalBuilder,
@@ -6,7 +5,6 @@ import {
 	TextInputStyle,
 	ActionRowBuilder,
 	EmbedBuilder,
-	Interaction,
 	ButtonInteraction,
 	ModalSubmitInteraction,
 	Client,
@@ -14,12 +12,12 @@ import {
 	Snowflake
 } from 'discord.js';
 import lib from '../../bridge/bridge';
+import ticketInfo from '../../interfaces/ticketInfo';
 module.exports = {
 	name: Events.InteractionCreate,
-	async execute(interaction: Interaction) {
+	async execute(interaction: ButtonInteraction | ModalSubmitInteraction) {
 		if (interaction.isButton()) {
-			const ch_cd11 = interaction.customId.startsWith('stat');
-			if (!ch_cd11) return;
+			if (!interaction.customId.startsWith('stat')) return;
 			switchCheck(interaction);
 		} else if (interaction.isModalSubmit()) {
 			if (interaction.customId == 'getTicketStatsModal') {
@@ -29,10 +27,8 @@ module.exports = {
 	}
 };
 
-async function switchCheck(passedInteraction: ButtonInteraction) {
-	const interaction = passedInteraction as ButtonInteraction;
-	const id_inter = interaction.customId.split('_');
-	switch (id_inter[1]) {
+async function switchCheck(interaction: ButtonInteraction) {
+	switch (interaction.customId.split('_')[1]) {
 		case 'rating':
 			rateFnc(interaction);
 			break;
@@ -42,7 +38,7 @@ async function switchCheck(passedInteraction: ButtonInteraction) {
 	}
 }
 
-async function rateFnc(interaction: Interaction) {
+async function rateFnc(interaction: ButtonInteraction) {
 	const all_tickets = await lib.ticket.get('tickets');
 	const arr = [];
 
@@ -50,6 +46,88 @@ async function rateFnc(interaction: Interaction) {
 		const data = await gatherTicketInfo(ticket);
 		if (data != null) arr.push(data);
 	}
+	const ratings = [];
+	const messagesByServer = [];
+	const messagesByDM = [];
+	const creatorIds = [];
+
+	for (const object of arr) {
+		if (object.analytics.rating) {
+			ratings.push(object.analytics.rating);
+		}
+		if (object.messageAnalitys.messages.sentByDM) {
+			messagesByDM.push(object.messageAnalitys.messages.sentByDM);
+		}
+		if (object.messageAnalitys.messages.sentByServer) {
+			messagesByServer.push(object.messageAnalitys.messages.sentByServer);
+		}
+		if (object.info.creatorId) {
+			creatorIds.push(object.info.creatorId);
+		}
+	}
+
+	const processedData = await calculateData(
+		ratings,
+		messagesByServer,
+		messagesByDM,
+		creatorIds
+	);
+	console.log(processedData);
+	// ! DOKONČAJ
+}
+
+async function calculateData(
+	ratings: Array<string>,
+	messagesByServer: Array<number>,
+	messagesByDM: Array<number>,
+	creatorId: Array<string>
+): Promise<{
+	avgRating: number;
+	avgMessSer: number;
+	avgMessDM: number;
+	mostCreator: { mostFrequent: string; maxCount: number };
+} | null> {
+	let avgRating = 0;
+	ratings.forEach((element) => (avgRating += parseInt(element)));
+	avgRating = avgRating / ratings.length;
+
+	let avgMessSer: number = 0;
+	messagesByServer.forEach((element) => (avgMessSer += element));
+	avgMessSer = avgMessSer / messagesByServer.length;
+
+	let avgMessDM: number = 0;
+	messagesByDM.forEach((element) => (avgMessDM += element));
+	avgMessDM = avgMessDM / messagesByDM.length;
+
+	const mostCreator = findMostFrequent(creatorId);
+
+	return {
+		avgRating: avgRating,
+		avgMessSer: avgMessSer,
+		avgMessDM: avgMessDM,
+		mostCreator: mostCreator
+	};
+}
+
+function findMostFrequent(arr: Array<string>): {
+	mostFrequent: string;
+	maxCount: number;
+} {
+	const countMap = new Map();
+	let mostFrequent = arr[0];
+	let maxCount = 0;
+
+	for (let i = 0; i < arr.length; i++) {
+		const num = arr[1];
+		const count = (countMap.get(num) || 0) + 1;
+		countMap.set(num, count);
+
+		if (count > maxCount) {
+			mostFrequent = num;
+			maxCount = count;
+		}
+	}
+	return { mostFrequent, maxCount };
 }
 
 async function ticketFnc(interaction: ButtonInteraction) {
@@ -95,14 +173,8 @@ async function processModal(interaction: ModalSubmitInteraction) {
 	interaction.reply({ embeds: [embed], ephemeral: true });
 }
 
-async function gatherTicketInfo(num: number): Promise<{
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	info: any;
-	analytics: any;
-	messageAnalitys: any;
-	num: number;
-} | null> {
-	const table = await lib.db.table(`tt_${num}`);
+async function gatherTicketInfo(num: number): Promise<ticketInfo | null> {
+	const table = lib.db.table(`tt_${num}`);
 	try {
 		const info = await table.get('info');
 		const analytics = await table.get('analytics');
@@ -121,7 +193,6 @@ async function gatherTicketInfo(num: number): Promise<{
 }
 
 async function embedCreator(
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	obj: { info: any; analytics: any; messageAnalitys: any; num: number },
 	client: Client
 ) {
@@ -159,7 +230,6 @@ async function embedCreator(
 
 // ! DOKONČAJ
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function dateMaker(data: any) {
 	const arr = data.split('_');
 
@@ -173,7 +243,6 @@ async function dateMaker(data: any) {
 
 async function getAllUsers(
 	client: Client,
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	data: { dmChannel: any; creatorId: Snowflake }
 ) {
 	const arr = [];

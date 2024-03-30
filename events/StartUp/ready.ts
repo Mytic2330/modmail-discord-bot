@@ -10,10 +10,14 @@ import {
 	ActionRowBuilder
 } from 'discord.js';
 import lib from '../../bridge/bridge';
+import startServer from '../../api/main';
 module.exports = {
 	name: Events.ClientReady,
 	once: true,
 	async execute(client: Client) {
+		if (lib.settings.useAPI) {
+			startServer();
+		}
 		await lib.db.init();
 		if (client) {
 			openTicketMessage(client);
@@ -28,11 +32,6 @@ module.exports = {
 				error: colorSettings.error,
 				info: colorSettings.info
 			});
-			await lib.db.set('screenshareRole', lib.settings.screenshareRole);
-			await lib.db.set(
-				'screenshareChannels',
-				lib.settings.screenshareChannels
-			);
 			if (lib.settings.vactarCommunityID.length > 1) {
 				await lib.db.set(
 					'vactarCommunityID',
