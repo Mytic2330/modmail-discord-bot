@@ -29,7 +29,9 @@ module.exports = {
 		}
 
 		// MORE DEFINITIONS //
-		const data = await lib.db.table(`tt_${cacheCheckTicketNumber}`).get('info');
+		const data = await lib.db
+			.table(`tt_${cacheCheckTicketNumber}`)
+			.get('info');
 
 		// TRIGGER IN DM //
 		if (typingRefrence.channel.isDMBased()) {
@@ -46,8 +48,7 @@ module.exports = {
 					if (chan && chan instanceof DMChannel) {
 						chan.sendTyping();
 					}
-				}
-				catch (e) {
+				} catch (e) {
 					console.log(e);
 				}
 			}
@@ -61,8 +62,7 @@ module.exports = {
 					if (chan && chan instanceof DMChannel) {
 						chan.sendTyping();
 					}
-				}
-				catch (e) {
+				} catch (e) {
 					console.log(e);
 				}
 			}

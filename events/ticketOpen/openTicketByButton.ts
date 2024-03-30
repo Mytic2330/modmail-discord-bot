@@ -1,4 +1,12 @@
-import { Events, ButtonInteraction, DMChannel, ButtonBuilder, ButtonStyle, ActionRowBuilder, EmbedBuilder } from 'discord.js';
+import {
+	Events,
+	ButtonInteraction,
+	DMChannel,
+	ButtonBuilder,
+	ButtonStyle,
+	ActionRowBuilder,
+	EmbedBuilder,
+} from 'discord.js';
 module.exports = {
 	name: Events.InteractionCreate,
 	async execute(interaction: ButtonInteraction) {
@@ -14,23 +22,26 @@ module.exports = {
 			const embed = new EmbedBuilder()
 				.setColor('Aqua')
 				.setTitle('Odpri ticket')
-				.setDescription('Pošlji sporočilo ali pritisni gumb spodaj,\nda odpreš nov ticket.');
+				.setDescription(
+					'Pošlji sporočilo ali pritisni gumb spodaj,\nda odpreš nov ticket.',
+				);
 			const button = new ButtonBuilder()
 				.setCustomId('openNewTicketButtonRemoved')
 				.setLabel('Odpri ticket')
 				.setStyle(ButtonStyle.Success);
-			const row: any = new ActionRowBuilder()
-				.addComponents(button);
+			const row: any = new ActionRowBuilder().addComponents(button);
 			try {
-				await dm.send({ embeds: [ embed ], components: [ row ] });
-				interaction.editReply({ content: `Prejel si sporočilo <#${dm.id}>` });
-			}
-			catch (e) {
+				await dm.send({ embeds: [embed], components: [row] });
+				interaction.editReply({
+					content: `Prejel si sporočilo <#${dm.id}>`,
+				});
+			} catch (e) {
 				interaction.editReply({ content: 'Imaš zaprte DMe!' });
 			}
-		}
-		else {
-			interaction.editReply({ content: 'Napaka! Poskusi napisati DM direktno meni.' });
+		} else {
+			interaction.editReply({
+				content: 'Napaka! Poskusi napisati DM direktno meni.',
+			});
 		}
 		return;
 	},

@@ -16,11 +16,15 @@ module.exports = {
 		let x = 0;
 		waitForNextMinute(() => {
 			inaCheck(client);
-			if (x >= 172800) {console.info('\x1b[31m BOT RESTART IS ADVISED ⚠️\x1b[0m');}
+			if (x >= 172800) {
+				console.info('\x1b[31m BOT RESTART IS ADVISED ⚠️\x1b[0m');
+			}
 			x = x + 1;
 			setInterval(() => {
 				inaCheck(client);
-				if (x >= 172800) {console.info('\x1b[31m BOT RESTART IS ADVISED ⚠️\x1b[0m');}
+				if (x >= 172800) {
+					console.info('\x1b[31m BOT RESTART IS ADVISED ⚠️\x1b[0m');
+				}
 				x = x + 1;
 			}, 60000);
 		});
@@ -44,8 +48,7 @@ async function inaCheck(client: Client) {
 		}
 		if (currentTime > 86400000) {
 			await ticket.set('inaData', 86400000);
-		}
-		else if (currentTime <= 86400000) {
+		} else if (currentTime <= 86400000) {
 			const time = currentTime - 60000;
 			await ticket.set('inaData', time);
 		}
@@ -78,8 +81,7 @@ async function sendEmbeds(client: Client, channels: any, embed: EmbedBuilder) {
 		try {
 			const channel: any = await client.channels.fetch(id);
 			await channel?.send({ embeds: [embed] });
-		}
-		catch (e) {
+		} catch (e) {
 			console.error(e);
 		}
 	}

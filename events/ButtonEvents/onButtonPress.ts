@@ -12,14 +12,11 @@ module.exports = {
 		if (!interaction.isButton()) return;
 		if (interaction.customId == 'closeByOpen') {
 			lib.close(interaction, 'cls', null);
-		}
-		else if (interaction.customId.startsWith('rat')) {
+		} else if (interaction.customId.startsWith('rat')) {
 			ratingButtonPressed(interaction);
-		}
-		else if (interaction.customId === 'openNewTicketButton') {
+		} else if (interaction.customId === 'openNewTicketButton') {
 			newTicketButtonPressed(interaction);
-		}
-		else if (interaction.customId === 'openNewTicketButtonRemoved') {
+		} else if (interaction.customId === 'openNewTicketButtonRemoved') {
 			openNewTicketButtonRemoved(interaction);
 		}
 	},

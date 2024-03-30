@@ -28,49 +28,42 @@ module.exports = {
 				try {
 					lib.cache.closingTickets.clear();
 					interaction.reply({ ephemeral: true, content: 'Cleared!' });
-				}
-				catch (e) {
+				} catch (e) {
 					console.error(e);
 					interaction.reply({
 						ephemeral: true,
 						content: 'Error while clearing\nCheck console!',
 					});
 				}
-			}
-			else if (reason.value == 'ranks') {
+			} else if (reason.value == 'ranks') {
 				try {
 					lib.cache.userRanks.clear();
 					interaction.reply({ ephemeral: true, content: 'Cleared!' });
-				}
-				catch (e) {
+				} catch (e) {
 					console.error(e);
 					interaction.reply({
 						ephemeral: true,
 						content: 'Error while clearing\nCheck console!',
 					});
 				}
-			}
-			else if (reason.value == 'users') {
+			} else if (reason.value == 'users') {
 				try {
 					lib.cache.usersOpeningTicket.clear();
 					interaction.reply({ ephemeral: true, content: 'Cleared!' });
-				}
-				catch (e) {
+				} catch (e) {
 					console.error(e);
 					interaction.reply({
 						ephemeral: true,
 						content: 'Error while clearing\nCheck console!',
 					});
 				}
-			}
-			else if (reason.value == 'all') {
+			} else if (reason.value == 'all') {
 				try {
 					lib.cache.usersOpeningTicket.clear();
 					lib.cache.userRanks.clear();
 					lib.cache.closingTickets.clear();
 					interaction.reply({ ephemeral: true, content: 'Cleared!' });
-				}
-				catch (e) {
+				} catch (e) {
 					console.error(e);
 					interaction.reply({
 						ephemeral: true,
@@ -78,8 +71,7 @@ module.exports = {
 					});
 				}
 			}
-		}
-		else {
+		} else {
 			interaction.reply({
 				ephemeral: true,
 				content: 'Error while clearing\nCheck console!',

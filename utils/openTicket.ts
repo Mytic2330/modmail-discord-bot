@@ -33,8 +33,7 @@ async function newTicket(
 		// If is button -- True
 		if (message) {
 			type = false;
-		}
-		else {
+		} else {
 			type = true;
 		}
 
@@ -44,8 +43,7 @@ async function newTicket(
 
 		if (type && interaction) {
 			if (await lib.ticket.has(interaction.user.id)) return;
-		}
-		else if (message) {
+		} else if (message) {
 			if (await lib.ticket.has(message.author.id)) {
 				return;
 			}
@@ -55,7 +53,8 @@ async function newTicket(
 		if (!channelId) {
 			channelId = interaction!.channelId;
 		}
-		const channel: Channel | undefined | null = await client?.channels.fetch(channelId!);
+		const channel: Channel | undefined | null =
+			await client?.channels.fetch(channelId!);
 		const embed = new EmbedBuilder()
 			.setTitle(locales.userSelectCategory.embed.title)
 			.setDescription(locales.userSelectCategory.embed.description)
@@ -79,13 +78,14 @@ async function newTicket(
 			);
 		}
 
-		const row: ActionRowBuilder<any> = new ActionRowBuilder().addComponents(select);
+		const row: ActionRowBuilder<any> = new ActionRowBuilder().addComponents(
+			select,
+		);
 
 		try {
 			const x = channel as DMChannel;
 			x?.send({ embeds: [embed], components: [row] });
-		}
-		catch (e) {
+		} catch (e) {
 			console.error(e);
 		}
 	}

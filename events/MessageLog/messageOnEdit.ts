@@ -23,26 +23,30 @@ module.exports = {
 			}
 		}
 		// CHECK FOR BOT MESSAGE //
-		try { if (oldMessage.author.bot || newMessage.author.bot) return; }
-		catch (e) { console.log();}
+		try {
+			if (oldMessage.author.bot || newMessage.author.bot) return;
+		} catch (e) {
+			console.log();
+		}
 
 		const cache = lib.cache.openTickets;
 		const tcNum = cache.get(newMessage.channelId);
-		const num: number = tcNum ? tcNum.number : await lib.ticket.get(newMessage.channelId) || 0;
+		const num: number = tcNum
+			? tcNum.number
+			: (await lib.ticket.get(newMessage.channelId)) || 0;
 		try {
 			if (!num) return;
 			const table = lib.db.table(`tt_${num}`);
 			const hasMessage = await table.has(newMessage.id);
 			switch (hasMessage) {
-			case true:
-				handleHasMessage(client, newMessage, oldMessage, table);
-				break;
-			case false:
-				handleNoMessage(newMessage);
-				break;
+				case true:
+					handleHasMessage(client, newMessage, oldMessage, table);
+					break;
+				case false:
+					handleNoMessage(newMessage);
+					break;
 			}
-		}
-		catch (e) {
+		} catch (e) {
 			console.error(e);
 			return;
 		}
@@ -70,8 +74,7 @@ async function handleHasMessage(
 		}
 		try {
 			await msg.edit({ embeds: [embed] });
-		}
-		catch (e) {
+		} catch (e) {
 			console.error(e);
 			arr.push(obj.channelId);
 		}
@@ -81,10 +84,10 @@ async function handleHasMessage(
 		const string = arr.join('\n');
 		message.reply({
 			content:
-        'Ni bilo mogoče spremeniti sporočila v naslednjih kanalih:\n' + string,
+				'Ni bilo mogoče spremeniti sporočila v naslednjih kanalih:\n' +
+				string,
 		});
-	}
-	else {
+	} else {
 		const embed = await createEditedEmbed(client, message);
 		const passedChannel = await client.channels.fetch(message.channelId);
 		const channel = passedChannel as TextChannel | DMChannel;
@@ -93,7 +96,9 @@ async function handleHasMessage(
 }
 
 async function handleNoMessage(message: Message) {
-	await message.reply({ content: 'Ni mogoče poslati spremenjenega sporočila' });
+	await message.reply({
+		content: 'Ni mogoče poslati spremenjenega sporočila',
+	});
 }
 
 async function createEmbedToSend(
@@ -109,7 +114,7 @@ async function createEmbedToSend(
 		.setFooter({
 			text: `${'Ekipa BCRP'}`,
 			iconURL:
-        'https://cdn.discordapp.com/attachments/1012850899980394557/1138546219640176851/097e89ede70464edaf570046b6b3f7b8.png',
+				'https://cdn.discordapp.com/attachments/1012850899980394557/1138546219640176851/097e89ede70464edaf570046b6b3f7b8.png',
 		});
 
 	if (message.content) {

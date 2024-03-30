@@ -26,7 +26,10 @@ module.exports = {
 		if (user) {
 			const checkOne = await lib.ticket.has(interaction.channelId);
 			if (checkOne === false) {
-				interaction.reply({ ephemeral: true, content: locales.notActiveChannel });
+				interaction.reply({
+					ephemeral: true,
+					content: locales.notActiveChannel,
+				});
 				return;
 			}
 			userCheck(interaction, user);
@@ -34,10 +37,7 @@ module.exports = {
 	},
 };
 
-async function userCheck(
-	interaction: CommandInteraction,
-	user: User,
-) {
+async function userCheck(interaction: CommandInteraction, user: User) {
 	const locales = lib.locales.commands.adduserjs;
 	const ticketDatabaseNumber = await lib.ticket.get(interaction.channelId);
 	const ticketDatabase = await lib.db
@@ -46,12 +46,15 @@ async function userCheck(
 	const status = await ticketDatabase.dmChannel.includes(user.id);
 
 	switch (status) {
-	case true:
-		interaction.reply({ ephemeral: true, content: locales.userCheck.userInTicket });
-		break;
-	case false:
-		addUserToTicket(interaction, user, ticketDatabaseNumber);
-		break;
+		case true:
+			interaction.reply({
+				ephemeral: true,
+				content: locales.userCheck.userInTicket,
+			});
+			break;
+		case false:
+			addUserToTicket(interaction, user, ticketDatabaseNumber);
+			break;
 	}
 }
 
@@ -72,7 +75,9 @@ async function addUserToTicket(
 	}
 	const embed = new EmbedBuilder()
 		.setTitle(locales.embed.title)
-		.setDescription(locales.embed.description.replace('USERNAME', username));
+		.setDescription(
+			locales.embed.description.replace('USERNAME', username),
+		);
 	const button = new ButtonBuilder()
 		.setCustomId('onlyMark')
 		.setDisabled(true)
@@ -81,41 +86,47 @@ async function addUserToTicket(
 	const acrow: any = new ActionRowBuilder().addComponents(button);
 	try {
 		await DM.send({ embeds: [embed], components: [acrow] });
-	}
-	catch (e) {
+	} catch (e) {
 		console.error(e);
 		interaction.reply({ ephemeral: true, content: locales.error });
 		return;
 	}
 	await sendToAllChannels(interaction, user, num);
 	await databaseSync(DM, num);
-	interaction.reply({ ephemeral: true, content: locales.added.replace('USERNAME', `<@${user.id}>`) });
+	interaction.reply({
+		ephemeral: true,
+		content: locales.added.replace('USERNAME', `<@${user.id}>`),
+	});
 }
 
-async function databaseSync(
-	DM: DMChannel,
-	num: number,
-) {
+async function databaseSync(DM: DMChannel, num: number) {
 	await lib.ticket.set(DM.id, num);
 	await lib.db.table(`tt_${num}`).push('info.dmChannel', DM.id);
 }
-async function checkIfUserHasOpenTicket(
-	DM: DMChannel,
-) {
+async function checkIfUserHasOpenTicket(DM: DMChannel) {
 	const status = await lib.ticket.has(DM.id);
 	if (status === true) return true;
 	if (status === false) return false;
 	return undefined;
 }
 
-async function sendToAllChannels(interaction: CommandInteraction, user: User, number: number) {
-	const locales = lib.locales.commands.adduserjs.addUserToTicket.sendToEveryChannel;
+async function sendToAllChannels(
+	interaction: CommandInteraction,
+	user: User,
+	number: number,
+) {
+	const locales =
+		lib.locales.commands.adduserjs.addUserToTicket.sendToEveryChannel;
 	const client = interaction.client;
 	const embed = new EmbedBuilder()
 		.setColor(await lib.db.get('color.default'))
 		.setTitle(locales.title)
-		.setDescription((locales.description.replace('USER', user)))
-		.setFooter({ text: (locales.footer.text).replace('USERNAME', interaction.user.username).replace('USERID', interaction.user.id) });
+		.setDescription(locales.description.replace('USER', user))
+		.setFooter({
+			text: locales.footer.text
+				.replace('USERNAME', interaction.user.username)
+				.replace('USERID', interaction.user.id),
+		});
 
 	const allUsers = await lib.db.table(`tt_${number}`).get('info');
 
@@ -131,13 +142,11 @@ async function sendToAllChannels(interaction: CommandInteraction, user: User, nu
 			if (channel && channel.type === ChannelType.DM) {
 				try {
 					channel.send({ embeds: [embed] });
-				}
-				catch (e) {
+				} catch (e) {
 					continue;
 				}
 			}
-		}
-		catch (e) {
+		} catch (e) {
 			console.error(e);
 		}
 	}

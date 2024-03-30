@@ -21,8 +21,7 @@ module.exports = {
 			const ch_cd11 = interaction.customId.startsWith('stat');
 			if (!ch_cd11) return;
 			switchCheck(interaction);
-		}
-		else if (interaction.isModalSubmit()) {
+		} else if (interaction.isModalSubmit()) {
 			if (interaction.customId == 'getTicketStatsModal') {
 				processModal(interaction);
 			}
@@ -34,12 +33,12 @@ async function switchCheck(passedInteraction: ButtonInteraction) {
 	const interaction = passedInteraction as ButtonInteraction;
 	const id_inter = interaction.customId.split('_');
 	switch (id_inter[1]) {
-	case 'rating':
-		rateFnc(interaction);
-		break;
-	case 'ticket':
-		ticketFnc(interaction);
-		break;
+		case 'rating':
+			rateFnc(interaction);
+			break;
+		case 'ticket':
+			ticketFnc(interaction);
+			break;
 	}
 }
 
@@ -96,14 +95,12 @@ async function processModal(interaction: ModalSubmitInteraction) {
 	interaction.reply({ embeds: [embed], ephemeral: true });
 }
 
-async function gatherTicketInfo(
-	num: number,
-): Promise<{
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  info: any;
-  analytics: any;
-  messageAnalitys: any;
-  num: number;
+async function gatherTicketInfo(num: number): Promise<{
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	info: any;
+	analytics: any;
+	messageAnalitys: any;
+	num: number;
 } | null> {
 	const table = await lib.db.table(`tt_${num}`);
 	try {
@@ -117,8 +114,7 @@ async function gatherTicketInfo(
 			num: num,
 		};
 		return obj;
-	}
-	catch (e) {
+	} catch (e) {
 		console.error(e);
 		return null;
 	}

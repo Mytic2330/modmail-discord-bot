@@ -15,8 +15,7 @@ export async function webhook(
 		}
 		const wbh = webhooks.find((webhookurl) => webhookurl.token);
 		return wbh;
-	}
-	catch (error) {
+	} catch (error) {
 		console.error(error);
 		return undefined;
 	}

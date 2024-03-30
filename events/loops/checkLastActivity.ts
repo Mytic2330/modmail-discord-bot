@@ -16,11 +16,15 @@ module.exports = {
 		let x = 0;
 		waitForNextMinute(() => {
 			checkAllOpendTickets(client);
-			if (x >= 172800) {console.info('\x1b[31m BOT RESTART IS ADVISED ⚠️\x1b[0m');}
+			if (x >= 172800) {
+				console.info('\x1b[31m BOT RESTART IS ADVISED ⚠️\x1b[0m');
+			}
 			x = x + 1;
 			setInterval(() => {
 				checkAllOpendTickets(client);
-				if (x >= 172800) {console.info('\x1b[31m BOT RESTART IS ADVISED ⚠️\x1b[0m');}
+				if (x >= 172800) {
+					console.info('\x1b[31m BOT RESTART IS ADVISED ⚠️\x1b[0m');
+				}
 				x = x + 1;
 			}, 60000);
 		});
@@ -31,7 +35,10 @@ async function checkAllOpendTickets(client: Client) {
 	const opendTickets = await lib.ticket.get('openTickets');
 	if (!opendTickets) return;
 	for (const ticNum of opendTickets) {
-		const data: { lastServerMessage:number, lastDMMessage: number } | null = await lib.db.table(`tt_${ticNum}`).get('activity');
+		const data: {
+			lastServerMessage: number;
+			lastDMMessage: number;
+		} | null = await lib.db.table(`tt_${ticNum}`).get('activity');
 		if (data) {
 			if (!data.lastDMMessage && !data.lastServerMessage) {
 				return;
@@ -41,7 +48,10 @@ async function checkAllOpendTickets(client: Client) {
 				const currentTime = lib.unixTimestamp();
 				const ServerDifference = currentTime - lastServerUnix;
 				if (ServerDifference >= 86400000) {
-					await lib.db.table(`tt_${ticNum}`).set('activity', { 'lastServerMessage':null, 'lastDMMessage': null });
+					await lib.db.table(`tt_${ticNum}`).set('activity', {
+						lastServerMessage: null,
+						lastDMMessage: null,
+					});
 					sendWarnings(ticNum, client);
 					return;
 				}
@@ -51,7 +61,10 @@ async function checkAllOpendTickets(client: Client) {
 				const currentTime = lib.unixTimestamp();
 				const ServerDifference = currentTime - lastDMUnix;
 				if (ServerDifference >= 86400000) {
-					await lib.db.table(`tt_${ticNum}`).set('activity', { 'lastServerMessage':null, 'lastDMMessage': null });
+					await lib.db.table(`tt_${ticNum}`).set('activity', {
+						lastServerMessage: null,
+						lastDMMessage: null,
+					});
 					sendWarnings(ticNum, client);
 					return;
 				}
@@ -61,8 +74,14 @@ async function checkAllOpendTickets(client: Client) {
 			const currentTime = lib.unixTimestamp();
 			const ServerDifference1 = currentTime - lastServerUnix;
 			const ServerDifference2 = currentTime - lastDMUnix;
-			if (ServerDifference1 >= 86400000 && ServerDifference2 >= 86400000) {
-				await lib.db.table(`tt_${ticNum}`).set('activity', { 'lastServerMessage':null, 'lastDMMessage': null });
+			if (
+				ServerDifference1 >= 86400000 &&
+				ServerDifference2 >= 86400000
+			) {
+				await lib.db.table(`tt_${ticNum}`).set('activity', {
+					lastServerMessage: null,
+					lastDMMessage: null,
+				});
 				sendWarnings(ticNum, client);
 			}
 		}

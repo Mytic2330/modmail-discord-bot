@@ -1,4 +1,9 @@
-import { Events, EmbedBuilder, ButtonInteraction, TextChannel } from 'discord.js';
+import {
+	Events,
+	EmbedBuilder,
+	ButtonInteraction,
+	TextChannel,
+} from 'discord.js';
 import lib from '../../bridge/bridge';
 module.exports = {
 	name: Events.InteractionCreate,
@@ -34,8 +39,7 @@ module.exports = {
 		try {
 			channel2.delete();
 			wbh?.send({ embeds: [embed] });
-		}
-		catch (e) {
+		} catch (e) {
 			console.error(e);
 		}
 	},

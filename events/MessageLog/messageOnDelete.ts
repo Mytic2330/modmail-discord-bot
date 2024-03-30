@@ -8,20 +8,21 @@ module.exports = {
 		// if (message.author.bot === true) return;
 		const cache = lib.cache.openTickets;
 		const tcNum = cache.get(message.channelId);
-		const num: number = tcNum ? tcNum.number : await lib.ticket.get(message.channelId) || 0;
+		const num: number = tcNum
+			? tcNum.number
+			: (await lib.ticket.get(message.channelId)) || 0;
 		try {
 			if (!num) return;
 			const table = lib.db.table(`tt_${num}`);
 			const hasMessage = await table.has(message.id);
 			switch (hasMessage) {
-			case true:
-				handleHasMessage(client, message, table);
-				break;
-			case false:
-				return;
+				case true:
+					handleHasMessage(client, message, table);
+					break;
+				case false:
+					return;
 			}
-		}
-		catch (e) {
+		} catch (e) {
 			console.error(e);
 			return;
 		}
@@ -40,8 +41,7 @@ async function handleHasMessage(
 		const msg = await channel.messages.fetch(obj.messageId);
 		if (Object.prototype.hasOwnProperty.call(channel, 'guildId')) {
 			await msg.react('❌');
-		}
-		else {
+		} else {
 			await msg.delete();
 		}
 	}

@@ -25,13 +25,11 @@ async function close(base: any, type: string, num: number | null) {
 		ina = true;
 		client = base;
 		interaction = null;
-	}
-	else if (type == 'cls') {
+	} else if (type == 'cls') {
 		ina = false;
 		interaction = base;
 		client = interaction.client;
-	}
-	else {
+	} else {
 		return;
 	}
 	// DEFFER IF INTERACTION
@@ -47,15 +45,13 @@ async function close(base: any, type: string, num: number | null) {
 	// DATABASE DEFINING
 	if (ina) {
 		number = num;
-	}
-	else {
+	} else {
 		number = await lib.ticket.get(base.channelId);
 	}
 	const data = await lib.db.table(`tt_${number}`).get('info');
 	if (ina) {
 		channelId = data.guildChannel;
-	}
-	else {
+	} else {
 		channelId = base.channelId;
 	}
 	// CHECK FOR DUPLICATE INTERACTIONS
@@ -77,8 +73,7 @@ async function close(base: any, type: string, num: number | null) {
 	const archive = await client.channels.fetch(gData.transcriptChannel);
 	if (ina) {
 		closeUser = { username: 'Neaktivnost', id: '0' };
-	}
-	else {
+	} else {
 		closeUser = { username: base.user.username, id: base.user.id };
 	}
 	// GET ALL USERS IN TICKET
@@ -163,8 +158,7 @@ async function close(base: any, type: string, num: number | null) {
 async function sendSwitch(embeds: any, rows: any, compactData: any) {
 	try {
 		compactData.wbh.send({ embeds: [embeds.closeLog] });
-	}
-	catch (e) {
+	} catch (e) {
 		console.error(e);
 	}
 	try {
@@ -172,8 +166,7 @@ async function sendSwitch(embeds: any, rows: any, compactData: any) {
 			embeds: [embeds.closeEmbed],
 			components: [rows.deleteRow],
 		});
-	}
-	catch (e) {
+	} catch (e) {
 		console.error(e);
 	}
 	for (const id of compactData.dmChannels) {
@@ -184,15 +177,13 @@ async function sendSwitch(embeds: any, rows: any, compactData: any) {
 					embeds: [embeds.creatorClose],
 					components: [rows.creatorRow, rows.openRow],
 				});
-			}
-			else {
+			} else {
 				await dm.send({
 					embeds: [embeds.closeDmEmbed],
 					components: [rows.openRowRemoved],
 				});
 			}
-		}
-		catch (e) {
+		} catch (e) {
 			console.error(e);
 		}
 	}
@@ -281,13 +272,13 @@ async function buildRow(
 async function embedBuilder(
 	type: string,
 	data: {
-    locales: any;
-    users: any;
-    closeUser: any;
-    client: any;
-    number: number;
-    author: string;
-  },
+		locales: any;
+		users: any;
+		closeUser: any;
+		client: any;
+		number: number;
+		author: string;
+	},
 ) {
 	const locales = data.locales;
 	const color = await lib.db.get('color.close');

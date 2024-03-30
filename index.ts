@@ -87,8 +87,7 @@ for (const folder of commandFolders) {
 		const command = require(filePath);
 		if ('data' in command && 'execute' in command) {
 			commands.set(command.data.name, command);
-		}
-		else {
+		} else {
 			console.error(
 				`\x1b[31m[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.\x1b[0m`,
 			);
@@ -100,21 +99,21 @@ client.on(Events.InteractionCreate, async (interaction) => {
 	if (!interaction.isChatInputCommand()) return;
 	const command = commands.get(interaction.commandName);
 	if (!command) {
-		console.error(`No command matching ${interaction.commandName} was found.`);
+		console.error(
+			`No command matching ${interaction.commandName} was found.`,
+		);
 		return;
 	}
 	try {
 		await command.execute(interaction);
-	}
-	catch (error) {
+	} catch (error) {
 		console.error(error);
 		if (interaction.replied || interaction.deferred) {
 			await interaction.followUp({
 				content: 'There was an error while executing this command!',
 				ephemeral: true,
 			});
-		}
-		else {
+		} else {
 			await interaction.reply({
 				content: 'There was an error while executing this command!',
 				ephemeral: true,
@@ -135,8 +134,7 @@ for (const folder of eventFolders) {
 		const event = require(filePath);
 		if (event.once) {
 			client.once(event.name, (...args) => event.execute(...args));
-		}
-		else {
+		} else {
 			client.on(event.name, (...args) => event.execute(...args));
 		}
 	}
@@ -158,6 +156,6 @@ client.on('error', console.log).on('warn', console.log);
 if (debug === true) client.on('debug', console.log);
 
 client.login(Token).catch((err) => {
-	console.error('[TOKEN-ERROR] Unable to connect to the BOT\'s Token');
+	console.error("[TOKEN-ERROR] Unable to connect to the BOT's Token");
 	console.error(err);
 });

@@ -22,7 +22,14 @@ async function clearCaches() {
 }
 
 async function handleOpenTickets() {
-	const blacklistedIds = ['blacklist', 'users', 'tickets', 'openTickets', 'inaQueue', 'closing'];
+	const blacklistedIds = [
+		'blacklist',
+		'users',
+		'tickets',
+		'openTickets',
+		'inaQueue',
+		'closing',
+	];
 	const cache = lib.cache.openTickets;
 	cache.clear();
 

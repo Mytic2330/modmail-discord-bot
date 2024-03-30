@@ -30,25 +30,23 @@ module.exports = {
 
 		if (!hasInCache) {
 			status = await lib.ticket.has(message.channelId);
-		}
-		else {
+		} else {
 			status = hasInCache;
 		}
 
 		switch (status) {
-		case true:
-			if (message.guildId != undefined) {
-				var processing: MessageReaction | undefined =
-            await message.react('🔵');
-			}
-			else {
-				processing = undefined;
-			}
-			messageHandeler(message, client, locales, processing);
-			break;
-		case false:
-			lib.newTicket(message, undefined);
-			break;
+			case true:
+				if (message.guildId != undefined) {
+					var processing: MessageReaction | undefined =
+						await message.react('🔵');
+				} else {
+					processing = undefined;
+				}
+				messageHandeler(message, client, locales, processing);
+				break;
+			case false:
+				lib.newTicket(message, undefined);
+				break;
 		}
 	},
 };
@@ -108,24 +106,30 @@ async function messageHandeler(
 				iconURL: member.displayAvatarURL(),
 			})
 			.setColor(await lib.db.get('color.recive'))
-		// .setTitle(locales.messageProcessing.reciveNewMessageEmbed.title)
+			// .setTitle(locales.messageProcessing.reciveNewMessageEmbed.title)
 			.setTimestamp()
-		// ${locales.messageProcessing.reciveNewMessageEmbed.footer.text} |
+			// ${locales.messageProcessing.reciveNewMessageEmbed.footer.text} |
 			.setFooter({
 				text: `Rank: ${returned.rank}`,
-				iconURL: locales.messageProcessing.reciveNewMessageEmbed.footer.iconURL,
+				iconURL:
+					locales.messageProcessing.reciveNewMessageEmbed.footer
+						.iconURL,
 			});
-	}
-	else {
+	} else {
 		const user = await client.users.fetch(message.author.id);
 		reciveChannelEmbed = new EmbedBuilder()
-			.setAuthor({ name: user.displayName, iconURL: user.displayAvatarURL() })
+			.setAuthor({
+				name: user.displayName,
+				iconURL: user.displayAvatarURL(),
+			})
 			.setColor(await lib.db.get('color.recive'))
-		// .setTitle(locales.messageProcessing.reciveNewMessageEmbed.title)
+			// .setTitle(locales.messageProcessing.reciveNewMessageEmbed.title)
 			.setTimestamp()
 			.setFooter({
 				text: `${locales.messageProcessing.reciveNewMessageEmbed.footer.text}`,
-				iconURL: locales.messageProcessing.reciveNewMessageEmbed.footer.iconURL,
+				iconURL:
+					locales.messageProcessing.reciveNewMessageEmbed.footer
+						.iconURL,
 			});
 	}
 
@@ -153,19 +157,19 @@ async function messageReciverSwitch(
 	const switchStatus = message.guildId === null;
 
 	switch (switchStatus) {
-	case true: {
-		const sts = await sendToServer(message, reciveChannelEmbed);
-		afterSendErrorHandler(message, client, 'server', sts, processing);
-		break;
-	}
-	case false: {
-		const sts = await sendToDMChannel(message, reciveChannelEmbed);
-		afterSendErrorHandler(message, client, 'DM', sts, processing);
-		break;
-	}
-	default: {
-		console.error('ERR');
-	}
+		case true: {
+			const sts = await sendToServer(message, reciveChannelEmbed);
+			afterSendErrorHandler(message, client, 'server', sts, processing);
+			break;
+		}
+		case false: {
+			const sts = await sendToDMChannel(message, reciveChannelEmbed);
+			afterSendErrorHandler(message, client, 'DM', sts, processing);
+			break;
+		}
+		default: {
+			console.error('ERR');
+		}
 	}
 }
 
@@ -188,8 +192,7 @@ async function afterSendErrorHandler(
 		);
 		try {
 			if (embed) errorEmbedSender(message, embed);
-		}
-		catch (e) {
+		} catch (e) {
 			console.error(e);
 		}
 		return;
@@ -200,8 +203,7 @@ async function afterSendErrorHandler(
 		const embed = await errorEmbedAsemblyServer(client, values, locales);
 		try {
 			if (embed) errorEmbedSender(message, embed);
-		}
-		catch (e) {
+		} catch (e) {
 			console.error(e);
 		}
 	}
@@ -233,12 +235,17 @@ async function errorEmbedAsemblyServer(
 						chan?.recipient,
 					),
 				});
-			}
-			catch (e) {
+			} catch (e) {
 				console.error(e);
 				one_time_warn_EMBED.addFields({
-					name: locales.oneOrMore.fields.unknownUser.replace('NUMBER', x),
-					value: locales.oneOrMore.fields.unknownUserex.replace('IDNUM', id),
+					name: locales.oneOrMore.fields.unknownUser.replace(
+						'NUMBER',
+						x,
+					),
+					value: locales.oneOrMore.fields.unknownUserex.replace(
+						'IDNUM',
+						id,
+					),
 				});
 				x++;
 			}
@@ -302,12 +309,17 @@ async function errorEmbedAsemblyClient(
 						chan.recipient,
 					),
 				});
-			}
-			catch (e) {
+			} catch (e) {
 				console.error(e);
 				one_time_warn_EMBED.addFields({
-					name: locales.oneOrMore.fields.unknownUser.replace('NUMBER', x),
-					value: locales.oneOrMore.fields.unknownUserex.replace('IDNUM', id),
+					name: locales.oneOrMore.fields.unknownUser.replace(
+						'NUMBER',
+						x,
+					),
+					value: locales.oneOrMore.fields.unknownUserex.replace(
+						'IDNUM',
+						id,
+					),
 				});
 				x++;
 			}
@@ -330,8 +342,7 @@ async function sendToDMChannel(message: Message, reciveChannelEmbed: any) {
 			const channel = recivedChannel as DMChannel;
 			const msh = await channel.send({ embeds: [reciveChannelEmbed] });
 			sendDBWrite(client, ticketNumberDatabse, message, msh);
-		}
-		catch (e) {
+		} catch (e) {
 			errorSender.push(id);
 		}
 	}
@@ -353,8 +364,7 @@ async function sendToServer(message: Message, reciveChannelEmbed: any) {
 		const msh = await channel.send({ embeds: [reciveChannelEmbed] });
 		sendDBWrite(client, ticketNumberDatabse, message, msh);
 		return status;
-	}
-	catch (e) {
+	} catch (e) {
 		return status;
 	}
 }
@@ -374,8 +384,7 @@ async function sendToDMByOtherDM(message: Message, reciveChannelEmbed: any) {
 			const channel = recivedChannel as DMChannel;
 			const msh = await channel.send({ embeds: [reciveChannelEmbed] });
 			sendDBWrite(client, ticketNumberDatabse, message, msh);
-		}
-		catch (e) {
+		} catch (e) {
 			errorSender.push(id);
 		}
 	}

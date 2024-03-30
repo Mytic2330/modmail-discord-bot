@@ -19,7 +19,9 @@ import {
 import lib from '../../bridge/bridge';
 module.exports = {
 	name: Events.InteractionCreate,
-	async execute(interaction: ModalSubmitInteraction | StringSelectMenuInteraction) {
+	async execute(
+		interaction: ModalSubmitInteraction | StringSelectMenuInteraction,
+	) {
 		// CHECK IF IT IS ANY OTHER INTERACTION //
 		if (interaction.isStringSelectMenu()) {
 			if (interaction.customId !== 'ticket') return;
@@ -32,12 +34,27 @@ module.exports = {
 	},
 };
 
-async function checksAndPass(interaction: ModalSubmitInteraction | StringSelectMenuInteraction, type: string) {
+async function checksAndPass(
+	interaction: ModalSubmitInteraction | StringSelectMenuInteraction,
+	type: string,
+) {
 	const status = await checkStatus(interaction);
-	if (status.code !== 200) { sendError(interaction, status); return; }
+	if (status.code !== 200) {
+		sendError(interaction, status);
+		return;
+	}
 
-	if (type === 'modal') { openNewTicket(interaction as ModalSubmitInteraction, interaction.customId.split('_')[1]); return; }
-	if (type === 'string') { stringSelect(interaction as StringSelectMenuInteraction); return; }
+	if (type === 'modal') {
+		openNewTicket(
+			interaction as ModalSubmitInteraction,
+			interaction.customId.split('_')[1],
+		);
+		return;
+	}
+	if (type === 'string') {
+		stringSelect(interaction as StringSelectMenuInteraction);
+		return;
+	}
 }
 
 async function stringSelect(interaction: StringSelectMenuInteraction) {
@@ -51,32 +68,53 @@ async function stringSelect(interaction: StringSelectMenuInteraction) {
 	await interaction.showModal(modal);
 }
 
-async function createModal(interaction: StringSelectMenuInteraction, modalSettings: any) {
+async function createModal(
+	interaction: StringSelectMenuInteraction,
+	modalSettings: any,
+) {
 	const modal = new ModalBuilder()
 		.setCustomId(`openTicketModal_${interaction.values[0]}`)
 		.setTitle(modalSettings.name);
 	for (const field of modalSettings.modal.fields) {
 		let sty = TextInputStyle.Paragraph;
-		if (field.type == 'short') { sty = TextInputStyle.Short; }
-		else if (field.type == 'long') { sty = TextInputStyle.Paragraph; }
+		if (field.type == 'short') {
+			sty = TextInputStyle.Short;
+		} else if (field.type == 'long') {
+			sty = TextInputStyle.Paragraph;
+		}
 		const com = new TextInputBuilder()
 			.setCustomId(field.id)
 			.setLabel(field.lable)
 			.setStyle(sty);
-		if (field.required) { com.setRequired(true); }
-		if (field.defaultValue) { com.setValue(field.defaultValue); }
-		if (field.placeholder) { com.setPlaceholder(field.placeholder); }
-		if (field.minLength) { com.setMinLength(field.minLength); }
-		if (field.maxLength) { com.setMaxLength(field.maxLength); }
+		if (field.required) {
+			com.setRequired(true);
+		}
+		if (field.defaultValue) {
+			com.setValue(field.defaultValue);
+		}
+		if (field.placeholder) {
+			com.setPlaceholder(field.placeholder);
+		}
+		if (field.minLength) {
+			com.setMinLength(field.minLength);
+		}
+		if (field.maxLength) {
+			com.setMaxLength(field.maxLength);
+		}
 		const x: any = new ActionRowBuilder().addComponents(com);
 		modal.addComponents(x);
 	}
 	return modal;
 }
 
-async function openNewTicket(interaction: ModalSubmitInteraction | StringSelectMenuInteraction, indexOfType: string) {
+async function openNewTicket(
+	interaction: ModalSubmitInteraction | StringSelectMenuInteraction,
+	indexOfType: string,
+) {
 	const locales = lib.locales.events.onSelectMenuInteractionjs;
-	lib.cache.usersOpeningTicket.set(interaction.user.id, { time: lib.unixTimestamp() });
+	lib.cache.usersOpeningTicket.set(interaction.user.id, {
+		time: lib.unixTimestamp(),
+	});
 	try {
 		const preparing = new EmbedBuilder()
 			.setColor(await lib.db.get('color.default'))
@@ -84,13 +122,14 @@ async function openNewTicket(interaction: ModalSubmitInteraction | StringSelectM
 			.setDescription(locales.ticketNowInMaking.description)
 			.setTimestamp();
 		if (interaction.message) {
-			await interaction.message.edit({ embeds: [preparing], components: [] });
-		}
-		else {
+			await interaction.message.edit({
+				embeds: [preparing],
+				components: [],
+			});
+		} else {
 			interaction.reply({ embeds: [preparing], components: [] });
 		}
-	}
-	catch (e) {
+	} catch (e) {
 		console.error(e);
 	}
 	const guildId = await lib.db.get('guildId');
@@ -99,52 +138,63 @@ async function openNewTicket(interaction: ModalSubmitInteraction | StringSelectM
 	createChannel(guild, interaction, ticketPrefix);
 }
 
-async function sendError(interaction: ModalSubmitInteraction | StringSelectMenuInteraction, param: { code: number, message: string}) {
+async function sendError(
+	interaction: ModalSubmitInteraction | StringSelectMenuInteraction,
+	param: { code: number; message: string },
+) {
 	const locales = lib.locales.events.onSelectMenuInteractionjs;
 	switch (param.code) {
-	case 500: {
-		const embed = new EmbedBuilder()
-			.setColor(await lib.db.get('color.default'))
-			.setTitle('Blacklist')
-			.setDescription(
-				'Bili ste blacklistani.\n Torej možnosti odpiranja ticketa nimate!',
-			)
-			.setTimestamp();
-		await interaction.reply({ embeds: [embed], ephemeral: true });
-		break;
-	}
-	case 501: {
-		const embed = new EmbedBuilder()
-			.setColor(await lib.db.get('color.default'))
-			.setTitle(locales.ticketAlreadyInMakingEmbed.title)
-			.setTimestamp();
-		await interaction.reply({ embeds: [embed], ephemeral: true });
-		break;
-	}
-	case 502: {
-		const embed = new EmbedBuilder()
-			.setColor(await lib.db.get('color.default'))
-			.setTitle(locales.ticketAlreadyOpen.title)
-			.setTimestamp();
-		await interaction.reply({ embeds: [embed], ephemeral: true });
-		break;
-	}
-	case 505: {
-		await interaction.reply({ content: 'NAPAKA. KONTAKTIRAJTE ADMINISTRACIJO', ephemeral: true });
-		break;
-	}
-	default: {
-		await interaction.reply({ content: 'NAPAKA. KONTAKTIRAJTE ADMINISTRACIJO', ephemeral: true });
-	}
+		case 500: {
+			const embed = new EmbedBuilder()
+				.setColor(await lib.db.get('color.default'))
+				.setTitle('Blacklist')
+				.setDescription(
+					'Bili ste blacklistani.\n Torej možnosti odpiranja ticketa nimate!',
+				)
+				.setTimestamp();
+			await interaction.reply({ embeds: [embed], ephemeral: true });
+			break;
+		}
+		case 501: {
+			const embed = new EmbedBuilder()
+				.setColor(await lib.db.get('color.default'))
+				.setTitle(locales.ticketAlreadyInMakingEmbed.title)
+				.setTimestamp();
+			await interaction.reply({ embeds: [embed], ephemeral: true });
+			break;
+		}
+		case 502: {
+			const embed = new EmbedBuilder()
+				.setColor(await lib.db.get('color.default'))
+				.setTitle(locales.ticketAlreadyOpen.title)
+				.setTimestamp();
+			await interaction.reply({ embeds: [embed], ephemeral: true });
+			break;
+		}
+		case 505: {
+			await interaction.reply({
+				content: 'NAPAKA. KONTAKTIRAJTE ADMINISTRACIJO',
+				ephemeral: true,
+			});
+			break;
+		}
+		default: {
+			await interaction.reply({
+				content: 'NAPAKA. KONTAKTIRAJTE ADMINISTRACIJO',
+				ephemeral: true,
+			});
+		}
 	}
 	return;
 }
 
 async function checkStatus(
 	interaction: StringSelectMenuInteraction | ModalSubmitInteraction,
-): Promise<{ code: number, message: string }> {
+): Promise<{ code: number; message: string }> {
 	const blacklist: Array<string> | null = await lib.ticket.get('blacklist');
-	if (blacklist!.includes(interaction.user.id)) { return { code: 500, message: 'blacklist' };}
+	if (blacklist!.includes(interaction.user.id)) {
+		return { code: 500, message: 'blacklist' };
+	}
 	if (interaction.channelId) {
 		const hasOpenTicket = lib.cache.openTickets.has(interaction.channelId);
 		const channelStatus = await lib.ticket.has(interaction.channelId);
@@ -154,10 +204,12 @@ async function checkStatus(
 					return { code: 501, message: 'alreadyMaking' };
 				}
 				return { code: 200, message: 'success' };
+			} else {
+				return { code: 502, message: 'open' };
 			}
-			else { return { code: 502, message: 'open' }; }
+		} else {
+			return { code: 502, message: 'open' };
 		}
-		else { return { code: 502, message: 'open' }; }
 	}
 	return { code: 505, message: 'error' };
 }
@@ -180,8 +232,7 @@ async function createChannel(
 			type: ChannelType.GuildText,
 		});
 		sendInitial(channel, interaction, ticketPrefix);
-	}
-	catch (e) {
+	} catch (e) {
 		console.error(e);
 	}
 }
@@ -208,7 +259,11 @@ async function sendInitial(
 		.setTitle(locales.logEmbed.title.replace('CATEGORY', ticketPrefix))
 		.setTimestamp()
 		.addFields(
-			{ name: locales.logEmbed.ticketNumber, value: `${num}`, inline: true },
+			{
+				name: locales.logEmbed.ticketNumber,
+				value: `${num}`,
+				inline: true,
+			},
 			{
 				name: locales.logEmbed.userProfile,
 				value: `${member.user}`,
@@ -216,7 +271,10 @@ async function sendInitial(
 			},
 		)
 		.setFooter({
-			text: locales.logEmbed.footer.text.replace('USERID', interaction.user.id),
+			text: locales.logEmbed.footer.text.replace(
+				'USERID',
+				interaction.user.id,
+			),
 		});
 	if (await lib.db.get('vactarCommunityID')) {
 		embed.addFields({
@@ -241,17 +299,18 @@ async function sendInitial(
 	// PIN THE MESSAGE //
 	try {
 		if (interaction instanceof StringSelectMenuInteraction) {
-			const mes = await guildChannel.send({ embeds: [embed], components: [row] });
+			const mes = await guildChannel.send({
+				embeds: [embed],
+				components: [row],
+			});
 			await mes.pin();
 			guildChannel.bulkDelete(1);
-		}
-		else {
+		} else {
 			const mes = await guildChannel.send({ embeds: [embed] });
 			await mes.pin();
 			guildChannel.bulkDelete(1);
 		}
-	}
-	catch (e) {
+	} catch (e) {
 		console.error(e);
 	}
 
@@ -271,7 +330,8 @@ async function sendInitial(
 			.setTitle('Odgovori');
 
 		for (const field of typeOfHelp.modal.fields) {
-			const userInput = interaction.fields.getTextInputValue(field.id) || 'EMPTY';
+			const userInput =
+				interaction.fields.getTextInputValue(field.id) || 'EMPTY';
 			const fieldLable = field.lable;
 			sendEmbed.addFields({ name: fieldLable, value: userInput });
 		}
@@ -300,7 +360,10 @@ async function logInteraction(
 		})
 		.setColor(await lib.db.get('color.default'))
 		.setTitle(
-			locales.otherLogEmbed.title.replace('USERNAME', member.user.username),
+			locales.otherLogEmbed.title.replace(
+				'USERNAME',
+				member.user.username,
+			),
 		)
 		.setTimestamp()
 		.addFields(
@@ -366,8 +429,7 @@ async function ticketNumberCalculation(
 	let num = await lib.db.get('ticketNumber');
 	if (num) {
 		await lib.db.set('ticketNumber', num + 1);
-	}
-	else {
+	} else {
 		num = interaction.channelId + x.id;
 		await lib.db.set('ticketNumber', 1);
 	}

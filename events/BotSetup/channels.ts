@@ -18,11 +18,13 @@ module.exports = {
 		if (status === false) {
 			try {
 				const category = await guild.channels.create({
-					name: lib.locales.events.channelsjs.channelCreation.category,
+					name: lib.locales.events.channelsjs.channelCreation
+						.category,
 					type: ChannelType.GuildCategory,
 				});
 				const categoryClosed = await guild.channels.create({
-					name: lib.locales.events.channelsjs.channelCreation.categoryClosed,
+					name: lib.locales.events.channelsjs.channelCreation
+						.categoryClosed,
 					type: ChannelType.GuildCategory,
 				});
 
@@ -36,22 +38,30 @@ module.exports = {
 					type: ChannelType.GuildText,
 				});
 
-				await category.permissionOverwrites.create(guild.roles.everyone, {
-					ViewChannel: false,
-				});
-				await categoryClosed.permissionOverwrites.create(guild.roles.everyone, {
-					ViewChannel: false,
-				});
+				await category.permissionOverwrites.create(
+					guild.roles.everyone,
+					{
+						ViewChannel: false,
+					},
+				);
+				await categoryClosed.permissionOverwrites.create(
+					guild.roles.everyone,
+					{
+						ViewChannel: false,
+					},
+				);
 				await log.permissionOverwrites.create(guild.roles.everyone, {
 					ViewChannel: false,
 				});
-				await archive.permissionOverwrites.create(guild.roles.everyone, {
-					ViewChannel: false,
-				});
+				await archive.permissionOverwrites.create(
+					guild.roles.everyone,
+					{
+						ViewChannel: false,
+					},
+				);
 
 				permissionSet(category, log, archive, categoryClosed, guild);
-			}
-			catch (e) {
+			} catch (e) {
 				console.error(e);
 			}
 		}

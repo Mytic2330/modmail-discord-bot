@@ -30,12 +30,12 @@ module.exports = {
 		const user = dm?.recipient;
 		if (user) {
 			userCheck(interaction, user, dm);
-		}
-		else {
-			interaction.editReply({ content: 'Ni bilo mogoče pridobiti uporabnika.' });
+		} else {
+			interaction.editReply({
+				content: 'Ni bilo mogoče pridobiti uporabnika.',
+			});
 			return;
 		}
-
 	},
 };
 
@@ -56,7 +56,8 @@ async function userCheck(
 		tctNum = cacheNumber.number;
 	}
 	// DEFINE NUMBER //
-	const ticketDatabaseNumber: number = tctNum || (await lib.ticket.get(channelId)) || 0;
+	const ticketDatabaseNumber: number =
+		tctNum || (await lib.ticket.get(channelId)) || 0;
 	// GET TICKET AND REMOVE / GIVE ERROR //
 	try {
 		const ticketDatabase = await lib.db
@@ -65,22 +66,23 @@ async function userCheck(
 		const status = await ticketDatabase.dmChannel.includes(dm.id);
 
 		switch (status) {
-		case false:
-			interaction.editReply({ content: locales.userNotInTicket });
-			break;
-		case true:
-			removeUserFromTicket(interaction, user, ticketDatabaseNumber);
-			break;
-		default:
-			interaction.editReply({ content: 'Prišlo je do napake! Kontaktirajte administracijo.' });
-			return;
+			case false:
+				interaction.editReply({ content: locales.userNotInTicket });
+				break;
+			case true:
+				removeUserFromTicket(interaction, user, ticketDatabaseNumber);
+				break;
+			default:
+				interaction.editReply({
+					content:
+						'Prišlo je do napake! Kontaktirajte administracijo.',
+				});
+				return;
 		}
-	}
-	catch (e) {
+	} catch (e) {
 		console.error(e);
 		return;
 	}
-
 }
 
 async function removeUserFromTicket(
@@ -98,12 +100,13 @@ async function removeUserFromTicket(
 		.setCustomId('openNewTicketButtonRemoved')
 		.setLabel(locales.openNewTicket.lable)
 		.setStyle(ButtonStyle.Primary);
-	const openRow: ActionRowBuilder<any> = new ActionRowBuilder().addComponents(openNewTicket);
+	const openRow: ActionRowBuilder<any> = new ActionRowBuilder().addComponents(
+		openNewTicket,
+	);
 	// TRY TO SEND EMBED TO REMOVED USER //
 	try {
 		await DM?.send({ embeds: [embed], components: [openRow] });
-	}
-	catch (e) {
+	} catch (e) {
 		console.log('');
 	}
 	// REMOVE FROM DATABASE
@@ -119,15 +122,23 @@ async function databaseSync(dm: DMChannel | undefined, num: number) {
 	}
 }
 
-async function sendToAllChannels(interaction: StringSelectMenuInteraction, user: User, number: number) {
+async function sendToAllChannels(
+	interaction: StringSelectMenuInteraction,
+	user: User,
+	number: number,
+) {
 	// DEFINITIONS //
 	const locales = lib.locales.events.removejs.sentToAllChannels;
 	const client = interaction.client;
 	const embed = new EmbedBuilder()
 		.setColor(await lib.db.get('color.default'))
 		.setTitle(locales.title)
-		.setDescription((locales.description).replace('USER', user))
-		.setFooter({ text: (locales.footer.text).replace('USERNAME', interaction.user.username).replace('USERID', interaction.user.id) });
+		.setDescription(locales.description.replace('USER', user))
+		.setFooter({
+			text: locales.footer.text
+				.replace('USERNAME', interaction.user.username)
+				.replace('USERID', interaction.user.id),
+		});
 
 	const allUsers = await lib.db.table(`tt_${number}`).get('info');
 	const guildChannel = await client.channels.fetch(allUsers.guildChannel);
@@ -142,13 +153,11 @@ async function sendToAllChannels(interaction: StringSelectMenuInteraction, user:
 			if (channel && channel.type === ChannelType.DM) {
 				try {
 					channel.send({ embeds: [embed] });
-				}
-				catch (e) {
+				} catch (e) {
 					continue;
 				}
 			}
-		}
-		catch (e) {
+		} catch (e) {
 			console.error(e);
 		}
 	}

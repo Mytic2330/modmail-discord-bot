@@ -28,14 +28,12 @@ module.exports = {
 		if (!que_chc1) {
 			await lib.ticket.set('inaQueue', []);
 			await lib.ticket.push('inaQueue', number);
-		}
-		else {
+		} else {
 			const que_chc2 = await lib.ticket.get('inaQueue');
 			if (que_chc2.includes(number)) {
 				interaction.editReply('Ticket je že označen kot neaktiven');
 				return;
-			}
-			else {
+			} else {
 				await lib.ticket.push('inaQueue', number);
 			}
 		}
@@ -73,8 +71,7 @@ async function sendEmbeds(
 			const passedChannel = await client.channels.fetch(id);
 			const channel = passedChannel as TextChannel | DMChannel;
 			await channel.send({ embeds: [embed] });
-		}
-		catch (e) {
+		} catch (e) {
 			console.error(e);
 		}
 	}

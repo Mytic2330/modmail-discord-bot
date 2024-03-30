@@ -26,17 +26,18 @@ module.exports = {
 					content: 'Uporabnik unblacklistan!',
 				});
 				return;
-			}
-			else {
+			} else {
 				interaction.reply({
 					ephemeral: true,
 					content: 'Uporabnik ni blacklistan!',
 				});
 				return;
 			}
-		}
-		else {
-			interaction.reply({ ephemeral: true, content: 'Uporabnik ni najden!' });
+		} else {
+			interaction.reply({
+				ephemeral: true,
+				content: 'Uporabnik ni najden!',
+			});
 			return;
 		}
 	},

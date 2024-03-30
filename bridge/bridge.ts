@@ -42,7 +42,7 @@ const cache = {
 };
 
 // TESTING FEATURE //
-const test = function(): boolean {
+const test = function (): boolean {
 	return true;
 };
 

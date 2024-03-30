@@ -25,8 +25,7 @@ module.exports = {
 					content: 'Uporabnik je že blacklistan!',
 				});
 				return;
-			}
-			else {
+			} else {
 				await lib.ticket.push('blacklist', user.id);
 				interaction.reply({
 					ephemeral: true,
@@ -34,9 +33,11 @@ module.exports = {
 				});
 				return;
 			}
-		}
-		else {
-			interaction.reply({ ephemeral: true, content: 'Uporabnik ni najden!' });
+		} else {
+			interaction.reply({
+				ephemeral: true,
+				content: 'Uporabnik ni najden!',
+			});
 			return;
 		}
 	},

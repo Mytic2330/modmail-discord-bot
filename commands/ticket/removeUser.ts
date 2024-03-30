@@ -47,19 +47,16 @@ module.exports = {
 					});
 					return;
 				}
-				const row: ActionRowBuilder<any> = new ActionRowBuilder().addComponents(
-					select,
-				);
+				const row: ActionRowBuilder<any> =
+					new ActionRowBuilder().addComponents(select);
 				await interaction.reply({ components: [row], ephemeral: true });
-			}
-			else {
+			} else {
 				await interaction.reply({
 					content: locales.error.nousers,
 					ephemeral: true,
 				});
 			}
-		}
-		else {
+		} else {
 			await interaction.reply({
 				content: locales.error.nopremission,
 				ephemeral: true,
