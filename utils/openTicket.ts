@@ -9,13 +9,13 @@ import {
 	Interaction,
 	Snowflake,
 	Channel,
-	DMChannel,
+	DMChannel
 } from 'discord.js';
 import lib from '../bridge/bridge';
 // FUNCTION
 async function newTicket(
 	passedMessage: Message | undefined,
-	passedInteraction: Interaction | undefined,
+	passedInteraction: Interaction | undefined
 ) {
 	if (passedMessage || passedInteraction) {
 		let interaction;
@@ -60,7 +60,7 @@ async function newTicket(
 			.setDescription(locales.userSelectCategory.embed.description)
 			.setFooter({
 				text: locales.userSelectCategory.embed.footer.text,
-				iconURL: locales.userSelectCategory.embed.footer.iconURL,
+				iconURL: locales.userSelectCategory.embed.footer.iconURL
 			})
 			.setTimestamp();
 
@@ -74,12 +74,12 @@ async function newTicket(
 				new StringSelectMenuOptionBuilder()
 					.setLabel(val.name)
 					.setDescription(val.description)
-					.setValue(index.toString()),
+					.setValue(index.toString())
 			);
 		}
 
 		const row: ActionRowBuilder<any> = new ActionRowBuilder().addComponents(
-			select,
+			select
 		);
 
 		try {

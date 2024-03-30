@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 // require('./utils/logger');
 import {
 	Client,
@@ -5,7 +6,7 @@ import {
 	GatewayIntentBits,
 	ActivityType,
 	Events,
-	Partials,
+	Partials
 } from 'discord.js';
 import { jsonc } from 'jsonc';
 import { QuickDB } from 'quick.db';
@@ -15,7 +16,7 @@ import * as path from 'node:path';
 const database: QuickDB = new QuickDB({ filePath: './database.sqlite' });
 export default database;
 const { Token } = jsonc.parse(
-	fs.readFileSync(path.join(__dirname, 'config/settings.jsonc'), 'utf8'),
+	fs.readFileSync(path.join(__dirname, 'config/settings.jsonc'), 'utf8')
 );
 const debug: boolean = true;
 
@@ -45,9 +46,9 @@ const client = new Client({
 		activities: [
 			{
 				name: 'Tickets',
-				type: ActivityType.Watching,
-			},
-		],
+				type: ActivityType.Watching
+			}
+		]
 	},
 	intents: [
 		GatewayIntentBits.MessageContent,
@@ -69,9 +70,9 @@ const client = new Client({
 		GatewayIntentBits.GuildWebhooks,
 		GatewayIntentBits.Guilds,
 		// SCREENSHARE COMMAND
-		GatewayIntentBits.GuildVoiceStates,
+		GatewayIntentBits.GuildVoiceStates
 	],
-	partials: [Partials.Message, Partials.Channel, Partials.Reaction],
+	partials: [Partials.Message, Partials.Channel, Partials.Reaction]
 });
 const commands = new Collection<string, any>();
 const foldersPath = path.join(__dirname, 'commands');
@@ -89,7 +90,7 @@ for (const folder of commandFolders) {
 			commands.set(command.data.name, command);
 		} else {
 			console.error(
-				`\x1b[31m[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.\x1b[0m`,
+				`\x1b[31m[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.\x1b[0m`
 			);
 		}
 	}
@@ -100,7 +101,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 	const command = commands.get(interaction.commandName);
 	if (!command) {
 		console.error(
-			`No command matching ${interaction.commandName} was found.`,
+			`No command matching ${interaction.commandName} was found.`
 		);
 		return;
 	}
@@ -111,12 +112,12 @@ client.on(Events.InteractionCreate, async (interaction) => {
 		if (interaction.replied || interaction.deferred) {
 			await interaction.followUp({
 				content: 'There was an error while executing this command!',
-				ephemeral: true,
+				ephemeral: true
 			});
 		} else {
 			await interaction.reply({
 				content: 'There was an error while executing this command!',
-				ephemeral: true,
+				ephemeral: true
 			});
 		}
 	}
@@ -143,19 +144,19 @@ process.on(
 	'unhandledRejection',
 	(reason: unknown, promise: unknown, a: unknown) => {
 		console.log(reason, promise, a);
-	},
+	}
 );
 process.on(
 	'uncaughtException',
 	(reason: unknown, promise: unknown, a: unknown) => {
 		console.log(reason, promise, a);
-	},
+	}
 );
 
 client.on('error', console.log).on('warn', console.log);
 if (debug === true) client.on('debug', console.log);
 
 client.login(Token).catch((err) => {
-	console.error("[TOKEN-ERROR] Unable to connect to the BOT's Token");
-	console.error(err);
+	console.log("[TOKEN-ERROR] Unable to connect to the BOT's Token");
+	console.log(err);
 });

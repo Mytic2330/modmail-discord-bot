@@ -28,7 +28,7 @@ module.exports = {
 				x = x + 1;
 			}, 60000);
 		});
-	},
+	}
 };
 
 async function checkAllOpendTickets(client: Client) {
@@ -50,7 +50,7 @@ async function checkAllOpendTickets(client: Client) {
 				if (ServerDifference >= 86400000) {
 					await lib.db.table(`tt_${ticNum}`).set('activity', {
 						lastServerMessage: null,
-						lastDMMessage: null,
+						lastDMMessage: null
 					});
 					sendWarnings(ticNum, client);
 					return;
@@ -63,7 +63,7 @@ async function checkAllOpendTickets(client: Client) {
 				if (ServerDifference >= 86400000) {
 					await lib.db.table(`tt_${ticNum}`).set('activity', {
 						lastServerMessage: null,
-						lastDMMessage: null,
+						lastDMMessage: null
 					});
 					sendWarnings(ticNum, client);
 					return;
@@ -80,7 +80,7 @@ async function checkAllOpendTickets(client: Client) {
 			) {
 				await lib.db.table(`tt_${ticNum}`).set('activity', {
 					lastServerMessage: null,
-					lastDMMessage: null,
+					lastDMMessage: null
 				});
 				sendWarnings(ticNum, client);
 			}

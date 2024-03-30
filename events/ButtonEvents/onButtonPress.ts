@@ -3,7 +3,7 @@ import {
 	ButtonStyle,
 	ButtonBuilder,
 	ActionRowBuilder,
-	ButtonInteraction,
+	ButtonInteraction
 } from 'discord.js';
 import lib from '../../bridge/bridge';
 module.exports = {
@@ -19,7 +19,7 @@ module.exports = {
 		} else if (interaction.customId === 'openNewTicketButtonRemoved') {
 			openNewTicketButtonRemoved(interaction);
 		}
-	},
+	}
 };
 
 async function ratingButtonPressed(interaction: ButtonInteraction) {
@@ -77,7 +77,7 @@ async function ratingButtonPressed(interaction: ButtonInteraction) {
 
 	await interaction.update({
 		embeds: [interaction.message.embeds[0]],
-		components: [creatorRow, interaction.message.components[1]],
+		components: [creatorRow, interaction.message.components[1]]
 	});
 }
 
@@ -90,11 +90,11 @@ async function newTicketButtonPressed(interaction: ButtonInteraction) {
 		.setDisabled(true)
 		.setStyle(ButtonStyle.Primary);
 	const openRow: ActionRowBuilder<any> = new ActionRowBuilder().addComponents(
-		openNewTicket,
+		openNewTicket
 	);
 	await interaction.update({
 		embeds: [interaction.message.embeds[0]],
-		components: [interaction.message.components[0], openRow],
+		components: [interaction.message.components[0], openRow]
 	});
 }
 
@@ -107,10 +107,10 @@ async function openNewTicketButtonRemoved(interaction: ButtonInteraction) {
 		.setDisabled(true)
 		.setStyle(ButtonStyle.Primary);
 	const openRow: ActionRowBuilder<any> = new ActionRowBuilder().addComponents(
-		openNewTicket,
+		openNewTicket
 	);
 	await interaction.update({
 		embeds: [interaction.message.embeds[0]],
-		components: [openRow],
+		components: [openRow]
 	});
 }

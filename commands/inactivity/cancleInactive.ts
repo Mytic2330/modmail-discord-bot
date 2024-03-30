@@ -4,7 +4,7 @@ import {
 	CommandInteraction,
 	Client,
 	TextChannel,
-	DMChannel,
+	DMChannel
 } from 'discord.js';
 import { QuickDB } from 'quick.db';
 import lib from '../../bridge/bridge';
@@ -40,14 +40,14 @@ module.exports = {
 			.setColor(await lib.db.get('color.default'))
 			.setTitle('Oznaka neaktivnosti odstranjena')
 			.setDescription(
-				'Ticket je bil označen kot aktiven to pomeni, \nda se ticket **ne** bo avtomatsko zaprl, če v 24ih urah ni sporočil.',
+				'Ticket je bil označen kot aktiven to pomeni, \nda se ticket **ne** bo avtomatsko zaprl, če v 24ih urah ni sporočil.'
 			);
 
 		const emb = new EmbedBuilder()
 			.setColor(await lib.db.get('color.default'))
 			.setTitle('Oznaka neaktivnosti odstranjena')
 			.setDescription(
-				'Ticket je bil označen kot aktiven to pomeni, \nda se ticket **ne** bo avtomatsko zaprl, če v 24ih urah ni sporočil.',
+				'Ticket je bil označen kot aktiven to pomeni, \nda se ticket **ne** bo avtomatsko zaprl, če v 24ih urah ni sporočil.'
 			);
 
 		const channels = data.dmChannel;
@@ -57,13 +57,13 @@ module.exports = {
 		sendToServer(client, channel, emb);
 		setData(database);
 		interaction.editReply('Ticket označen kot aktiven');
-	},
+	}
 };
 
 async function sendEmbeds(
 	client: Client,
 	channels: Array<any>,
-	embed: EmbedBuilder,
+	embed: EmbedBuilder
 ) {
 	for (const id of channels) {
 		try {
@@ -79,7 +79,7 @@ async function sendEmbeds(
 async function sendToServer(
 	client: Client,
 	channel: TextChannel,
-	emb: EmbedBuilder,
+	emb: EmbedBuilder
 ) {
 	const wbh = await lib.wbh(channel);
 	wbh?.send({ embeds: [emb] });

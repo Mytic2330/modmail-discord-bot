@@ -5,7 +5,7 @@ import path from 'path';
 
 // LOCALES DEFINITION //
 const locales: any = jsonc.parse(
-	fs.readFileSync(path.join(__dirname, '../locales/locales.jsonc'), 'utf8'),
+	fs.readFileSync(path.join(__dirname, '../locales/locales.jsonc'), 'utf8')
 );
 // DATABASE DEFINITION //
 import database from '../index';
@@ -13,7 +13,7 @@ import database from '../index';
 const ticket = database.table('ticket');
 // SETTINGS DEFINITION //
 const settings: any = jsonc.parse(
-	fs.readFileSync(path.join(__dirname, '../config/settings.jsonc'), 'utf8'),
+	fs.readFileSync(path.join(__dirname, '../config/settings.jsonc'), 'utf8')
 );
 // VERSION //
 import { version } from '../package.json';
@@ -25,7 +25,7 @@ import {
 	getDatestamp,
 	getTimestamp,
 	hasNewUsername,
-	unixTimestamp,
+	unixTimestamp
 } from '../utils/etc';
 import { webhook } from '../utils/webhook';
 
@@ -38,7 +38,7 @@ const cache = {
 	userRanks: userRanks,
 	usersOpeningTicket: usersOpeningTicket,
 	closingTickets: closingTickets,
-	openTickets: openTickets,
+	openTickets: openTickets
 };
 
 // TESTING FEATURE //
@@ -63,7 +63,7 @@ const lib = {
 	// CACHE //
 	cache: cache,
 	// TEST FUNCTION//
-	test: test,
+	test: test
 };
 // EXPORT
 export default lib;

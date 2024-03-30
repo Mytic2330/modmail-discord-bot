@@ -4,7 +4,7 @@ import {
 	CommandInteraction,
 	Client,
 	TextChannel,
-	DMChannel,
+	DMChannel
 } from 'discord.js';
 import { QuickDB } from 'quick.db';
 import lib from '../../bridge/bridge';
@@ -41,14 +41,14 @@ module.exports = {
 			.setColor(await lib.db.get('color.default'))
 			.setTitle('Oznaka inaktivnosti')
 			.setDescription(
-				'Vaš ticket je bil označen kot neaktiven to pomeni, \nda mora biti v vašem ticketu poslano sporočilo vsakih \n48 ur drugače se bo ticket avtomatsko zaprl.\n24 ur pred zaprtjem boste opozorjeni.',
+				'Vaš ticket je bil označen kot neaktiven to pomeni, \nda mora biti v vašem ticketu poslano sporočilo vsakih \n48 ur drugače se bo ticket avtomatsko zaprl.\n24 ur pred zaprtjem boste opozorjeni.'
 			);
 
 		const emb = new EmbedBuilder()
 			.setColor(await lib.db.get('color.default'))
 			.setTitle('Oznaka inaktivnosti')
 			.setDescription(
-				'Ticket je bil označen kot neaktiven to pomeni, \nda se bo ticket avtomatsko zaprl, če v 48ih urah ni sporočil.\n24 ur pred zaprtjem boste opozorjeni.',
+				'Ticket je bil označen kot neaktiven to pomeni, \nda se bo ticket avtomatsko zaprl, če v 48ih urah ni sporočil.\n24 ur pred zaprtjem boste opozorjeni.'
 			);
 
 		const channels = data.dmChannel;
@@ -58,13 +58,13 @@ module.exports = {
 		sendToServer(client, channel, emb);
 		setData(database);
 		interaction.editReply('Ticket označen kot neaktiven');
-	},
+	}
 };
 
 async function sendEmbeds(
 	client: Client,
 	channels: Array<any>,
-	embed: EmbedBuilder,
+	embed: EmbedBuilder
 ) {
 	for (const id of channels) {
 		try {
@@ -80,7 +80,7 @@ async function sendEmbeds(
 async function sendToServer(
 	client: Client,
 	channel: TextChannel | null,
-	emb: EmbedBuilder,
+	emb: EmbedBuilder
 ) {
 	if (channel) {
 		const wbh = await lib.wbh(channel);

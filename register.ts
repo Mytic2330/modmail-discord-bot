@@ -21,7 +21,7 @@ const deployCommands = async () => {
 				commands.push(command.data.toJSON());
 			} else {
 				console.log(
-					`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`,
+					`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`
 				);
 			}
 		}
@@ -30,18 +30,18 @@ const deployCommands = async () => {
 
 	try {
 		console.log(
-			`Started refreshing ${commands.length} application (/) commands.`,
+			`Started refreshing ${commands.length} application (/) commands.`
 		);
 		const data: any = await rest.put(
 			Routes.applicationGuildCommands(
 				lib.settings.clientId,
-				lib.settings.guildId,
+				lib.settings.guildId
 			),
-			{ body: commands },
+			{ body: commands }
 		);
 
 		console.log(
-			`Successfully reloaded ${data.length} application (/) commands.`,
+			`Successfully reloaded ${data.length} application (/) commands.`
 		);
 	} catch (error) {
 		console.error(error);

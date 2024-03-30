@@ -2,7 +2,7 @@ import {
 	Events,
 	EmbedBuilder,
 	ButtonInteraction,
-	TextChannel,
+	TextChannel
 } from 'discord.js';
 import lib from '../../bridge/bridge';
 module.exports = {
@@ -17,7 +17,7 @@ module.exports = {
 		const data = await lib.db.get(interaction.guildId);
 		const info = await interaction.client.channels.fetch(data.logChannel);
 		const info2 = await interaction.client.channels.fetch(
-			interaction.channelId,
+			interaction.channelId
 		);
 		// SET CHANNEL TYPES //
 		const channel2 = info2 as TextChannel;
@@ -32,7 +32,7 @@ module.exports = {
 			.setFooter({
 				text: locales.embed.footer.text
 					.replace('USERNAME', interaction.user.username)
-					.replace('ID', interaction.user.id),
+					.replace('ID', interaction.user.id)
 			});
 
 		// SEND THE LOG AND DELETE THE CHANNEL //
@@ -42,5 +42,5 @@ module.exports = {
 		} catch (e) {
 			console.error(e);
 		}
-	},
+	}
 };

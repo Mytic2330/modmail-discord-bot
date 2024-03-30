@@ -7,7 +7,7 @@ import {
 	User,
 	DMChannel,
 	CommandInteraction,
-	ChannelType,
+	ChannelType
 } from 'discord.js';
 import lib from '../../bridge/bridge';
 module.exports = {
@@ -18,7 +18,7 @@ module.exports = {
 			option
 				.setName('user')
 				.setDescription('Uporabnik, ki bo dodan v ticket')
-				.setRequired(true),
+				.setRequired(true)
 		),
 	async execute(interaction: CommandInteraction) {
 		const locales = lib.locales.commands.adduserjs;
@@ -28,13 +28,13 @@ module.exports = {
 			if (checkOne === false) {
 				interaction.reply({
 					ephemeral: true,
-					content: locales.notActiveChannel,
+					content: locales.notActiveChannel
 				});
 				return;
 			}
 			userCheck(interaction, user);
 		}
-	},
+	}
 };
 
 async function userCheck(interaction: CommandInteraction, user: User) {
@@ -49,7 +49,7 @@ async function userCheck(interaction: CommandInteraction, user: User) {
 		case true:
 			interaction.reply({
 				ephemeral: true,
-				content: locales.userCheck.userInTicket,
+				content: locales.userCheck.userInTicket
 			});
 			break;
 		case false:
@@ -61,7 +61,7 @@ async function userCheck(interaction: CommandInteraction, user: User) {
 async function addUserToTicket(
 	interaction: CommandInteraction,
 	user: User,
-	num: number,
+	num: number
 ) {
 	const locales = lib.locales.commands.adduserjs.addUserToTicket;
 	const DM = await user.createDM();
@@ -76,7 +76,7 @@ async function addUserToTicket(
 	const embed = new EmbedBuilder()
 		.setTitle(locales.embed.title)
 		.setDescription(
-			locales.embed.description.replace('USERNAME', username),
+			locales.embed.description.replace('USERNAME', username)
 		);
 	const button = new ButtonBuilder()
 		.setCustomId('onlyMark')
@@ -95,7 +95,7 @@ async function addUserToTicket(
 	await databaseSync(DM, num);
 	interaction.reply({
 		ephemeral: true,
-		content: locales.added.replace('USERNAME', `<@${user.id}>`),
+		content: locales.added.replace('USERNAME', `<@${user.id}>`)
 	});
 }
 
@@ -113,7 +113,7 @@ async function checkIfUserHasOpenTicket(DM: DMChannel) {
 async function sendToAllChannels(
 	interaction: CommandInteraction,
 	user: User,
-	number: number,
+	number: number
 ) {
 	const locales =
 		lib.locales.commands.adduserjs.addUserToTicket.sendToEveryChannel;
@@ -125,7 +125,7 @@ async function sendToAllChannels(
 		.setFooter({
 			text: locales.footer.text
 				.replace('USERNAME', interaction.user.username)
-				.replace('USERID', interaction.user.id),
+				.replace('USERID', interaction.user.id)
 		});
 
 	const allUsers = await lib.db.table(`tt_${number}`).get('info');

@@ -4,7 +4,7 @@ import {
 	StringSelectMenuBuilder,
 	StringSelectMenuOptionBuilder,
 	CommandInteraction,
-	DMChannel,
+	DMChannel
 } from 'discord.js';
 import lib from '../../bridge/bridge';
 module.exports = {
@@ -37,13 +37,13 @@ module.exports = {
 					select.addOptions(
 						new StringSelectMenuOptionBuilder()
 							.setLabel(user?.username || 'ERROR')
-							.setValue(id),
+							.setValue(id)
 					);
 				}
 				if (select.options.length === 0) {
 					await interaction.reply({
 						content: locales.error.nousers,
-						ephemeral: true,
+						ephemeral: true
 					});
 					return;
 				}
@@ -53,14 +53,14 @@ module.exports = {
 			} else {
 				await interaction.reply({
 					content: locales.error.nousers,
-					ephemeral: true,
+					ephemeral: true
 				});
 			}
 		} else {
 			await interaction.reply({
 				content: locales.error.nopremission,
-				ephemeral: true,
+				ephemeral: true
 			});
 		}
-	},
+	}
 };

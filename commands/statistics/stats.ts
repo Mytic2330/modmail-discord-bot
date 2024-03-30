@@ -5,7 +5,7 @@ import {
 	ActionRowBuilder,
 	ButtonStyle,
 	PermissionFlagsBits,
-	CommandInteraction,
+	CommandInteraction
 } from 'discord.js';
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -16,7 +16,7 @@ module.exports = {
 	async execute(interaction: CommandInteraction) {
 		interaction.reply({
 			content: 'Ta komanda trenutno ni v uporabi!',
-			ephemeral: true,
+			ephemeral: true
 		});
 		return;
 		// const embed = new EmbedBuilder()
@@ -40,5 +40,5 @@ module.exports = {
 		// 	.addComponents(ratingButton)
 		// 	.addComponents(selectTicket);
 		// interaction.reply({ embeds: [embed], components: [row] });
-	},
+	}
 };

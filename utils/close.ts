@@ -7,7 +7,7 @@ import {
 	ButtonStyle,
 	ActionRowBuilder,
 	Client,
-	TextChannel,
+	TextChannel
 } from 'discord.js';
 import lib from '../bridge/bridge';
 
@@ -92,7 +92,7 @@ async function close(base: any, type: string, num: number | null) {
 		closeUser: closeUser,
 		client: client,
 		number: number,
-		author: author.username,
+		author: author.username
 	};
 	const closeLog = await embedBuilder('log', embedData);
 	const closeEmbed = await embedBuilder('close', embedData);
@@ -105,7 +105,7 @@ async function close(base: any, type: string, num: number | null) {
 		filename: `${author.username}.htm`,
 		saveImages: true,
 		footerText: 'Made by mytic2330',
-		poweredBy: false,
+		poweredBy: false
 	});
 	// LOG WEBHOOK DEFINING
 	const wbh = await lib.wbh(logChannel);
@@ -117,11 +117,11 @@ async function close(base: any, type: string, num: number | null) {
 	if (obj) {
 		closeLog?.addFields({
 			name: locales.transcriptField.name,
-			value: locales.transcriptField.value.replace('LINK', obj.url),
+			value: locales.transcriptField.value.replace('LINK', obj.url)
 		});
 		closeEmbed?.addFields({
 			name: locales.transcriptField.name,
-			value: locales.transcriptField.value.replace('LINK', obj.url),
+			value: locales.transcriptField.value.replace('LINK', obj.url)
 		});
 	}
 	// COMPACTING STRUCTURE
@@ -129,20 +129,20 @@ async function close(base: any, type: string, num: number | null) {
 		closeLog: closeLog,
 		closeEmbed: closeEmbed,
 		creatorClose: creatorClose,
-		closeDmEmbed: closeDmEmbed,
+		closeDmEmbed: closeDmEmbed
 	};
 	const rows = {
 		creatorRow: creatorRow,
 		deleteRow: deleteRow,
 		openRow: openRow,
-		openRowRemoved: openRowRemoved,
+		openRowRemoved: openRowRemoved
 	};
 	const compactData = {
 		channel: channel,
 		wbh: wbh,
 		dmChannels: data.dmChannel,
 		client: client,
-		creatorId: data.creatorId,
+		creatorId: data.creatorId
 	};
 	// SEND ALL CLOSE EMBEDS
 	await sendSwitch(embeds, rows, compactData);
@@ -164,7 +164,7 @@ async function sendSwitch(embeds: any, rows: any, compactData: any) {
 	try {
 		compactData.channel.send({
 			embeds: [embeds.closeEmbed],
-			components: [rows.deleteRow],
+			components: [rows.deleteRow]
 		});
 	} catch (e) {
 		console.error(e);
@@ -175,12 +175,12 @@ async function sendSwitch(embeds: any, rows: any, compactData: any) {
 			if (dm.recipientId === compactData.creatorId) {
 				await dm.send({
 					embeds: [embeds.creatorClose],
-					components: [rows.creatorRow, rows.openRow],
+					components: [rows.creatorRow, rows.openRow]
 				});
 			} else {
 				await dm.send({
 					embeds: [embeds.closeDmEmbed],
-					components: [rows.openRowRemoved],
+					components: [rows.openRowRemoved]
 				});
 			}
 		} catch (e) {
@@ -200,7 +200,7 @@ async function unsetClosing(client: Client, number: number) {
 
 async function buildRow(
 	type: string,
-	data: { locales: any; number: number | null },
+	data: { locales: any; number: number | null }
 ) {
 	const locales = data.locales;
 	const number = data.number;
@@ -278,7 +278,7 @@ async function embedBuilder(
 		client: any;
 		number: number;
 		author: string;
-	},
+	}
 ) {
 	const locales = data.locales;
 	const color = await lib.db.get('color.close');
@@ -293,18 +293,18 @@ async function embedBuilder(
 			.setTitle(locales.closeEmbed.title)
 			.addFields(
 				{ name: ' ', value: locales.closeEmbed.field.value },
-				{ name: 'Ticket ID', value: `${number}`, inline: true },
+				{ name: 'Ticket ID', value: `${number}`, inline: true }
 			)
 			.addFields({
 				name: 'Uporabniki v ticketu',
 				value: `\n${users}`,
-				inline: true,
+				inline: true
 			})
 			.setTimestamp()
 			.setFooter({
 				text: locales.closeEmbed.footer.text
 					.replace('USERNAME', closeUser.username)
-					.replace('ID', closeUser.id),
+					.replace('ID', closeUser.id)
 			});
 		return embed;
 	}
@@ -314,18 +314,18 @@ async function embedBuilder(
 			.setTitle(locales.closeLog.title.replace('CHANNELNAME', author))
 			.addFields(
 				{ name: ' ', value: locales.closeLog.field.value },
-				{ name: 'Ticket ID', value: `${number}`, inline: true },
+				{ name: 'Ticket ID', value: `${number}`, inline: true }
 			)
 			.addFields({
 				name: 'Uporabniki v ticketu',
 				value: `\n${users}`,
-				inline: true,
+				inline: true
 			})
 			.setTimestamp()
 			.setFooter({
 				text: locales.closeLog.footer.text
 					.replace('USERNAME', closeUser.username)
-					.replace('ID', closeUser.id),
+					.replace('ID', closeUser.id)
 			});
 		return embed;
 	}
@@ -336,13 +336,13 @@ async function embedBuilder(
 			.addFields({
 				name: ' ',
 				value: locales.creatorClose.field.value,
-				inline: true,
+				inline: true
 			})
 			.setTimestamp()
 			.setFooter({
 				text: locales.creatorClose.footer.text
 					.replace('USERNAME', closeUser.username)
-					.replace('ID', closeUser.id),
+					.replace('ID', closeUser.id)
 			});
 		return embed;
 	}
@@ -362,7 +362,7 @@ async function dataSetUpdate(
 	client: Client,
 	obj: any,
 	channel: TextChannel,
-	gData: any,
+	gData: any
 ) {
 	moveTicket(channel, gData);
 	for (const id of data.dmChannel) {

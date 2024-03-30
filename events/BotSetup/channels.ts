@@ -6,7 +6,7 @@ import {
 	CategoryChannel,
 	Client,
 	Guild,
-	Role,
+	Role
 } from 'discord.js';
 import lib from '../../bridge/bridge';
 module.exports = {
@@ -20,44 +20,44 @@ module.exports = {
 				const category = await guild.channels.create({
 					name: lib.locales.events.channelsjs.channelCreation
 						.category,
-					type: ChannelType.GuildCategory,
+					type: ChannelType.GuildCategory
 				});
 				const categoryClosed = await guild.channels.create({
 					name: lib.locales.events.channelsjs.channelCreation
 						.categoryClosed,
-					type: ChannelType.GuildCategory,
+					type: ChannelType.GuildCategory
 				});
 
 				const log = await category.children.create({
 					name: lib.locales.events.channelsjs.channelCreation.log,
-					type: ChannelType.GuildText,
+					type: ChannelType.GuildText
 				});
 
 				const archive = await category.children.create({
 					name: lib.locales.events.channelsjs.channelCreation.archive,
-					type: ChannelType.GuildText,
+					type: ChannelType.GuildText
 				});
 
 				await category.permissionOverwrites.create(
 					guild.roles.everyone,
 					{
-						ViewChannel: false,
-					},
+						ViewChannel: false
+					}
 				);
 				await categoryClosed.permissionOverwrites.create(
 					guild.roles.everyone,
 					{
-						ViewChannel: false,
-					},
+						ViewChannel: false
+					}
 				);
 				await log.permissionOverwrites.create(guild.roles.everyone, {
-					ViewChannel: false,
+					ViewChannel: false
 				});
 				await archive.permissionOverwrites.create(
 					guild.roles.everyone,
 					{
-						ViewChannel: false,
-					},
+						ViewChannel: false
+					}
 				);
 
 				permissionSet(category, log, archive, categoryClosed, guild);
@@ -65,7 +65,7 @@ module.exports = {
 				console.error(e);
 			}
 		}
-	},
+	}
 };
 
 async function permissionSet(
@@ -73,7 +73,7 @@ async function permissionSet(
 	log: TextChannel,
 	archive: TextChannel,
 	categoryClosed: CategoryChannel,
-	guild: Guild,
+	guild: Guild
 ) {
 	const roles = lib.settings.allowedRoles;
 	for (const roleLoop of roles) {
@@ -83,7 +83,7 @@ async function permissionSet(
 		await log.permissionOverwrites.create(role, { ViewChannel: true });
 		await archive.permissionOverwrites.create(role, { ViewChannel: true });
 		await categoryClosed.permissionOverwrites.create(role, {
-			ViewChannel: true,
+			ViewChannel: true
 		});
 	}
 	const wbh = await lib.wbh(log);
@@ -93,7 +93,7 @@ async function permissionSet(
 		logChannel: log.id,
 		transcriptChannel: archive.id,
 		categoryId: category.id,
-		closeCategoryId: categoryClosed.id,
+		closeCategoryId: categoryClosed.id
 	});
 
 	const embed = new EmbedBuilder()

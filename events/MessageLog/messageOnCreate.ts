@@ -7,7 +7,7 @@ import {
 	type DMChannel,
 	type TextChannel,
 	type GuildMember,
-	type MessageReaction,
+	type MessageReaction
 } from 'discord.js';
 import lib from '../../bridge/bridge';
 module.exports = {
@@ -48,11 +48,11 @@ module.exports = {
 				lib.newTicket(message, undefined);
 				break;
 		}
-	},
+	}
 };
 
 async function getName(
-	member: GuildMember,
+	member: GuildMember
 ): Promise<{ username: string; rank: string }> {
 	const userId = member.user.id;
 	const userRankCache = lib.cache.userRanks;
@@ -92,7 +92,7 @@ async function messageHandeler(
 	message: Message,
 	client: Client,
 	locales: any,
-	processing: MessageReaction | undefined,
+	processing: MessageReaction | undefined
 ) {
 	let reciveChannelEmbed: EmbedBuilder;
 	if (message.guildId != undefined || message.guildId != null) {
@@ -103,7 +103,7 @@ async function messageHandeler(
 		reciveChannelEmbed = new EmbedBuilder()
 			.setAuthor({
 				name: returned.username,
-				iconURL: member.displayAvatarURL(),
+				iconURL: member.displayAvatarURL()
 			})
 			.setColor(await lib.db.get('color.recive'))
 			// .setTitle(locales.messageProcessing.reciveNewMessageEmbed.title)
@@ -113,14 +113,14 @@ async function messageHandeler(
 				text: `Rank: ${returned.rank}`,
 				iconURL:
 					locales.messageProcessing.reciveNewMessageEmbed.footer
-						.iconURL,
+						.iconURL
 			});
 	} else {
 		const user = await client.users.fetch(message.author.id);
 		reciveChannelEmbed = new EmbedBuilder()
 			.setAuthor({
 				name: user.displayName,
-				iconURL: user.displayAvatarURL(),
+				iconURL: user.displayAvatarURL()
 			})
 			.setColor(await lib.db.get('color.recive'))
 			// .setTitle(locales.messageProcessing.reciveNewMessageEmbed.title)
@@ -129,7 +129,7 @@ async function messageHandeler(
 				text: `${locales.messageProcessing.reciveNewMessageEmbed.footer.text}`,
 				iconURL:
 					locales.messageProcessing.reciveNewMessageEmbed.footer
-						.iconURL,
+						.iconURL
 			});
 	}
 
@@ -141,7 +141,7 @@ async function messageHandeler(
 		message.attachments.forEach((keys: any) => {
 			reciveChannelEmbed.addFields({
 				name: `${locales.messageProcessing.attachment} ${num}`,
-				value: `[**LINK**](${keys.attachment})`,
+				value: `[**LINK**](${keys.attachment})`
 			});
 			num++;
 		});
@@ -152,7 +152,7 @@ async function messageReciverSwitch(
 	message: Message,
 	reciveChannelEmbed: any,
 	client: Client,
-	processing: MessageReaction | undefined,
+	processing: MessageReaction | undefined
 ) {
 	const switchStatus = message.guildId === null;
 
@@ -178,7 +178,7 @@ async function afterSendErrorHandler(
 	client: Client,
 	type: string,
 	values: any,
-	processing: MessageReaction | undefined,
+	processing: MessageReaction | undefined
 ) {
 	const locales = lib.locales.events.messageOnCreatejs.errorHandler;
 	if (type === 'DM') {
@@ -188,7 +188,7 @@ async function afterSendErrorHandler(
 			message,
 			client,
 			values,
-			locales,
+			locales
 		);
 		try {
 			if (embed) errorEmbedSender(message, embed);
@@ -211,7 +211,7 @@ async function afterSendErrorHandler(
 async function errorEmbedAsemblyServer(
 	client: Client,
 	values: any,
-	locales: any,
+	locales: any
 ) {
 	if (values.channels.length > 1 && values.errorSender.length > 0) {
 		var one_time_warn_EMBED: any;
@@ -221,7 +221,7 @@ async function errorEmbedAsemblyServer(
 			.setTimestamp()
 			.setFooter({
 				text: locales.oneOrMore.footer.text,
-				iconURL: locales.oneOrMore.footer.iconURL,
+				iconURL: locales.oneOrMore.footer.iconURL
 			});
 		let x = 1;
 		for (const id of values.errorSender) {
@@ -232,20 +232,20 @@ async function errorEmbedAsemblyServer(
 					name: id,
 					value: locales.oneOrMore.fields.user.replace(
 						'USERNAME',
-						chan?.recipient,
-					),
+						chan?.recipient
+					)
 				});
 			} catch (e) {
 				console.error(e);
 				one_time_warn_EMBED.addFields({
 					name: locales.oneOrMore.fields.unknownUser.replace(
 						'NUMBER',
-						x,
+						x
 					),
 					value: locales.oneOrMore.fields.unknownUserex.replace(
 						'IDNUM',
-						id,
-					),
+						id
+					)
 				});
 				x++;
 			}
@@ -257,7 +257,7 @@ async function errorEmbedAsemblyClient(
 	message: Message,
 	client: Client,
 	values: any,
-	locales: any,
+	locales: any
 ) {
 	if (values.channels.length === values.errorSender.length) {
 		const embd = new EmbedBuilder()
@@ -267,7 +267,7 @@ async function errorEmbedAsemblyClient(
 			.setTimestamp()
 			.setFooter({
 				text: locales.messageNotDelivered.footer.text,
-				iconURL: locales.messageNotDelivered.footer.iconURL,
+				iconURL: locales.messageNotDelivered.footer.iconURL
 			});
 
 		errorEmbedSender(message, embd);
@@ -281,7 +281,7 @@ async function errorEmbedAsemblyClient(
 			.setTimestamp()
 			.setFooter({
 				text: locales.unknownError.footer.text,
-				iconURL: locales.unknownError.footer.iconURL,
+				iconURL: locales.unknownError.footer.iconURL
 			});
 
 		errorEmbedSender(message, embd);
@@ -295,7 +295,7 @@ async function errorEmbedAsemblyClient(
 			.setTimestamp()
 			.setFooter({
 				text: locales.oneOrMore.footer.text,
-				iconURL: locales.oneOrMore.footer.iconURL,
+				iconURL: locales.oneOrMore.footer.iconURL
 			});
 		let x = 1;
 		for (const id of values.errorSender) {
@@ -306,20 +306,20 @@ async function errorEmbedAsemblyClient(
 					name: id,
 					value: locales.oneOrMore.fields.user.replace(
 						'USERNAME',
-						chan.recipient,
-					),
+						chan.recipient
+					)
 				});
 			} catch (e) {
 				console.error(e);
 				one_time_warn_EMBED.addFields({
 					name: locales.oneOrMore.fields.unknownUser.replace(
 						'NUMBER',
-						x,
+						x
 					),
 					value: locales.oneOrMore.fields.unknownUserex.replace(
 						'IDNUM',
-						id,
-					),
+						id
+					)
 				});
 				x++;
 			}
@@ -414,15 +414,15 @@ async function infoWriter(
 	client: Client,
 	ticketNumberDatabse: number,
 	message: Message,
-	x: string,
+	x: string
 ) {
 	if (x === 'toServer') {
 		await lib.db.table(`tt_${ticketNumberDatabse}`).set(message.id, {
 			mesageData: {
 				channelId: message.channelId,
 				guildId: message.guildId,
-				author: message.author.id,
-			},
+				author: message.author.id
+			}
 		});
 		await lib.db
 			.table(`tt_${ticketNumberDatabse}`)
@@ -430,7 +430,7 @@ async function infoWriter(
 		await lib.db
 			.table(`tt_${ticketNumberDatabse}`)
 			.push('messageAnalitys.messages.DMMessagesUsers', {
-				user: message.author.id,
+				user: message.author.id
 			});
 		await lib.db
 			.table(`tt_${ticketNumberDatabse}`)
@@ -442,8 +442,8 @@ async function infoWriter(
 			mesageData: {
 				channelId: message.channelId,
 				guildId: message.guildId,
-				author: message.author.id,
-			},
+				author: message.author.id
+			}
 		});
 		await lib.db
 			.table(`tt_${ticketNumberDatabse}`)
@@ -451,7 +451,7 @@ async function infoWriter(
 		await lib.db
 			.table(`tt_${ticketNumberDatabse}`)
 			.push('messageAnalitys.messages.serverMessagesUsers', {
-				user: message.author.id,
+				user: message.author.id
 			});
 		await lib.db
 			.table(`tt_${ticketNumberDatabse}`)
@@ -463,13 +463,13 @@ async function sendDBWrite(
 	client: Client,
 	ticketNumberDatabse: number,
 	message: any,
-	msh: any,
+	msh: any
 ) {
 	await lib.db
 		.table(`tt_${ticketNumberDatabse}`)
 		.push(`${message.id}.recive`, {
 			channelId: msh.channelId,
 			messageId: msh.id,
-			guildId: msh.guildId,
+			guildId: msh.guildId
 		});
 }

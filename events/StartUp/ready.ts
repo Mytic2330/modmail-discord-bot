@@ -7,7 +7,7 @@ import {
 	BaseGuildTextChannel,
 	ButtonBuilder,
 	ButtonStyle,
-	ActionRowBuilder,
+	ActionRowBuilder
 } from 'discord.js';
 import lib from '../../bridge/bridge';
 module.exports = {
@@ -26,17 +26,17 @@ module.exports = {
 				open: colorSettings.open,
 				delete: colorSettings.delete,
 				error: colorSettings.error,
-				info: colorSettings.info,
+				info: colorSettings.info
 			});
 			await lib.db.set('screenshareRole', lib.settings.screenshareRole);
 			await lib.db.set(
 				'screenshareChannels',
-				lib.settings.screenshareChannels,
+				lib.settings.screenshareChannels
 			);
 			if (lib.settings.vactarCommunityID.length > 1) {
 				await lib.db.set(
 					'vactarCommunityID',
-					lib.settings.vactarCommunityID,
+					lib.settings.vactarCommunityID
 				);
 			}
 			await lib.db.set('guildId', lib.settings.guildId);
@@ -68,17 +68,17 @@ module.exports = {
 ╚═════╝░░╚════╝░░░░╚═╝░░░░░╚═╝░░╚═╝╚══════╝╚═╝░░╚═╝╚═════╝░░░░╚═╝░░░
 			
 		Logged in as ${client?.user?.tag}\x1b[0m`);
-	},
+	}
 };
 
 async function readyMessage(client: Client) {
 	const data = await lib.db.get(lib.settings.guildId);
 	if (data) {
 		const logChan: Channel | null = await client.channels.fetch(
-			data.logChannel,
+			data.logChannel
 		);
 		const transChan: Channel | null = await client.channels.fetch(
-			data.transcriptChannel,
+			data.transcriptChannel
 		);
 
 		const idOfLog = logChan as TextChannel;
@@ -90,7 +90,7 @@ async function readyMessage(client: Client) {
 			.setColor('Aqua')
 			.setTitle('Program zagnan')
 			.setDescription(
-				`Program se je uspešno zagnal.\n **Ustvarjalec:** mytic2330\n**Verzija:** ${lib.version}`,
+				`Program se je uspešno zagnal.\n **Ustvarjalec:** mytic2330\n**Verzija:** ${lib.version}`
 			);
 
 		try {
@@ -118,7 +118,7 @@ async function openTicketMessage(client: Client) {
 		if (channel instanceof BaseGuildTextChannel) {
 			try {
 				const msg = await channel.messages.fetch(
-					databaseRecived.messageID,
+					databaseRecived.messageID
 				);
 				msg.delete();
 			} catch (e) {
@@ -143,19 +143,19 @@ async function sendEmbed(client: Client, channelidRecived: string) {
 				.setFields(
 					{
 						name: '1. Odprti DM',
-						value: 'Da lahko začneš pogovor z našo ekipo,\nmoraš imeti odprete DMe za ta server.',
+						value: 'Da lahko začneš pogovor z našo ekipo,\nmoraš imeti odprete DMe za ta server.'
 					},
 					{
 						name: '2. Nimaš blokiranega bota',
-						value: 'Mene, od katerega bereš sporočilo, ne smeš imeti blokirangea.',
+						value: 'Mene, od katerega bereš sporočilo, ne smeš imeti blokirangea.'
 					},
 					{
 						name: '3. Nisi blacklistan',
-						value: 'Upam, da se nisi zameril komu od staffov. Namreč, lahko so te blacklistali...',
-					},
+						value: 'Upam, da se nisi zameril komu od staffov. Namreč, lahko so te blacklistali...'
+					}
 				)
 				.setDescription(
-					'Pozdravljen! \n Malo bolj nenavaden način odpiranja ticketa...\n Tukaj lahko pritisneš spodnji gumb, da začneš pogovor z našo ekipo.\n Moraš pa izpolnjevati naslednje pogoje:',
+					'Pozdravljen! \n Malo bolj nenavaden način odpiranja ticketa...\n Tukaj lahko pritisneš spodnji gumb, da začneš pogovor z našo ekipo.\n Moraš pa izpolnjevati naslednje pogoje:'
 				);
 			const button = new ButtonBuilder()
 				.setCustomId('openTicketInGuild')
@@ -165,11 +165,11 @@ async function sendEmbed(client: Client, channelidRecived: string) {
 			try {
 				const message = await channel.send({
 					embeds: [embed],
-					components: [row],
+					components: [row]
 				});
 				await lib.db.set('openMessage', {
 					messageID: message.id,
-					channelID: message.channelId,
+					channelID: message.channelId
 				});
 			} catch (e) {
 				console.error(e);

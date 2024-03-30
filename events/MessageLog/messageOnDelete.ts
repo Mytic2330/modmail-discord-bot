@@ -26,13 +26,13 @@ module.exports = {
 			console.error(e);
 			return;
 		}
-	},
+	}
 };
 
 async function handleHasMessage(
 	client: Client,
 	message: Message,
-	table: QuickDB,
+	table: QuickDB
 ) {
 	const dataMessage = await table.get(message.id);
 	for (const obj of dataMessage.recive) {

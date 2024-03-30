@@ -16,7 +16,7 @@
 		//"": "Admin",
 		//"": "S - Admin",
 		"1122603209278636091": "H - Staff",
-		"1122603209299603576": "Owner",
+		"1122603209299603576": "Owner"
 	},
 	// ID of your guild/server
 	"guildId": "1122603209035362385",
@@ -38,10 +38,10 @@
 						"defaultValue": "",
 						"placeholder": "",
 						"minLength": 10,
-						"maxLength": 1000,
-					},
-				],
-			},
+						"maxLength": 1000
+					}
+				]
+			}
 		},
 		{
 			"name": "BAN",
@@ -59,7 +59,7 @@
 						"defaultValue": "",
 						"placeholder": "",
 						"minLength": 1,
-						"maxLength": 1000,
+						"maxLength": 1000
 					},
 					{
 						"id": "howLongIsBan",
@@ -69,7 +69,7 @@
 						"defaultValue": "",
 						"placeholder": "",
 						"minLength": 1,
-						"maxLength": 1000,
+						"maxLength": 1000
 					},
 					{
 						"id": "whyUnban",
@@ -79,10 +79,10 @@
 						"defaultValue": "",
 						"placeholder": "",
 						"minLength": 50,
-						"maxLength": 1000,
-					},
-				],
-			},
+						"maxLength": 1000
+					}
+				]
+			}
 		},
 		{
 			"name": "DONACIJA",
@@ -100,10 +100,10 @@
 						"defaultValue": "",
 						"placeholder": "",
 						"minLength": 1,
-						"maxLength": 1000,
-					},
-				],
-			},
+						"maxLength": 1000
+					}
+				]
+			}
 		},
 		{
 			"name": "OSTALO",
@@ -121,11 +121,11 @@
 						"defaultValue": "",
 						"placeholder": "",
 						"minLength": 1,
-						"maxLength": 1000,
-					},
-				],
-			},
-		},
+						"maxLength": 1000
+					}
+				]
+			}
+		}
 		// "pomoc_Pomoč_Vprašanja in pomoč",
 		// "ban_Bani_Pomoč glede banov, opozoril...",
 		// "donacija_Donacije_Donacije",
@@ -139,10 +139,10 @@
 		"open": "Aqua",
 		"delete": "Orange",
 		"error": "Red",
-		"info": "Aqua",
+		"info": "Aqua"
 	},
 	// Delay between user closing a ticket and being able to open another one (in milliseconds)
 	"DMClose": 60000,
 	"vactarCommunityID": "61a151532b0b55369034aaf0", // LEAVE EMPTY IF YOU DON'T USE VACTAR
-	"openTicketMessageChannel": "1202327747469508638", // LEAVE EMPTY IF YOU DON'T WANT TO USE IT
+	"openTicketMessageChannel": "1202327747469508638" // LEAVE EMPTY IF YOU DON'T WANT TO USE IT
 }

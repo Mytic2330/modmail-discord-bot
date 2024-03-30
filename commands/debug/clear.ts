@@ -1,7 +1,7 @@
 import {
 	SlashCommandBuilder,
 	CommandInteraction,
-	PermissionFlagsBits,
+	PermissionFlagsBits
 } from 'discord.js';
 import lib from '../../bridge/bridge';
 module.exports = {
@@ -16,8 +16,8 @@ module.exports = {
 					{ name: 'closing', value: 'closing' },
 					{ name: 'users', value: 'users' },
 					{ name: 'ranks', value: 'ranks' },
-					{ name: 'all', value: 'all' },
-				),
+					{ name: 'all', value: 'all' }
+				)
 		)
 		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
 		.setDescription('Debug command'),
@@ -32,7 +32,7 @@ module.exports = {
 					console.error(e);
 					interaction.reply({
 						ephemeral: true,
-						content: 'Error while clearing\nCheck console!',
+						content: 'Error while clearing\nCheck console!'
 					});
 				}
 			} else if (reason.value == 'ranks') {
@@ -43,7 +43,7 @@ module.exports = {
 					console.error(e);
 					interaction.reply({
 						ephemeral: true,
-						content: 'Error while clearing\nCheck console!',
+						content: 'Error while clearing\nCheck console!'
 					});
 				}
 			} else if (reason.value == 'users') {
@@ -54,7 +54,7 @@ module.exports = {
 					console.error(e);
 					interaction.reply({
 						ephemeral: true,
-						content: 'Error while clearing\nCheck console!',
+						content: 'Error while clearing\nCheck console!'
 					});
 				}
 			} else if (reason.value == 'all') {
@@ -67,15 +67,15 @@ module.exports = {
 					console.error(e);
 					interaction.reply({
 						ephemeral: true,
-						content: 'Error while clearing\nCheck console!',
+						content: 'Error while clearing\nCheck console!'
 					});
 				}
 			}
 		} else {
 			interaction.reply({
 				ephemeral: true,
-				content: 'Error while clearing\nCheck console!',
+				content: 'Error while clearing\nCheck console!'
 			});
 		}
-	},
+	}
 };

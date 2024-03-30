@@ -1,7 +1,7 @@
 import {
 	SlashCommandBuilder,
 	CommandInteraction,
-	PermissionFlagsBits,
+	PermissionFlagsBits
 } from 'discord.js';
 import lib from '../../bridge/bridge';
 module.exports = {
@@ -11,7 +11,7 @@ module.exports = {
 			option
 				.setName('user')
 				.setRequired(true)
-				.setDescription('Uporabnik, ki bo unblacklistan'),
+				.setDescription('Uporabnik, ki bo unblacklistan')
 		)
 		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
 		.setDescription('Debug command'),
@@ -23,22 +23,22 @@ module.exports = {
 				lib.ticket.pull('blacklist', user.id);
 				interaction.reply({
 					ephemeral: true,
-					content: 'Uporabnik unblacklistan!',
+					content: 'Uporabnik unblacklistan!'
 				});
 				return;
 			} else {
 				interaction.reply({
 					ephemeral: true,
-					content: 'Uporabnik ni blacklistan!',
+					content: 'Uporabnik ni blacklistan!'
 				});
 				return;
 			}
 		} else {
 			interaction.reply({
 				ephemeral: true,
-				content: 'Uporabnik ni najden!',
+				content: 'Uporabnik ni najden!'
 			});
 			return;
 		}
-	},
+	}
 };

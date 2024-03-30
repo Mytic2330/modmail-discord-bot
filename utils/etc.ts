@@ -4,7 +4,7 @@ import { GuildMember, User } from 'discord.js';
 export async function hasNewUsername(
 	x: User | GuildMember,
 	returnUsername: boolean,
-	type: string,
+	type: string
 ): Promise<boolean | string | undefined> {
 	if (type == 'member') {
 		const guildMember = x as GuildMember;
@@ -59,7 +59,7 @@ export function getDatestamp(): string {
 
 function getWeekNumber(date: Date): number {
 	const d: any = new Date(
-		Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()),
+		Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
 	);
 	d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
 	const yearStart: any = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));

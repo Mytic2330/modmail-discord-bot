@@ -9,7 +9,7 @@ module.exports = {
 		setInterval(() => {
 			clearCaches();
 		}, 2000);
-	},
+	}
 };
 
 async function clearCaches() {
@@ -28,7 +28,7 @@ async function handleOpenTickets() {
 		'tickets',
 		'openTickets',
 		'inaQueue',
-		'closing',
+		'closing'
 	];
 	const cache = lib.cache.openTickets;
 	cache.clear();

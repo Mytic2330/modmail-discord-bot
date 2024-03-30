@@ -52,9 +52,8 @@ module.exports = {
 					console.log(e);
 				}
 			}
-		}
-		// TRIGGER IN GUILD //
-		else {
+		} else {
+			// TRIGGER IN GUILD /
 			for (const chanId of data.dmChannel) {
 				try {
 					if (chanId == typingRefrence.channel.id) continue;
@@ -67,5 +66,5 @@ module.exports = {
 				}
 			}
 		}
-	},
+	}
 };

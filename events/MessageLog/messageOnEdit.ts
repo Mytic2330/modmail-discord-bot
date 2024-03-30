@@ -4,7 +4,7 @@ import {
 	Message,
 	Client,
 	DMChannel,
-	TextChannel,
+	TextChannel
 } from 'discord.js';
 import { QuickDB } from 'quick.db';
 import lib from '../../bridge/bridge';
@@ -50,14 +50,14 @@ module.exports = {
 			console.error(e);
 			return;
 		}
-	},
+	}
 };
 
 async function handleHasMessage(
 	client: Client,
 	message: Message,
 	oldMessage: Message,
-	table: QuickDB,
+	table: QuickDB
 ) {
 	const dataMessage = await table.get(message.id);
 	const arr = [];
@@ -69,7 +69,7 @@ async function handleHasMessage(
 		if (msg.guildId) {
 			embed.addFields({
 				name: 'Before:',
-				value: oldMessage.content || 'Prazno',
+				value: oldMessage.content || 'Prazno'
 			});
 		}
 		try {
@@ -85,7 +85,7 @@ async function handleHasMessage(
 		message.reply({
 			content:
 				'Ni bilo mogoče spremeniti sporočila v naslednjih kanalih:\n' +
-				string,
+				string
 		});
 	} else {
 		const embed = await createEditedEmbed(client, message);
@@ -97,13 +97,13 @@ async function handleHasMessage(
 
 async function handleNoMessage(message: Message) {
 	await message.reply({
-		content: 'Ni mogoče poslati spremenjenega sporočila',
+		content: 'Ni mogoče poslati spremenjenega sporočila'
 	});
 }
 
 async function createEmbedToSend(
 	client: Client,
-	message: Message,
+	message: Message
 ): Promise<EmbedBuilder> {
 	const user = await client.users.fetch(message.author.id);
 	const reciveChannelEmbed = new EmbedBuilder()
@@ -114,7 +114,7 @@ async function createEmbedToSend(
 		.setFooter({
 			text: `${'Ekipa BCRP'}`,
 			iconURL:
-				'https://cdn.discordapp.com/attachments/1012850899980394557/1138546219640176851/097e89ede70464edaf570046b6b3f7b8.png',
+				'https://cdn.discordapp.com/attachments/1012850899980394557/1138546219640176851/097e89ede70464edaf570046b6b3f7b8.png'
 		});
 
 	if (message.content) {
@@ -125,7 +125,7 @@ async function createEmbedToSend(
 		message.attachments.forEach((keys: any) => {
 			reciveChannelEmbed.addFields({
 				name: `Priponka ${num}`,
-				value: `[**LINK**](${keys.attachment})`,
+				value: `[**LINK**](${keys.attachment})`
 			});
 			num++;
 		});
@@ -136,7 +136,7 @@ async function createEmbedToSend(
 
 async function createEditedEmbed(
 	client: Client,
-	message: Message,
+	message: Message
 ): Promise<EmbedBuilder> {
 	const reciveChannelEmbed = new EmbedBuilder()
 		.setColor(await lib.db.get('color.info'))

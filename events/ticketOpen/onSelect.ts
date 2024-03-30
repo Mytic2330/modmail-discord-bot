@@ -14,13 +14,13 @@ import {
 	ModalBuilder,
 	TextInputBuilder,
 	TextInputStyle,
-	ModalSubmitInteraction,
+	ModalSubmitInteraction
 } from 'discord.js';
 import lib from '../../bridge/bridge';
 module.exports = {
 	name: Events.InteractionCreate,
 	async execute(
-		interaction: ModalSubmitInteraction | StringSelectMenuInteraction,
+		interaction: ModalSubmitInteraction | StringSelectMenuInteraction
 	) {
 		// CHECK IF IT IS ANY OTHER INTERACTION //
 		if (interaction.isStringSelectMenu()) {
@@ -31,12 +31,12 @@ module.exports = {
 			if (!interaction.customId.startsWith('openTicketModal')) return;
 			checksAndPass(interaction, 'modal');
 		}
-	},
+	}
 };
 
 async function checksAndPass(
 	interaction: ModalSubmitInteraction | StringSelectMenuInteraction,
-	type: string,
+	type: string
 ) {
 	const status = await checkStatus(interaction);
 	if (status.code !== 200) {
@@ -47,7 +47,7 @@ async function checksAndPass(
 	if (type === 'modal') {
 		openNewTicket(
 			interaction as ModalSubmitInteraction,
-			interaction.customId.split('_')[1],
+			interaction.customId.split('_')[1]
 		);
 		return;
 	}
@@ -70,7 +70,7 @@ async function stringSelect(interaction: StringSelectMenuInteraction) {
 
 async function createModal(
 	interaction: StringSelectMenuInteraction,
-	modalSettings: any,
+	modalSettings: any
 ) {
 	const modal = new ModalBuilder()
 		.setCustomId(`openTicketModal_${interaction.values[0]}`)
@@ -109,11 +109,11 @@ async function createModal(
 
 async function openNewTicket(
 	interaction: ModalSubmitInteraction | StringSelectMenuInteraction,
-	indexOfType: string,
+	indexOfType: string
 ) {
 	const locales = lib.locales.events.onSelectMenuInteractionjs;
 	lib.cache.usersOpeningTicket.set(interaction.user.id, {
-		time: lib.unixTimestamp(),
+		time: lib.unixTimestamp()
 	});
 	try {
 		const preparing = new EmbedBuilder()
@@ -124,7 +124,7 @@ async function openNewTicket(
 		if (interaction.message) {
 			await interaction.message.edit({
 				embeds: [preparing],
-				components: [],
+				components: []
 			});
 		} else {
 			interaction.reply({ embeds: [preparing], components: [] });
@@ -140,7 +140,7 @@ async function openNewTicket(
 
 async function sendError(
 	interaction: ModalSubmitInteraction | StringSelectMenuInteraction,
-	param: { code: number; message: string },
+	param: { code: number; message: string }
 ) {
 	const locales = lib.locales.events.onSelectMenuInteractionjs;
 	switch (param.code) {
@@ -149,7 +149,7 @@ async function sendError(
 				.setColor(await lib.db.get('color.default'))
 				.setTitle('Blacklist')
 				.setDescription(
-					'Bili ste blacklistani.\n Torej možnosti odpiranja ticketa nimate!',
+					'Bili ste blacklistani.\n Torej možnosti odpiranja ticketa nimate!'
 				)
 				.setTimestamp();
 			await interaction.reply({ embeds: [embed], ephemeral: true });
@@ -174,14 +174,14 @@ async function sendError(
 		case 505: {
 			await interaction.reply({
 				content: 'NAPAKA. KONTAKTIRAJTE ADMINISTRACIJO',
-				ephemeral: true,
+				ephemeral: true
 			});
 			break;
 		}
 		default: {
 			await interaction.reply({
 				content: 'NAPAKA. KONTAKTIRAJTE ADMINISTRACIJO',
-				ephemeral: true,
+				ephemeral: true
 			});
 		}
 	}
@@ -189,7 +189,7 @@ async function sendError(
 }
 
 async function checkStatus(
-	interaction: StringSelectMenuInteraction | ModalSubmitInteraction,
+	interaction: StringSelectMenuInteraction | ModalSubmitInteraction
 ): Promise<{ code: number; message: string }> {
 	const blacklist: Array<string> | null = await lib.ticket.get('blacklist');
 	if (blacklist!.includes(interaction.user.id)) {
@@ -217,7 +217,7 @@ async function checkStatus(
 async function createChannel(
 	guild: Guild,
 	interaction: StringSelectMenuInteraction | ModalSubmitInteraction,
-	ticketPrefix: string,
+	ticketPrefix: string
 ) {
 	// DEFINITIONS //
 	const data = await lib.db.get(guild.id);
@@ -229,7 +229,7 @@ async function createChannel(
 	try {
 		const channel = await category?.children.create({
 			name: name,
-			type: ChannelType.GuildText,
+			type: ChannelType.GuildText
 		});
 		sendInitial(channel, interaction, ticketPrefix);
 	} catch (e) {
@@ -240,7 +240,7 @@ async function createChannel(
 async function sendInitial(
 	guildChannel: TextChannel,
 	interaction: StringSelectMenuInteraction | ModalSubmitInteraction,
-	ticketPrefix: string,
+	ticketPrefix: string
 ) {
 	// DEFINITIONS
 	const locales = lib.locales.events.onSelectMenuInteractionjs.initialOpening;
@@ -253,7 +253,7 @@ async function sendInitial(
 	const embed = new EmbedBuilder()
 		.setAuthor({
 			name: interaction.user.username,
-			iconURL: member.user.displayAvatarURL(),
+			iconURL: member.user.displayAvatarURL()
 		})
 		.setColor(color)
 		.setTitle(locales.logEmbed.title.replace('CATEGORY', ticketPrefix))
@@ -262,19 +262,19 @@ async function sendInitial(
 			{
 				name: locales.logEmbed.ticketNumber,
 				value: `${num}`,
-				inline: true,
+				inline: true
 			},
 			{
 				name: locales.logEmbed.userProfile,
 				value: `${member.user}`,
-				inline: true,
-			},
+				inline: true
+			}
 		)
 		.setFooter({
 			text: locales.logEmbed.footer.text.replace(
 				'USERID',
-				interaction.user.id,
-			),
+				interaction.user.id
+			)
 		});
 	if (await lib.db.get('vactarCommunityID')) {
 		embed.addFields({
@@ -282,10 +282,10 @@ async function sendInitial(
 			value: locales.logEmbed.openHere.replace(
 				'LINK',
 				`https://app.vactar.io/communities/${await lib.db.get(
-					'vactarCommunityID',
-				)}/players/identifiers?search=${member.user.id}`,
+					'vactarCommunityID'
+				)}/players/identifiers?search=${member.user.id}`
 			),
-			inline: true,
+			inline: true
 		});
 	}
 	const select = new ButtonBuilder()
@@ -294,14 +294,14 @@ async function sendInitial(
 		.setStyle(ButtonStyle.Danger);
 
 	const row: ActionRowBuilder<any> = new ActionRowBuilder().addComponents(
-		select,
+		select
 	);
 	// PIN THE MESSAGE //
 	try {
 		if (interaction instanceof StringSelectMenuInteraction) {
 			const mes = await guildChannel.send({
 				embeds: [embed],
-				components: [row],
+				components: [row]
 			});
 			await mes.pin();
 			guildChannel.bulkDelete(1);
@@ -343,7 +343,7 @@ async function sendInitial(
 async function logInteraction(
 	x: TextChannel,
 	member: GuildMember,
-	num: number,
+	num: number
 ) {
 	// DEFINITIONS //
 	const locales = lib.locales.events.onSelectMenuInteractionjs.initialOpening;
@@ -356,27 +356,27 @@ async function logInteraction(
 	const embed = new EmbedBuilder()
 		.setAuthor({
 			name: member.user.username,
-			iconURL: member.user.displayAvatarURL(),
+			iconURL: member.user.displayAvatarURL()
 		})
 		.setColor(await lib.db.get('color.default'))
 		.setTitle(
 			locales.otherLogEmbed.title.replace(
 				'USERNAME',
-				member.user.username,
-			),
+				member.user.username
+			)
 		)
 		.setTimestamp()
 		.addFields(
 			{
 				name: locales.otherLogEmbed.ticketNumber,
 				value: `${num}`,
-				inline: true,
+				inline: true
 			},
 			{
 				name: locales.otherLogEmbed.userProfile,
 				value: `${member.user}`,
-				inline: true,
-			},
+				inline: true
+			}
 		)
 		.setFooter({ text: locales.otherLogEmbed.footer.text });
 
@@ -387,7 +387,7 @@ async function logInteraction(
 async function databaseSync(
 	interaction: StringSelectMenuInteraction | ModalSubmitInteraction,
 	x: TextChannel,
-	num: number,
+	num: number
 ) {
 	lib.cache.usersOpeningTicket.delete(interaction.user.id);
 	const newTable = lib.db.table(`tt_${num}`);
@@ -395,7 +395,7 @@ async function databaseSync(
 		guildChannel: x.id,
 		dmChannel: [interaction.channelId],
 		creatorId: interaction.user.id,
-		closed: false,
+		closed: false
 	});
 	await lib.ticket.set(x.id, num);
 	await lib.ticket.set(interaction.channelId!, num);
@@ -404,19 +404,19 @@ async function databaseSync(
 	await newTable.set('analytics', {
 		date: lib.datestamp(),
 		time: lib.timestamp(),
-		rating: null,
+		rating: null
 	});
 	await newTable.set('messageAnalitys', {
 		messages: {
 			sentByDM: 0,
 			sentByServer: 0,
 			serverMessagesUsers: [],
-			DMMessagesUsers: [],
-		},
+			DMMessagesUsers: []
+		}
 	});
 	await newTable.set('activity', {
 		lastServerMessage: lib.unixTimestamp(),
-		lastDMMessage: lib.unixTimestamp(),
+		lastDMMessage: lib.unixTimestamp()
 	});
 	await lib.ticket.push('tickets', num);
 	await lib.ticket.push('openTickets', num);
@@ -424,7 +424,7 @@ async function databaseSync(
 
 async function ticketNumberCalculation(
 	interaction: StringSelectMenuInteraction | ModalSubmitInteraction,
-	x: TextChannel,
+	x: TextChannel
 ) {
 	let num = await lib.db.get('ticketNumber');
 	if (num) {

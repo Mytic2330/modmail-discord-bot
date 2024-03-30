@@ -7,5 +7,5 @@ module.exports = {
 		.setDMPermission(false),
 	async execute(interaction: CommandInteraction) {
 		lib.close(interaction, 'cls', null);
-	},
+	}
 };

@@ -5,7 +5,7 @@ import {
 	ButtonBuilder,
 	ButtonStyle,
 	ActionRowBuilder,
-	EmbedBuilder,
+	EmbedBuilder
 } from 'discord.js';
 module.exports = {
 	name: Events.InteractionCreate,
@@ -23,7 +23,7 @@ module.exports = {
 				.setColor('Aqua')
 				.setTitle('Odpri ticket')
 				.setDescription(
-					'Pošlji sporočilo ali pritisni gumb spodaj,\nda odpreš nov ticket.',
+					'Pošlji sporočilo ali pritisni gumb spodaj,\nda odpreš nov ticket.'
 				);
 			const button = new ButtonBuilder()
 				.setCustomId('openNewTicketButtonRemoved')
@@ -33,16 +33,16 @@ module.exports = {
 			try {
 				await dm.send({ embeds: [embed], components: [row] });
 				interaction.editReply({
-					content: `Prejel si sporočilo <#${dm.id}>`,
+					content: `Prejel si sporočilo <#${dm.id}>`
 				});
 			} catch (e) {
 				interaction.editReply({ content: 'Imaš zaprte DMe!' });
 			}
 		} else {
 			interaction.editReply({
-				content: 'Napaka! Poskusi napisati DM direktno meni.',
+				content: 'Napaka! Poskusi napisati DM direktno meni.'
 			});
 		}
 		return;
-	},
+	}
 };

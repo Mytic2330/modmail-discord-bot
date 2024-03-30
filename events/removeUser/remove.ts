@@ -11,7 +11,7 @@ import {
 	Channel,
 	Snowflake,
 	StringSelectMenuInteraction,
-	ChannelType,
+	ChannelType
 } from 'discord.js';
 import lib from '../../bridge/bridge';
 module.exports = {
@@ -22,7 +22,7 @@ module.exports = {
 		if (interaction.customId !== 'removeUser') return;
 		const client: Client = interaction.client;
 		const chan: Channel | null = await client.channels.fetch(
-			interaction.values[0],
+			interaction.values[0]
 		);
 		interaction.deferReply({ ephemeral: true });
 		// DEFINITIONS //
@@ -32,17 +32,17 @@ module.exports = {
 			userCheck(interaction, user, dm);
 		} else {
 			interaction.editReply({
-				content: 'Ni bilo mogoče pridobiti uporabnika.',
+				content: 'Ni bilo mogoče pridobiti uporabnika.'
 			});
 			return;
 		}
-	},
+	}
 };
 
 async function userCheck(
 	passedInteraction: Interaction,
 	user: User,
-	dm: DMChannel,
+	dm: DMChannel
 ) {
 	// DEFINITIONS
 	const interaction = passedInteraction as StringSelectMenuInteraction;
@@ -75,7 +75,7 @@ async function userCheck(
 			default:
 				interaction.editReply({
 					content:
-						'Prišlo je do napake! Kontaktirajte administracijo.',
+						'Prišlo je do napake! Kontaktirajte administracijo.'
 				});
 				return;
 		}
@@ -88,7 +88,7 @@ async function userCheck(
 async function removeUserFromTicket(
 	interaction: StringSelectMenuInteraction,
 	user: User,
-	num: number,
+	num: number
 ) {
 	// DEFINITIONS //
 	const locales = lib.locales.events.removejs;
@@ -101,7 +101,7 @@ async function removeUserFromTicket(
 		.setLabel(locales.openNewTicket.lable)
 		.setStyle(ButtonStyle.Primary);
 	const openRow: ActionRowBuilder<any> = new ActionRowBuilder().addComponents(
-		openNewTicket,
+		openNewTicket
 	);
 	// TRY TO SEND EMBED TO REMOVED USER //
 	try {
@@ -125,7 +125,7 @@ async function databaseSync(dm: DMChannel | undefined, num: number) {
 async function sendToAllChannels(
 	interaction: StringSelectMenuInteraction,
 	user: User,
-	number: number,
+	number: number
 ) {
 	// DEFINITIONS //
 	const locales = lib.locales.events.removejs.sentToAllChannels;
@@ -137,7 +137,7 @@ async function sendToAllChannels(
 		.setFooter({
 			text: locales.footer.text
 				.replace('USERNAME', interaction.user.username)
-				.replace('USERID', interaction.user.id),
+				.replace('USERID', interaction.user.id)
 		});
 
 	const allUsers = await lib.db.table(`tt_${number}`).get('info');

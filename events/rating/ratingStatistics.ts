@@ -11,7 +11,7 @@ import {
 	ModalSubmitInteraction,
 	Client,
 	DMChannel,
-	Snowflake,
+	Snowflake
 } from 'discord.js';
 import lib from '../../bridge/bridge';
 module.exports = {
@@ -26,7 +26,7 @@ module.exports = {
 				processModal(interaction);
 			}
 		}
-	},
+	}
 };
 
 async function switchCheck(passedInteraction: ButtonInteraction) {
@@ -61,7 +61,7 @@ async function ticketFnc(interaction: ButtonInteraction) {
 		.setLabel('Številka ticketa, ki si ga želite ogledati')
 		.setStyle(TextInputStyle.Short);
 	const firstActionRow: any = new ActionRowBuilder().addComponents(
-		favoriteColorInput,
+		favoriteColorInput
 	);
 
 	modal.addComponents(firstActionRow);
@@ -76,7 +76,7 @@ async function processModal(interaction: ModalSubmitInteraction) {
 	if (!chc) {
 		await interaction.reply({
 			content: 'Neveljavna številka ticketa!',
-			ephemeral: true,
+			ephemeral: true
 		});
 		return;
 	}
@@ -85,7 +85,7 @@ async function processModal(interaction: ModalSubmitInteraction) {
 	if (!info) {
 		interaction.reply({
 			content: 'Ni uspelo pridobiti podatkov!',
-			ephemeral: true,
+			ephemeral: true
 		});
 		return;
 	}
@@ -111,7 +111,7 @@ async function gatherTicketInfo(num: number): Promise<{
 			info: info,
 			analytics: analytics,
 			messageAnalitys: messageAnalitys,
-			num: num,
+			num: num
 		};
 		return obj;
 	} catch (e) {
@@ -123,7 +123,7 @@ async function gatherTicketInfo(num: number): Promise<{
 async function embedCreator(
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	obj: { info: any; analytics: any; messageAnalitys: any; num: number },
-	client: Client,
+	client: Client
 ) {
 	const embed = new EmbedBuilder()
 		.setColor(await lib.db.get('color.default'))
@@ -134,15 +134,15 @@ async function embedCreator(
 	embed.addFields({
 		name: 'Podatki o ticketu',
 		value: `Datum odprjta: ${await dateMaker(
-			obj.analytics.date,
+			obj.analytics.date
 		)}\nUra odprtja: **${obj.analytics.time}**`,
-		inline: true,
+		inline: true
 	});
 
 	embed.addFields({
 		name: 'Podatki o avtorju',
 		value: `Tag: ${await client.users.fetch(obj.info.creatorId)}`,
-		inline: true,
+		inline: true
 	});
 
 	const users = await getAllUsers(client, obj.info);
@@ -150,7 +150,7 @@ async function embedCreator(
 	if (users) {
 		embed.addFields({
 			name: 'Uporabniki v ticketu',
-			value: `${users}`,
+			value: `${users}`
 		});
 	}
 
@@ -174,7 +174,7 @@ async function dateMaker(data: any) {
 async function getAllUsers(
 	client: Client,
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	data: { dmChannel: any; creatorId: Snowflake },
+	data: { dmChannel: any; creatorId: Snowflake }
 ) {
 	const arr = [];
 	for (const id of data.dmChannel) {
