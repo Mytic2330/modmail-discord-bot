@@ -33,10 +33,12 @@ import { webhook } from '../utils/webhook';
 const userRanks = new Map<string, { username: string; rank: string }>();
 const usersOpeningTicket = new Map<string, { time: number }>();
 const closingTickets = new Map<number, { time: number }>();
+const openTickets = new Map<string, { number: number }>();
 const cache = {
 	userRanks: userRanks,
 	usersOpeningTicket: usersOpeningTicket,
 	closingTickets: closingTickets,
+	openTickets: openTickets,
 };
 
 // TESTING FEATURE //

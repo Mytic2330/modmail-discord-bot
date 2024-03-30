@@ -17,6 +17,7 @@ import lib from '../../bridge/bridge';
 module.exports = {
 	name: Events.InteractionCreate,
 	async execute(interaction: Interaction) {
+		// CHECKS //
 		if (!interaction.isStringSelectMenu()) return;
 		if (interaction.customId !== 'removeUser') return;
 		const client: Client = interaction.client;
@@ -24,9 +25,17 @@ module.exports = {
 			interaction.values[0],
 		);
 		interaction.deferReply({ ephemeral: true });
+		// DEFINITIONS //
 		const dm = chan as DMChannel;
 		const user = dm?.recipient;
-		userCheck(interaction, user!, dm);
+		if (user) {
+			userCheck(interaction, user, dm);
+		}
+		else {
+			interaction.editReply({ content: 'Ni bilo mogoče pridobiti uporabnika.' });
+			return;
+		}
+
 	},
 };
 
@@ -35,24 +44,43 @@ async function userCheck(
 	user: User,
 	dm: DMChannel,
 ) {
+	// DEFINITIONS
 	const interaction = passedInteraction as StringSelectMenuInteraction;
 	const locales = lib.locales.events.removejs;
 	const channelId: Snowflake = interaction.channelId || '0';
-	const ticketDatabaseNumber: number | null =
-    (await lib.ticket.get(channelId)) || 0;
-	const ticketDatabase = await lib.db
-		.table(`tt_${ticketDatabaseNumber}`)
-		.get('info');
-	const status = await ticketDatabase.dmChannel.includes(dm.id);
+	let tctNum = 0;
 
-	switch (status) {
-	case false:
-		interaction.editReply({ content: locales.userNotInTicket });
-		break;
-	case true:
-		removeUserFromTicket(interaction, user, ticketDatabaseNumber);
-		break;
+	// CHECK CACHE //
+	const cacheNumber = lib.cache.openTickets.get(channelId);
+	if (cacheNumber) {
+		tctNum = cacheNumber.number;
 	}
+	// DEFINE NUMBER //
+	const ticketDatabaseNumber: number = tctNum || (await lib.ticket.get(channelId)) || 0;
+	// GET TICKET AND REMOVE / GIVE ERROR //
+	try {
+		const ticketDatabase = await lib.db
+			.table(`tt_${ticketDatabaseNumber}`)
+			.get('info');
+		const status = await ticketDatabase.dmChannel.includes(dm.id);
+
+		switch (status) {
+		case false:
+			interaction.editReply({ content: locales.userNotInTicket });
+			break;
+		case true:
+			removeUserFromTicket(interaction, user, ticketDatabaseNumber);
+			break;
+		default:
+			interaction.editReply({ content: 'Prišlo je do napake! Kontaktirajte administracijo.' });
+			return;
+		}
+	}
+	catch (e) {
+		console.error(e);
+		return;
+	}
+
 }
 
 async function removeUserFromTicket(
@@ -60,8 +88,9 @@ async function removeUserFromTicket(
 	user: User,
 	num: number,
 ) {
+	// DEFINITIONS //
 	const locales = lib.locales.events.removejs;
-	const DM = await user?.createDM();
+	const DM = await user.createDM();
 	const embed = new EmbedBuilder()
 		.setTitle(locales.embed.title)
 		.setDescription(locales.embed.description);
@@ -69,14 +98,15 @@ async function removeUserFromTicket(
 		.setCustomId('openNewTicketButtonRemoved')
 		.setLabel(locales.openNewTicket.lable)
 		.setStyle(ButtonStyle.Primary);
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const openRow: ActionRowBuilder<any> = new ActionRowBuilder().addComponents(openNewTicket);
+	// TRY TO SEND EMBED TO REMOVED USER //
 	try {
 		await DM?.send({ embeds: [embed], components: [openRow] });
 	}
 	catch (e) {
 		console.log('');
 	}
+	// REMOVE FROM DATABASE
 	await sendToAllChannels(interaction, user, num);
 	databaseSync(DM, num);
 	interaction.editReply({ content: locales.userRemoved });
@@ -90,6 +120,7 @@ async function databaseSync(dm: DMChannel | undefined, num: number) {
 }
 
 async function sendToAllChannels(interaction: StringSelectMenuInteraction, user: User, number: number) {
+	// DEFINITIONS //
 	const locales = lib.locales.events.removejs.sentToAllChannels;
 	const client = interaction.client;
 	const embed = new EmbedBuilder()
@@ -99,7 +130,6 @@ async function sendToAllChannels(interaction: StringSelectMenuInteraction, user:
 		.setFooter({ text: (locales.footer.text).replace('USERNAME', interaction.user.username).replace('USERID', interaction.user.id) });
 
 	const allUsers = await lib.db.table(`tt_${number}`).get('info');
-
 	const guildChannel = await client.channels.fetch(allUsers.guildChannel);
 
 	if (guildChannel && guildChannel.type === ChannelType.GuildText) {

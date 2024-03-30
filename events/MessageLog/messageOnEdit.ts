@@ -12,24 +12,39 @@ module.exports = {
 	name: Events.MessageUpdate,
 	async execute(oldMessage: Message, newMessage: Message) {
 		const client = newMessage.client;
-		if (newMessage.content.toLowerCase().startsWith('!')) {
-			const check = newMessage.content.substring(1, 4);
-			if (check.toLowerCase().startsWith('adm')) {
+		// CHECK IF IT IS ADMIN ONLY MESSAGE //
+		if (newMessage.guildId) {
+			if (newMessage.content.toLowerCase().startsWith('!adm')) {
 				return;
+				// const check = newMessage.content.substring(1, 4);
+				// if (check.toLowerCase().startsWith('adm')) {
+				// 	return;
+				// }
 			}
 		}
-		if (newMessage.author.bot === true) return;
-		if (!(await lib.ticket.has(newMessage.channelId))) return;
-		const num = await lib.ticket.get(newMessage.channelId);
-		const table = lib.db.table(`tt_${num}`);
-		const hasMessage = await table.has(newMessage.id);
-		switch (hasMessage) {
-		case true:
-			handleHasMessage(client, newMessage, oldMessage, table);
-			break;
-		case false:
-			handleNoMessage(newMessage);
-			break;
+		// CHECK FOR BOT MESSAGE //
+		try { if (oldMessage.author.bot || newMessage.author.bot) return; }
+		catch (e) { console.log();}
+
+		const cache = lib.cache.openTickets;
+		const tcNum = cache.get(newMessage.channelId);
+		const num: number = tcNum ? tcNum.number : await lib.ticket.get(newMessage.channelId) || 0;
+		try {
+			if (!num) return;
+			const table = lib.db.table(`tt_${num}`);
+			const hasMessage = await table.has(newMessage.id);
+			switch (hasMessage) {
+			case true:
+				handleHasMessage(client, newMessage, oldMessage, table);
+				break;
+			case false:
+				handleNoMessage(newMessage);
+				break;
+			}
+		}
+		catch (e) {
+			console.error(e);
+			return;
 		}
 	},
 };
@@ -46,7 +61,7 @@ async function handleHasMessage(
 		const resolvingChannel = await client.channels.fetch(obj.channelId);
 		const channel = resolvingChannel as DMChannel | TextChannel;
 		const msg = await channel.messages.fetch(obj.messageId);
-		const embed = await createEmbedToSend(client, message, oldMessage);
+		const embed = await createEmbedToSend(client, message);
 		if (msg.guildId) {
 			embed.addFields({
 				name: 'Before:',
@@ -84,7 +99,6 @@ async function handleNoMessage(message: Message) {
 async function createEmbedToSend(
 	client: Client,
 	message: Message,
-	oldMessage: Message,
 ): Promise<EmbedBuilder> {
 	const user = await client.users.fetch(message.author.id);
 	const reciveChannelEmbed = new EmbedBuilder()

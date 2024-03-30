@@ -6,93 +6,180 @@ import {
 	ButtonBuilder,
 	ButtonStyle,
 	ActionRowBuilder,
-	Client,
 	StringSelectMenuInteraction,
 	Guild,
 	CategoryChannel,
 	TextChannel,
 	GuildMember,
+	ModalBuilder,
+	TextInputBuilder,
+	TextInputStyle,
+	ModalSubmitInteraction,
 } from 'discord.js';
 import lib from '../../bridge/bridge';
 module.exports = {
 	name: Events.InteractionCreate,
-	async execute(interaction: StringSelectMenuInteraction) {
-		if (!interaction.isStringSelectMenu()) return;
-		if (interaction.customId !== 'ticket') return;
-		await interaction.deferReply({ ephemeral: true });
-		const client = interaction.client;
-		const locales = lib.locales.events.onSelectMenuInteractionjs;
-		const blacklist: Array<string> | null = await lib.ticket.get('blacklist');
-		if (blacklist!.includes(interaction.user.id)) {
-			const embed = new EmbedBuilder()
-				.setColor(await lib.db.get('color.default'))
-				.setTitle('Blacklist')
-				.setDescription(
-					'Bili ste blacklistani.\n Torej možnosti odpiranja ticketa nimate!',
-				)
-				.setTimestamp();
-			await interaction.editReply({ embeds: [embed] });
-			return;
+	async execute(interaction: ModalSubmitInteraction | StringSelectMenuInteraction) {
+		// CHECK IF IT IS ANY OTHER INTERACTION //
+		if (interaction.isStringSelectMenu()) {
+			if (interaction.customId !== 'ticket') return;
+			checksAndPass(interaction, 'string');
 		}
-		checkStatus(interaction, client, locales);
+		if (interaction.isModalSubmit()) {
+			if (!interaction.customId.startsWith('openTicketModal')) return;
+			checksAndPass(interaction, 'modal');
+		}
 	},
 };
-async function checkStatus(
-	interaction: StringSelectMenuInteraction,
-	client: Client,
-	locales: any,
-) {
-	const channelStatus = await lib.ticket.has(interaction.channelId);
-	if (channelStatus === false) {
-		if (await lib.ticket.has('users')) {
-			if (lib.cache.usersOpeningTicket.has(interaction.user.id)) {
-				const embed = new EmbedBuilder()
-					.setColor(await lib.db.get('color.default'))
-					.setTitle(locales.ticketAlreadyInMakingEmbed.title)
-					.setTimestamp();
-				await interaction.editReply({ embeds: [embed] });
-				return;
-			}
-		}
-		const time: number = lib.unixTimestamp();
-		lib.cache.usersOpeningTicket.set(interaction.user.id, { time });
 
+async function checksAndPass(interaction: ModalSubmitInteraction | StringSelectMenuInteraction, type: string) {
+	const status = await checkStatus(interaction);
+	if (status.code !== 200) { sendError(interaction, status); return; }
+
+	if (type === 'modal') { openNewTicket(interaction as ModalSubmitInteraction, interaction.customId.split('_')[1]); return; }
+	if (type === 'string') { stringSelect(interaction as StringSelectMenuInteraction); return; }
+}
+
+async function stringSelect(interaction: StringSelectMenuInteraction) {
+	const indexOfType = interaction.values[0];
+	const typeOfHelp = lib.settings.categories[indexOfType];
+	if (typeOfHelp.modal.enable == false) {
+		openNewTicket(interaction, indexOfType);
+		return;
+	}
+	const modal = await createModal(interaction, typeOfHelp);
+	await interaction.showModal(modal);
+}
+
+async function createModal(interaction: StringSelectMenuInteraction, modalSettings: any) {
+	const modal = new ModalBuilder()
+		.setCustomId(`openTicketModal_${interaction.values[0]}`)
+		.setTitle(modalSettings.name);
+	for (const field of modalSettings.modal.fields) {
+		let sty = TextInputStyle.Paragraph;
+		if (field.type == 'short') { sty = TextInputStyle.Short; }
+		else if (field.type == 'long') { sty = TextInputStyle.Paragraph; }
+		const com = new TextInputBuilder()
+			.setCustomId(field.id)
+			.setLabel(field.lable)
+			.setStyle(sty);
+		if (field.required) { com.setRequired(true); }
+		if (field.defaultValue) { com.setValue(field.defaultValue); }
+		if (field.placeholder) { com.setPlaceholder(field.placeholder); }
+		if (field.minLength) { com.setMinLength(field.minLength); }
+		if (field.maxLength) { com.setMaxLength(field.maxLength); }
+		const x: any = new ActionRowBuilder().addComponents(com);
+		modal.addComponents(x);
+	}
+	return modal;
+}
+
+async function openNewTicket(interaction: ModalSubmitInteraction | StringSelectMenuInteraction, indexOfType: string) {
+	const locales = lib.locales.events.onSelectMenuInteractionjs;
+	lib.cache.usersOpeningTicket.set(interaction.user.id, { time: lib.unixTimestamp() });
+	try {
 		const preparing = new EmbedBuilder()
 			.setColor(await lib.db.get('color.default'))
 			.setTitle(locales.ticketNowInMaking.title)
 			.setDescription(locales.ticketNowInMaking.description)
 			.setTimestamp();
-
-		await interaction.message.edit({ embeds: [preparing], components: [] });
-		const guildId = await lib.db.get('guildId');
-		const guild = await client.guilds.fetch(guildId);
-		createChannel(guild, interaction);
+		if (interaction.message) {
+			await interaction.message.edit({ embeds: [preparing], components: [] });
+		}
+		else {
+			interaction.reply({ embeds: [preparing], components: [] });
+		}
 	}
-	if (channelStatus === true) {
+	catch (e) {
+		console.error(e);
+	}
+	const guildId = await lib.db.get('guildId');
+	const guild = await interaction.client.guilds.fetch(guildId);
+	const ticketPrefix = lib.settings.categories[indexOfType].channelprefix;
+	createChannel(guild, interaction, ticketPrefix);
+}
+
+async function sendError(interaction: ModalSubmitInteraction | StringSelectMenuInteraction, param: { code: number, message: string}) {
+	const locales = lib.locales.events.onSelectMenuInteractionjs;
+	switch (param.code) {
+	case 500: {
+		const embed = new EmbedBuilder()
+			.setColor(await lib.db.get('color.default'))
+			.setTitle('Blacklist')
+			.setDescription(
+				'Bili ste blacklistani.\n Torej možnosti odpiranja ticketa nimate!',
+			)
+			.setTimestamp();
+		await interaction.reply({ embeds: [embed], ephemeral: true });
+		break;
+	}
+	case 501: {
+		const embed = new EmbedBuilder()
+			.setColor(await lib.db.get('color.default'))
+			.setTitle(locales.ticketAlreadyInMakingEmbed.title)
+			.setTimestamp();
+		await interaction.reply({ embeds: [embed], ephemeral: true });
+		break;
+	}
+	case 502: {
 		const embed = new EmbedBuilder()
 			.setColor(await lib.db.get('color.default'))
 			.setTitle(locales.ticketAlreadyOpen.title)
 			.setTimestamp();
-		await interaction.editReply({ embeds: [embed] });
-		return;
+		await interaction.reply({ embeds: [embed], ephemeral: true });
+		break;
 	}
+	case 505: {
+		await interaction.reply({ content: 'NAPAKA. KONTAKTIRAJTE ADMINISTRACIJO', ephemeral: true });
+		break;
+	}
+	default: {
+		await interaction.reply({ content: 'NAPAKA. KONTAKTIRAJTE ADMINISTRACIJO', ephemeral: true });
+	}
+	}
+	return;
+}
+
+async function checkStatus(
+	interaction: StringSelectMenuInteraction | ModalSubmitInteraction,
+): Promise<{ code: number, message: string }> {
+	const blacklist: Array<string> | null = await lib.ticket.get('blacklist');
+	if (blacklist!.includes(interaction.user.id)) { return { code: 500, message: 'blacklist' };}
+	if (interaction.channelId) {
+		const hasOpenTicket = lib.cache.openTickets.has(interaction.channelId);
+		const channelStatus = await lib.ticket.has(interaction.channelId);
+		if (!hasOpenTicket) {
+			if (!channelStatus) {
+				if (lib.cache.usersOpeningTicket.has(interaction.user.id)) {
+					return { code: 501, message: 'alreadyMaking' };
+				}
+				return { code: 200, message: 'success' };
+			}
+			else { return { code: 502, message: 'open' }; }
+		}
+		else { return { code: 502, message: 'open' }; }
+	}
+	return { code: 505, message: 'error' };
 }
 
 async function createChannel(
 	guild: Guild,
-	interaction: StringSelectMenuInteraction,
+	interaction: StringSelectMenuInteraction | ModalSubmitInteraction,
+	ticketPrefix: string,
 ) {
+	// DEFINITIONS //
 	const data = await lib.db.get(guild.id);
 	const passedCategory = await guild.channels.fetch(data.categoryId);
 	const category = passedCategory as CategoryChannel;
 	const username = await lib.hasNewUsername(interaction.user, true, 'user');
-	const name = `${interaction.values[0]}-${username}`;
+	const name = `${ticketPrefix}-${username}`;
+	// CREATE CHANNEL //
 	try {
 		const channel = await category?.children.create({
 			name: name,
 			type: ChannelType.GuildText,
 		});
-		sendInitial(channel, interaction);
+		sendInitial(channel, interaction, ticketPrefix);
 	}
 	catch (e) {
 		console.error(e);
@@ -100,22 +187,25 @@ async function createChannel(
 }
 
 async function sendInitial(
-	x: TextChannel,
-	interaction: StringSelectMenuInteraction,
+	guildChannel: TextChannel,
+	interaction: StringSelectMenuInteraction | ModalSubmitInteraction,
+	ticketPrefix: string,
 ) {
+	// DEFINITIONS
 	const locales = lib.locales.events.onSelectMenuInteractionjs.initialOpening;
-	const member = await x.guild.members.fetch(interaction.user.id);
-	const num = await ticketNumberCalculation(interaction, x);
+	const member = await guildChannel.guild.members.fetch(interaction.user.id);
+	const num = await ticketNumberCalculation(interaction, guildChannel);
 
+	// SEND NEW TICKET EMBED IN TICKET CHANNEL //
 	const color = await lib.db.get('color.default');
-	logInteraction(x, member, num);
+	logInteraction(guildChannel, member, num);
 	const embed = new EmbedBuilder()
 		.setAuthor({
 			name: interaction.user.username,
 			iconURL: member.user.displayAvatarURL(),
 		})
 		.setColor(color)
-		.setTitle(locales.logEmbed.title.replace('CATEGORY', interaction.values[0]))
+		.setTitle(locales.logEmbed.title.replace('CATEGORY', ticketPrefix))
 		.setTimestamp()
 		.addFields(
 			{ name: locales.logEmbed.ticketNumber, value: `${num}`, inline: true },
@@ -148,10 +238,18 @@ async function sendInitial(
 	const row: ActionRowBuilder<any> = new ActionRowBuilder().addComponents(
 		select,
 	);
+	// PIN THE MESSAGE //
 	try {
-		const mes = await x.send({ embeds: [embed], components: [row] });
-		await mes.pin();
-		x.bulkDelete(1);
+		if (interaction instanceof StringSelectMenuInteraction) {
+			const mes = await guildChannel.send({ embeds: [embed], components: [row] });
+			await mes.pin();
+			guildChannel.bulkDelete(1);
+		}
+		else {
+			const mes = await guildChannel.send({ embeds: [embed] });
+			await mes.pin();
+			guildChannel.bulkDelete(1);
+		}
 	}
 	catch (e) {
 		console.error(e);
@@ -161,8 +259,25 @@ async function sendInitial(
 		.setColor(color)
 		.setTitle(locales.channelEmbed.title)
 		.setTimestamp();
-	await interaction.editReply({ embeds: [embed2] });
-	databaseSync(interaction, x, num);
+	await interaction.reply({ embeds: [embed2] });
+	// SEND ALL DATA TO DATABASE //
+	databaseSync(interaction, guildChannel, num);
+
+	if (interaction instanceof ModalSubmitInteraction) {
+		const indexOfType = interaction.customId.split('_')[1];
+		const typeOfHelp = lib.settings.categories[indexOfType];
+		const sendEmbed = new EmbedBuilder()
+			.setColor(color)
+			.setTitle('Odgovori');
+
+		for (const field of typeOfHelp.modal.fields) {
+			const userInput = interaction.fields.getTextInputValue(field.id) || 'EMPTY';
+			const fieldLable = field.lable;
+			sendEmbed.addFields({ name: fieldLable, value: userInput });
+		}
+
+		await guildChannel.send({ embeds: [sendEmbed], components: [row] });
+	}
 }
 
 async function logInteraction(
@@ -170,12 +285,14 @@ async function logInteraction(
 	member: GuildMember,
 	num: number,
 ) {
+	// DEFINITIONS //
 	const locales = lib.locales.events.onSelectMenuInteractionjs.initialOpening;
 	const data = await lib.db.get(x.guildId);
 	const passedChannel = await x.guild.channels.fetch(data.logChannel);
 	const channel = passedChannel as TextChannel;
 	const wbh = await lib.wbh(channel);
 
+	// EMBEDS //
 	const embed = new EmbedBuilder()
 		.setAuthor({
 			name: member.user.username,
@@ -200,15 +317,16 @@ async function logInteraction(
 		)
 		.setFooter({ text: locales.otherLogEmbed.footer.text });
 
+	// SEND TO LOG CHANNEL //
 	wbh?.send({ embeds: [embed] });
 }
 
 async function databaseSync(
-	interaction: StringSelectMenuInteraction,
+	interaction: StringSelectMenuInteraction | ModalSubmitInteraction,
 	x: TextChannel,
 	num: number,
 ) {
-	await lib.ticket.pull('users', interaction.user.id);
+	lib.cache.usersOpeningTicket.delete(interaction.user.id);
 	const newTable = lib.db.table(`tt_${num}`);
 	await newTable.set('info', {
 		guildChannel: x.id,
@@ -217,7 +335,9 @@ async function databaseSync(
 		closed: false,
 	});
 	await lib.ticket.set(x.id, num);
-	await lib.ticket.set(interaction.channelId, num);
+	await lib.ticket.set(interaction.channelId!, num);
+	lib.cache.openTickets.set(x.id, { number: num });
+	lib.cache.openTickets.set(interaction.channelId!, { number: num });
 	await newTable.set('analytics', {
 		date: lib.datestamp(),
 		time: lib.timestamp(),
@@ -240,7 +360,7 @@ async function databaseSync(
 }
 
 async function ticketNumberCalculation(
-	interaction: StringSelectMenuInteraction,
+	interaction: StringSelectMenuInteraction | ModalSubmitInteraction,
 	x: TextChannel,
 ) {
 	let num = await lib.db.get('ticketNumber');

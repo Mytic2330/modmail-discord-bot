@@ -1,10 +1,11 @@
-import { Events, Client } from 'discord.js';
+import { Events } from 'discord.js';
 import lib from '../../bridge/bridge';
 module.exports = {
 	name: Events.ClientReady,
 	once: true,
-	execute(client: Client) {
+	execute() {
 		setInterval(clearCache, 3600000);
+		setInterval(handleOpenTickets, 600000);
 		setInterval(() => {
 			clearCaches();
 		}, 2000);
@@ -20,6 +21,18 @@ async function clearCaches() {
 	checkCache(closingTickets, serverTms);
 }
 
+async function handleOpenTickets() {
+	const blacklistedIds = ['blacklist', 'users', 'tickets', 'openTickets', 'inaQueue', 'closing'];
+	const cache = lib.cache.openTickets;
+	cache.clear();
+
+	const allTickets = await lib.ticket.all();
+	for (const { id, value } of allTickets) {
+		if (blacklistedIds.includes(id)) continue;
+		cache.set(id, { number: value });
+	}
+}
+
 function clearCache() {
 	lib.cache.userRanks.clear();
 }
@@ -30,7 +43,6 @@ async function checkCache(cache: any, serverTms: number) {
 		const time = value.time;
 		const cal = serverTms - time;
 		if (cal >= 10000) {
-			console.log('Deleting');
 			cache.delete(key);
 		}
 	}

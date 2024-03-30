@@ -2,19 +2,19 @@
 import {
 	Events,
 	EmbedBuilder,
-	Message,
-	Client,
-	DMChannel,
-	TextChannel,
-	GuildMember,
-	MessageReaction,
+	type Message,
+	type Client,
+	type DMChannel,
+	type TextChannel,
+	type GuildMember,
+	type MessageReaction,
 } from 'discord.js';
 import lib from '../../bridge/bridge';
 module.exports = {
 	name: Events.MessageCreate,
 	async execute(message: Message) {
 		if (message.author.bot === true) return;
-		if (message.guildId != undefined || message.guildId != null) {
+		if (message.guildId) {
 			if (message.content.toLowerCase().startsWith('!')) {
 				const check = message.content.substring(1, 4);
 				if (check.toLowerCase().startsWith('adm')) {
@@ -22,9 +22,18 @@ module.exports = {
 				}
 			}
 		}
+		var status: boolean = false;
 		const client = message.client;
 		const locales = lib.locales.events.messageOnCreatejs;
-		const status = await lib.ticket.has(message.channelId);
+
+		const hasInCache = lib.cache.openTickets.has(message.channelId);
+
+		if (!hasInCache) {
+			status = await lib.ticket.has(message.channelId);
+		}
+		else {
+			status = hasInCache;
+		}
 
 		switch (status) {
 		case true:
@@ -50,7 +59,8 @@ async function getName(
 	const userId = member.user.id;
 	const userRankCache = lib.cache.userRanks;
 	if (userRankCache.has(userId)) {
-		return userRankCache.get(userId)!;
+		const userRank = userRankCache.get(userId);
+		if (userRank) return userRank;
 	}
 	const username = member.user.username;
 	const enableRanks = await lib.db.get('enableRanks');

@@ -22,10 +22,114 @@
   "guildId": "1122603209035362385",
   // Catagorys of help => channelname_name_description
   "categories": [
-    "pomoc_Pomoč_Vprašanja in pomoč",
-    "ban_Bani_Pomoč glede banov, opozoril...",
-    "donacija_Donacije_Donacije",
-    "ostalo_Ostalo_Ostala pomoč"
+    {
+      "name": "IN-GAME Pomoč",
+      "channelprefix": "igpomoc",
+      "description": "Pomoč v zvezi z ingame stvarmi",
+      "modal": {
+        "enable": true,
+        "title": "Pomoč",
+        "fields": [
+          {
+            "id": "descibeHelpField",
+            "lable": "Zakaj odpirate ticket?",
+            "type": "long",
+            "required": true,
+            "defaultValue": "",
+            "placeholder": "",
+            "minLength": 10,
+            "maxLength": 1000
+          }
+        ]
+      }
+    },
+    {
+      "name": "BAN",
+      "channelprefix": "ban",
+      "description": "Pomoč / Vprašanja v zvezi z banom.",
+      "modal": {
+        "enable": true,
+        "title": "BAN",
+        "fields": [
+          {
+            "id": "whoBannedYou",
+            "lable": "Kdo vas je bannal?",
+            "type": "short",
+            "required": true,
+            "defaultValue": "",
+            "placeholder": "",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          {
+            "id": "howLongIsBan",
+            "lable": "Do kdaj ste banani?",
+            "type": "short",
+            "required": true,
+            "defaultValue": "",
+            "placeholder": "",
+            "minLength": 1,
+            "maxLength": 1000
+          },
+          {
+            "id": "whyUnban",
+            "lable": "Zakaj želite unban?",
+            "type": "long",
+            "required": false,
+            "defaultValue": "",
+            "placeholder": "",
+            "minLength": 50,
+            "maxLength": 1000
+          }
+        ]
+      }
+    },
+    {
+      "name": "DONACIJA",
+      "channelprefix": "donacija",
+      "description": "Želja po podpori strežnika.",
+      "modal": {
+        "enable": true,
+        "title": "DONACIJA",
+        "fields": [
+          {
+            "id": "whatToDonateFor",
+            "lable": "Za katero stvar želite donirati?",
+            "type": "long",
+            "required": true,
+            "defaultValue": "",
+            "placeholder": "",
+            "minLength": 1,
+            "maxLength": 1000
+          }
+        ]
+      }
+    },
+    {
+      "name": "OSTALO",
+      "channelprefix": "ostalo",
+      "description": "Ostala pomoč / Vprašanja.",
+      "modal": {
+        "enable": false,
+        "title": "DONACIJA",
+        "fields": [
+          {
+            "id": "whatToDonateFor",
+            "lable": "Za katero stvar želite donirati?",
+            "type": "long",
+            "required": true,
+            "defaultValue": "",
+            "placeholder": "",
+            "minLength": 1,
+            "maxLength": 1000
+          }
+        ]
+      }
+    }
+    // "pomoc_Pomoč_Vprašanja in pomoč",
+    // "ban_Bani_Pomoč glede banov, opozoril...",
+    // "donacija_Donacije_Donacije",
+    // "ostalo_Ostalo_Ostala pomoč"
   ],
   // Colors
   "colors": {

@@ -69,17 +69,16 @@ async function newTicket(
 			.setCustomId('ticket')
 			.setPlaceholder(locales.userSelectCategory.SelectMenuPlaceholder);
 
-		lib.settings.categories.forEach((x: string) => {
-			const options = x.split('_');
+		for (const val of lib.settings.categories) {
+			const index = lib.settings.categories.indexOf(val);
 			select.addOptions(
 				new StringSelectMenuOptionBuilder()
-					.setLabel(options[1])
-					.setDescription(options[2])
-					.setValue(options[0]),
+					.setLabel(val.name)
+					.setDescription(val.description)
+					.setValue(index.toString()),
 			);
-		});
+		}
 
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const row: ActionRowBuilder<any> = new ActionRowBuilder().addComponents(select);
 
 		try {

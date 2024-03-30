@@ -24,9 +24,8 @@ module.exports = {
 				await lib.db.set('vactarCommunityID', lib.settings.vactarCommunityID);
 			}
 			await lib.db.set('guildId', lib.settings.guildId);
-			await lib.db.set('botID', client?.user?.id);
-			await lib.db.set('ApplicationID', client?.application?.id);
-			await lib.db.set('ApplicationID', client?.application?.id);
+			await lib.db.set('botID', client.user?.id);
+			await lib.db.set('ApplicationID', client.application?.id);
 			if (!(await lib.db.has('ticketNumber'))) {
 				await lib.db.set('ticketNumber', 1);
 			}

@@ -376,8 +376,10 @@ async function dataSetUpdate(
 	moveTicket(channel, gData);
 	for (const id of data.dmChannel) {
 		await lib.ticket.delete(id);
+		lib.cache.openTickets.delete(id);
 	}
 	await lib.ticket.delete(data.guildChannel);
+	lib.cache.openTickets.delete(data.guildChannel);
 	await lib.db.table(`tt_${number}`).set('info.closed', true);
 	await lib.db.table(`tt_${number}`).set('info.transcript', `${obj.url}`);
 	await lib.ticket.pull('openTickets', number);
