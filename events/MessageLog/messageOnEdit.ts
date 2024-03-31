@@ -16,10 +16,6 @@ module.exports = {
 		if (newMessage.guildId) {
 			if (newMessage.content.toLowerCase().startsWith('!adm')) {
 				return;
-				// const check = newMessage.content.substring(1, 4);
-				// if (check.toLowerCase().startsWith('adm')) {
-				// 	return;
-				// }
 			}
 		}
 		// CHECK FOR BOT MESSAGE //

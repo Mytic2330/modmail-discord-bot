@@ -1,4 +1,4 @@
-interface settings {
+interface settingsI {
 	useAPI: boolean;
 	clientId: string;
 	allowedRoles: [string];
@@ -36,4 +36,4 @@ interface settings {
 	openTicketMessageChannel: string;
 }
 
-export default settings;
+export default settingsI;

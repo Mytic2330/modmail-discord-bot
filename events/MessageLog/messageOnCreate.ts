@@ -15,11 +15,8 @@ module.exports = {
 	async execute(message: Message) {
 		if (message.author.bot === true) return;
 		if (message.guildId) {
-			if (message.content.toLowerCase().startsWith('!')) {
-				const check = message.content.substring(1, 4);
-				if (check.toLowerCase().startsWith('adm')) {
-					return;
-				}
+			if (message.content.toLowerCase().startsWith('!adm')) {
+				return;
 			}
 		}
 		var status: boolean = false;
@@ -150,7 +147,7 @@ async function messageHandeler(
 }
 async function messageReciverSwitch(
 	message: Message,
-	reciveChannelEmbed: any,
+	reciveChannelEmbed: EmbedBuilder,
 	client: Client,
 	processing: MessageReaction | undefined
 ) {
@@ -327,7 +324,10 @@ async function errorEmbedAsemblyClient(
 	}
 	return one_time_warn_EMBED;
 }
-async function sendToDMChannel(message: Message, reciveChannelEmbed: any) {
+async function sendToDMChannel(
+	message: Message,
+	reciveChannelEmbed: EmbedBuilder
+) {
 	resetInaStatus(message);
 	const client = message.client;
 	const ticketNumberDatabse = await lib.ticket.get(message.channelId);
@@ -341,7 +341,7 @@ async function sendToDMChannel(message: Message, reciveChannelEmbed: any) {
 			const recivedChannel = await client.channels.fetch(id);
 			const channel = recivedChannel as DMChannel;
 			const msh = await channel.send({ embeds: [reciveChannelEmbed] });
-			sendDBWrite(client, ticketNumberDatabse, message, msh);
+			sendDBWrite(ticketNumberDatabse, message, msh);
 		} catch (e) {
 			errorSender.push(id);
 		}
@@ -349,7 +349,10 @@ async function sendToDMChannel(message: Message, reciveChannelEmbed: any) {
 	return { errorSender, channels };
 }
 
-async function sendToServer(message: Message, reciveChannelEmbed: any) {
+async function sendToServer(
+	message: Message,
+	reciveChannelEmbed: EmbedBuilder
+) {
 	resetInaStatus(message);
 	const client = message.client;
 	const status = await sendToDMByOtherDM(message, reciveChannelEmbed);
@@ -362,7 +365,7 @@ async function sendToServer(message: Message, reciveChannelEmbed: any) {
 	infoWriter(client, ticketNumberDatabse, message, 'toServer');
 	try {
 		const msh = await channel.send({ embeds: [reciveChannelEmbed] });
-		sendDBWrite(client, ticketNumberDatabse, message, msh);
+		sendDBWrite(ticketNumberDatabse, message, msh);
 		return status;
 	} catch (e) {
 		return status;
@@ -383,7 +386,7 @@ async function sendToDMByOtherDM(message: Message, reciveChannelEmbed: any) {
 			const recivedChannel = await client.channels.fetch(id);
 			const channel = recivedChannel as DMChannel;
 			const msh = await channel.send({ embeds: [reciveChannelEmbed] });
-			sendDBWrite(client, ticketNumberDatabse, message, msh);
+			sendDBWrite(ticketNumberDatabse, message, msh);
 		} catch (e) {
 			errorSender.push(id);
 		}
@@ -460,10 +463,9 @@ async function infoWriter(
 }
 
 async function sendDBWrite(
-	client: Client,
 	ticketNumberDatabse: number,
-	message: any,
-	msh: any
+	message: Message,
+	msh: Message
 ) {
 	await lib.db
 		.table(`tt_${ticketNumberDatabse}`)

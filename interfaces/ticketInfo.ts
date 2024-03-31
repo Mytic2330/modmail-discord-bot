@@ -1,4 +1,4 @@
-interface ticketInfo {
+interface ticketInfoI {
 	info: {
 		guildChannel: string;
 		dmChannel: [];
@@ -22,4 +22,4 @@ interface ticketInfo {
 	num: number;
 }
 
-export default ticketInfo;
+export default ticketInfoI;

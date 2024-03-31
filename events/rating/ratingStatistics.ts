@@ -9,22 +9,33 @@ import {
 	ModalSubmitInteraction,
 	Client,
 	DMChannel,
-	Snowflake
+	Snowflake,
+	ButtonBuilder,
+	ButtonStyle,
+	CommandInteraction
 } from 'discord.js';
 import lib from '../../bridge/bridge';
-import ticketInfo from '../../interfaces/ticketInfo';
+import ticketInfoI from '../../interfaces/ticketInfo';
 module.exports = {
 	name: Events.InteractionCreate,
 	async execute(interaction: ButtonInteraction | ModalSubmitInteraction) {
 		if (interaction.isButton()) {
 			if (!interaction.customId.startsWith('stat')) return;
+			if (
+				interaction.message?.interaction?.user.id !==
+				interaction.user.id
+			) {
+				interaction.reply({ content: 'To ni tvoje!', ephemeral: true });
+				return;
+			}
 			switchCheck(interaction);
 		} else if (interaction.isModalSubmit()) {
 			if (interaction.customId == 'getTicketStatsModal') {
 				processModal(interaction);
 			}
 		}
-	}
+	},
+	originalEmbed
 };
 
 async function switchCheck(interaction: ButtonInteraction) {
@@ -34,6 +45,9 @@ async function switchCheck(interaction: ButtonInteraction) {
 			break;
 		case 'ticket':
 			ticketFnc(interaction);
+			break;
+		case 'goBack':
+			originalEmbed(interaction);
 			break;
 	}
 }
@@ -72,8 +86,38 @@ async function rateFnc(interaction: ButtonInteraction) {
 		messagesByDM,
 		creatorIds
 	);
-	console.log(processedData);
-	// ! DOKONČAJ
+
+	if (processedData) {
+		const embed = new EmbedBuilder()
+			.setTitle('Statistika')
+			.setColor('Random')
+			.addFields(
+				{
+					name: 'Povprečna ocena:',
+					value: `${processedData.avgRating}`
+				},
+				{
+					name: 'Povprečno sporočil od administracije:',
+					value: `${processedData.avgMessSer}`
+				},
+				{
+					name: 'Povprečno sporočil od uporabnika:',
+					value: `${processedData.avgMessDM}`
+				},
+				{
+					name: 'Uporabnik, ki je največkrat odprl ticke:',
+					value: `<@${processedData.mostCreator.mostFrequent}>\nID: ${processedData.mostCreator.mostFrequent}\nKolikokrat: ${processedData.mostCreator.maxCount}`
+				}
+			);
+		const button = new ButtonBuilder()
+			.setCustomId('stat_goBack')
+			.setLabel('Nazaj')
+			.setStyle(ButtonStyle.Danger);
+		const row: any = new ActionRowBuilder().addComponents(button);
+		interaction.update({ embeds: [embed], components: [row] });
+	} else {
+		interaction.message.edit({ content: 'Prišlo je do napake' });
+	}
 }
 
 async function calculateData(
@@ -147,33 +191,42 @@ async function ticketFnc(interaction: ButtonInteraction) {
 }
 
 async function processModal(interaction: ModalSubmitInteraction) {
+	await interaction.deferUpdate();
 	const num = parseInt(interaction.fields.getTextInputValue('ticketNumber'));
 
+	const button = new ButtonBuilder()
+		.setCustomId('stat_goBack')
+		.setLabel('Nazaj')
+		.setStyle(ButtonStyle.Danger);
+	const row: any = new ActionRowBuilder().addComponents(button);
 	const allTickets = await lib.ticket.get('tickets');
 	const chc = allTickets.includes(num);
 	if (!chc) {
-		await interaction.reply({
-			content: 'Neveljavna številka ticketa!',
-			ephemeral: true
+		const errorEmbed = new EmbedBuilder()
+			.setColor('Red')
+			.setTitle('Neveljavna številka ticketa!');
+		await interaction.message?.edit({
+			components: [row],
+			embeds: [errorEmbed]
 		});
 		return;
 	}
-
 	const info = await gatherTicketInfo(num);
 	if (!info) {
-		interaction.reply({
-			content: 'Ni uspelo pridobiti podatkov!',
-			ephemeral: true
+		const errorEmbed2 = new EmbedBuilder()
+			.setColor('Red')
+			.setTitle('Ni uspelo pridobiti podatkov!');
+		interaction.message?.edit({
+			components: [row],
+			embeds: [errorEmbed2]
 		});
 		return;
 	}
-
 	const embed = await embedCreator(info, interaction.client);
-
-	interaction.reply({ embeds: [embed], ephemeral: true });
+	await interaction.message?.edit({ embeds: [embed], components: [row] });
 }
 
-async function gatherTicketInfo(num: number): Promise<ticketInfo | null> {
+async function gatherTicketInfo(num: number): Promise<ticketInfoI | null> {
 	const table = lib.db.table(`tt_${num}`);
 	try {
 		const info = await table.get('info');
@@ -228,8 +281,6 @@ async function embedCreator(
 	return embed;
 }
 
-// ! DOKONČAJ
-
 async function dateMaker(data: any) {
 	const arr = data.split('_');
 
@@ -256,4 +307,42 @@ async function getAllUsers(
 	if (arr.length === 0) return null;
 	const string = arr.join('\n');
 	return string;
+}
+
+async function originalEmbed(
+	interaction: ButtonInteraction | CommandInteraction
+) {
+	const embed = new EmbedBuilder()
+		.setTitle('Pregled statistik')
+		.setDescription(
+			'Izberite kategorijo statistike, ki si jo želite ogledati:'
+		)
+		.setColor('Random')
+		.addFields(
+			{ name: '\u200B', value: '\u200B' },
+			{
+				name: '⭐',
+				value: 'Statistični vpogled v \nzadovoljstvo uporabnikov pri ticketih,\n povprečni podatki ticketov...'
+			},
+			{
+				name: '📋',
+				value: 'Statistični vpogled v \npodatke iz ticketa vaše izbere'
+			}
+		);
+	const ratingButton = new ButtonBuilder()
+		.setCustomId('stat_rating')
+		.setStyle(ButtonStyle.Primary)
+		.setEmoji('⭐');
+	const selectTicket = new ButtonBuilder()
+		.setCustomId('stat_ticket')
+		.setStyle(ButtonStyle.Primary)
+		.setEmoji('📋');
+	const row: any = new ActionRowBuilder()
+		.addComponents(ratingButton)
+		.addComponents(selectTicket);
+	if (interaction instanceof CommandInteraction) {
+		interaction.reply({ embeds: [embed], components: [row] });
+	} else {
+		interaction.update({ embeds: [embed], components: [row] });
+	}
 }

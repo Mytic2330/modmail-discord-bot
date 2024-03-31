@@ -2,7 +2,10 @@
 import { jsonc } from 'jsonc';
 import fs from 'fs';
 import path from 'path';
-import settings from '../interfaces/settings';
+
+// INTERFACES //
+import * as cacheI from '../interfaces/cache';
+import settingsI from '../interfaces/settings';
 
 // LOCALES DEFINITION //
 const locales: any = jsonc.parse(
@@ -13,7 +16,7 @@ import database from '../index';
 // TICKET TABLE DEFINITION //
 const ticket = database.table('ticket');
 // SETTINGS DEFINITION //
-const settings: settings = jsonc.parse(
+const settings: settingsI = jsonc.parse(
 	fs.readFileSync(path.join(__dirname, '../config/settings.jsonc'), 'utf8')
 );
 // VERSION //
@@ -31,11 +34,11 @@ import {
 import { webhook } from '../utils/webhook';
 
 // CACHE //
-const userRanks = new Map<string, { username: string; rank: string }>();
-const usersOpeningTicket = new Map<string, { time: number }>();
-const closingTickets = new Map<number, { time: number }>();
-const openTickets = new Map<string, { number: number }>();
-const cache = {
+const userRanks = new Map<string, cacheI.userRanksI>();
+const usersOpeningTicket = new Map<string, cacheI.usersOpeningTicketI>();
+const closingTickets = new Map<number, cacheI.closingTicketsI>();
+const openTickets = new Map<string, cacheI.openTicketsI>();
+const cache: cacheI.cacheI = {
 	userRanks: userRanks,
 	usersOpeningTicket: usersOpeningTicket,
 	closingTickets: closingTickets,
@@ -43,6 +46,7 @@ const cache = {
 };
 
 // TESTING FEATURE //
+// eslint-disable-next-line space-before-function-paren
 const test = function (): boolean {
 	return true;
 };
