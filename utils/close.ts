@@ -1,5 +1,6 @@
 export default close;
 import discordTranscripts, { ExportReturnType } from 'discord-html-transcripts';
+import fs from 'node:fs';
 import {
 	EmbedBuilder,
 	ButtonBuilder,
@@ -97,10 +98,22 @@ async function close(base: any, type: string, num: number | null) {
 	const creatorClose = await embedBuilder('creator', embedData);
 	const closeDmEmbed = await embedBuilder('dm', embedData);
 	// TRANSCRIPT BULDING
+	const localFile = await discordTranscripts.createTranscript(channel, {
+		limit: -1,
+		returnType: ExportReturnType.Buffer,
+		saveImages: true,
+		footerText: 'Made by mytic2330',
+		poweredBy: false
+	});
+	fs.writeFile(`../web/ticketarchive/${number}.htm`, localFile, err => {
+		if (err) {
+			console.error(err);
+		}
+	});
 	const attachment = await discordTranscripts.createTranscript(channel, {
 		limit: -1,
 		returnType: ExportReturnType.Attachment,
-		filename: `${author.username}.htm`,
+		filename: `${number}.htm`,
 		saveImages: true,
 		footerText: 'Made by mytic2330',
 		poweredBy: false

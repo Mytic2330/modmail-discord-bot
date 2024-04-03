@@ -15,6 +15,8 @@ const locales: any = jsonc.parse(
 import database from '../index';
 // TICKET TABLE DEFINITION //
 const ticket = database.table('ticket');
+// TICKET HISTORY TABLE DEFINITION //
+const thistory = database.table('thistory');
 // SETTINGS DEFINITION //
 const settings: settingsI = jsonc.parse(
 	fs.readFileSync(path.join(__dirname, '../config/settings.jsonc'), 'utf8')
@@ -55,6 +57,7 @@ const lib = {
 	locales: locales,
 	db: database,
 	ticket: ticket,
+	thistory: thistory,
 	settings: settings,
 	version: version,
 	// FUNCTIONS //

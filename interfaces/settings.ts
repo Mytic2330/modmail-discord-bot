@@ -1,5 +1,6 @@
 interface settingsI {
 	useAPI: boolean;
+	useWebServerForTickets: boolean;
 	clientId: string;
 	allowedRoles: [string];
 	enableRanks: boolean;
