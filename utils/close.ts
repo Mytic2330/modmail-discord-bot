@@ -105,7 +105,7 @@ async function close(base: any, type: string, num: number | null) {
 		footerText: 'Made by mytic2330',
 		poweredBy: false
 	});
-	fs.writeFile(`../web/ticketarchive/${number}.htm`, localFile, err => {
+	fs.writeFile(`../web/ticketarchive/${number}.htm`, localFile, (err) => {
 		if (err) {
 			console.error(err);
 		}

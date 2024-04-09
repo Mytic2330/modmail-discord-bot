@@ -20,11 +20,17 @@ module.exports = {
 				for (const roleID of lib.settings.allowedRoles) {
 					if (memberRoles.has(roleID)) {
 						const key = await createAuthKey();
-						interaction.reply({ content: `Vaš ključ: ${key}`, ephemeral: true });
+						interaction.reply({
+							content: `Vaš ključ: ${key}`,
+							ephemeral: true
+						});
 						return;
 					}
 				}
-				interaction.reply({ content: 'Nimaš dostopa do tega!', ephemeral: true });
+				interaction.reply({
+					content: 'Nimaš dostopa do tega!',
+					ephemeral: true
+				});
 			}
 		}
 	}

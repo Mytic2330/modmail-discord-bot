@@ -423,7 +423,10 @@ async function databaseSync(
 	});
 	await lib.ticket.push('tickets', num);
 	await lib.ticket.push('openTickets', num);
-	await lib.thistory.push(interaction.user.id, { 'ticket': num, 'creator': true });
+	await lib.thistory.push(interaction.user.id, {
+		ticket: num,
+		creator: true
+	});
 }
 
 async function ticketNumberCalculation(

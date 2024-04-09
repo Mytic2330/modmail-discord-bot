@@ -16,8 +16,12 @@ module.exports = {
 	name: Events.ClientReady,
 	once: true,
 	async execute(client: Client) {
-		if (lib.settings.useAPI) { startServer(); }
-		if (lib.settings.useWebServerForTickets) { startWebServer(); }
+		if (lib.settings.useAPI) {
+			startServer();
+		}
+		if (lib.settings.useWebServerForTickets) {
+			startWebServer();
+		}
 		await lib.db.init();
 		if (client) {
 			openTicketMessage(client);
