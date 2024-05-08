@@ -1,7 +1,7 @@
 {
 	// BOT TOKEN => https://discord.com/developers/applications
-	"useAPI": true,
-	"useWebServerForTickets": true,
+	"useAPI": false,
+	"useWebServerForTickets": false,
 	"clientId": "1081345422834012240",
 	// IDs of roles that get access to tickets
 	"allowedRoles": ["1122603209278636085", "1122603209278636085"],
