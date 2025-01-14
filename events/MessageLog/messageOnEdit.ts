@@ -8,32 +8,41 @@ import {
 } from 'discord.js';
 import { QuickDB } from 'quick.db';
 import lib from '../../bridge/bridge';
+
 module.exports = {
 	name: Events.MessageUpdate,
 	async execute(oldMessage: Message, newMessage: Message) {
 		const client = newMessage.client;
+
 		// CHECK IF IT IS ADMIN ONLY MESSAGE //
+		// Ignore messages that start with '!adm' in guilds
 		if (newMessage.guildId) {
 			if (newMessage.content.toLowerCase().startsWith('!adm')) {
 				return;
 			}
 		}
+
 		// CHECK FOR BOT MESSAGE //
+		// Ignore messages from bots
 		try {
 			if (oldMessage.author.bot || newMessage.author.bot) return;
 		} catch (e) {
 			console.log();
 		}
 
+		// Fetch ticket number from cache or database
 		const cache = lib.cache.openTickets;
 		const tcNum = cache.get(newMessage.channelId);
 		const num: number = tcNum
 			? tcNum.number
 			: (await lib.ticket.get(newMessage.channelId)) || 0;
+
 		try {
 			if (!num) return;
 			const table = lib.db.table(`tt_${num}`);
 			const hasMessage = await table.has(newMessage.id);
+
+			// Handle message update based on whether it exists in the database
 			switch (hasMessage) {
 				case true:
 					handleHasMessage(client, newMessage, oldMessage, table);
@@ -49,6 +58,7 @@ module.exports = {
 	}
 };
 
+// Function to handle message update if it exists in the database
 async function handleHasMessage(
 	client: Client,
 	message: Message,
@@ -76,6 +86,7 @@ async function handleHasMessage(
 		}
 	}
 
+	// Notify if message update failed in some channels
 	if (arr.length != 0) {
 		const string = arr.join('\n');
 		message.reply({
@@ -91,12 +102,14 @@ async function handleHasMessage(
 	}
 }
 
+// Function to handle message update if it does not exist in the database
 async function handleNoMessage(message: Message) {
 	await message.reply({
 		content: 'Ni mogoče poslati spremenjenega sporočila'
 	});
 }
 
+// Function to create an embed for the updated message
 async function createEmbedToSend(
 	client: Client,
 	message: Message
@@ -130,6 +143,7 @@ async function createEmbedToSend(
 	return reciveChannelEmbed;
 }
 
+// Function to create an embed indicating successful message update
 async function createEditedEmbed(
 	client: Client,
 	message: Message

@@ -14,18 +14,21 @@ import {
 	ChannelType
 } from 'discord.js';
 import lib from '../../bridge/bridge';
+
 module.exports = {
 	name: Events.InteractionCreate,
 	async execute(interaction: Interaction) {
 		// CHECKS //
+		// Ensure the interaction is a string select menu and the custom ID is 'removeUser'
 		if (!interaction.isStringSelectMenu()) return;
 		if (interaction.customId !== 'removeUser') return;
+
 		const client: Client = interaction.client;
-		const chan: Channel | null = await client.channels.fetch(
-			interaction.values[0]
-		);
+		const chan: Channel | null = await client.channels.fetch(interaction.values[0]);
 		interaction.deferReply({ ephemeral: true });
+
 		// DEFINITIONS //
+		// Get the DM channel and recipient user
 		const dm = chan as DMChannel;
 		const user = dm?.recipient;
 		if (user) {
@@ -39,6 +42,7 @@ module.exports = {
 	}
 };
 
+// Function to check if the user is part of the ticket and remove them if they are
 async function userCheck(
 	passedInteraction: Interaction,
 	user: User,
@@ -51,13 +55,17 @@ async function userCheck(
 	let tctNum = 0;
 
 	// CHECK CACHE //
+	// Check if the ticket number is cached
 	const cacheNumber = lib.cache.openTickets.get(channelId);
 	if (cacheNumber) {
 		tctNum = cacheNumber.number;
 	}
+
 	// DEFINE NUMBER //
+	// Get the ticket number from the database if not cached
 	const ticketDatabaseNumber: number =
 		tctNum || (await lib.ticket.get(channelId)) || 0;
+
 	// GET TICKET AND REMOVE / GIVE ERROR //
 	try {
 		const ticketDatabase = await lib.db
@@ -85,6 +93,7 @@ async function userCheck(
 	}
 }
 
+// Function to remove the user from the ticket and notify them
 async function removeUserFromTicket(
 	interaction: StringSelectMenuInteraction,
 	user: User,
@@ -103,18 +112,21 @@ async function removeUserFromTicket(
 	const openRow: ActionRowBuilder<any> = new ActionRowBuilder().addComponents(
 		openNewTicket
 	);
+
 	// TRY TO SEND EMBED TO REMOVED USER //
 	try {
 		await DM?.send({ embeds: [embed], components: [openRow] });
 	} catch (e) {
 		console.log('');
 	}
+
 	// REMOVE FROM DATABASE
 	await sendToAllChannels(interaction, user, num);
 	databaseSync(DM, num);
 	interaction.editReply({ content: locales.userRemoved });
 }
 
+// Function to sync the database after removing the user
 async function databaseSync(dm: DMChannel | undefined, num: number) {
 	if (dm) {
 		await lib.ticket.delete(dm.id);
@@ -122,6 +134,7 @@ async function databaseSync(dm: DMChannel | undefined, num: number) {
 	}
 }
 
+// Function to send a notification to all channels about the user removal
 async function sendToAllChannels(
 	interaction: StringSelectMenuInteraction,
 	user: User,

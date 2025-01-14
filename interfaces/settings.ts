@@ -1,3 +1,4 @@
+// Interface for settings configuration
 interface settingsI {
 	useAPI: boolean;
 	useWebServerForTickets: boolean;

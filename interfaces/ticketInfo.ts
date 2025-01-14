@@ -1,3 +1,4 @@
+// Interface for ticket information
 interface ticketInfoI {
 	info: {
 		guildChannel: string;

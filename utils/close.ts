@@ -11,6 +11,7 @@ import {
 } from 'discord.js';
 import lib from '../bridge/bridge';
 
+// Function to close a ticket
 async function close(base: any, type: string, num: number | null) {
 	// BASIC DEFINING
 	let ina;
@@ -31,7 +32,7 @@ async function close(base: any, type: string, num: number | null) {
 	} else {
 		return;
 	}
-	// DEFFER IF INTERACTION
+	// DEFER IF INTERACTION
 	if (!ina && interaction) {
 		await interaction.deferReply({ ephemeral: true });
 	}
@@ -97,7 +98,7 @@ async function close(base: any, type: string, num: number | null) {
 	const closeEmbed = await embedBuilder('close', embedData);
 	const creatorClose = await embedBuilder('creator', embedData);
 	const closeDmEmbed = await embedBuilder('dm', embedData);
-	// TRANSCRIPT BULDING
+	// TRANSCRIPT BUILDING
 	const localFile = await discordTranscripts.createTranscript(channel, {
 		limit: -1,
 		returnType: ExportReturnType.Buffer,
@@ -166,6 +167,7 @@ async function close(base: any, type: string, num: number | null) {
 	}
 }
 
+// Function to send close embeds to appropriate channels
 async function sendSwitch(embeds: any, rows: any, compactData: any) {
 	try {
 		compactData.wbh.send({ embeds: [embeds.closeLog] });
@@ -200,15 +202,18 @@ async function sendSwitch(embeds: any, rows: any, compactData: any) {
 	}
 }
 
+// Function to set a ticket as closing
 async function setClosing(client: Client, number: number) {
 	const time: number = lib.unixTimestamp();
 	lib.cache.closingTickets.set(number, { time });
 }
 
+// Function to unset a ticket as closing
 async function unsetClosing(client: Client, number: number) {
 	lib.cache.closingTickets.delete(number);
 }
 
+// Function to build action rows for embeds
 async function buildRow(
 	type: string,
 	data: { locales: any; number: number | null }
@@ -280,6 +285,7 @@ async function buildRow(
 	}
 }
 
+// Function to build embeds for different purposes
 async function embedBuilder(
 	type: string,
 	data: {
@@ -367,6 +373,7 @@ async function embedBuilder(
 	}
 }
 
+// Function to update the database after closing a ticket
 async function dataSetUpdate(
 	number: number,
 	data: { dmChannel: any; guildChannel: any },
@@ -389,6 +396,7 @@ async function dataSetUpdate(
 	await unsetClosing(client, number);
 }
 
+// Function to get all users in a ticket
 async function getAllUsers(client: Client, data: { dmChannel: any }) {
 	const arr = [];
 	for (const id of data.dmChannel) {
@@ -402,6 +410,7 @@ async function getAllUsers(client: Client, data: { dmChannel: any }) {
 	return string;
 }
 
+// Function to move a ticket to a different category
 async function moveTicket(channel: TextChannel, gData: any) {
 	const parent = gData.closeCategoryId;
 	await channel.setParent(parent, { lockPermissions: false });

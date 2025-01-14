@@ -6,10 +6,14 @@ import {
 	ButtonInteraction
 } from 'discord.js';
 import lib from '../../bridge/bridge';
+
 module.exports = {
 	name: Events.InteractionCreate,
 	async execute(interaction: ButtonInteraction) {
+		// Check if the interaction is a button press
 		if (!interaction.isButton()) return;
+
+		// Handle different button interactions based on customId
 		if (interaction.customId == 'closeByOpen') {
 			lib.close(interaction, 'cls', null);
 		} else if (interaction.customId.startsWith('rat')) {
@@ -22,14 +26,17 @@ module.exports = {
 	}
 };
 
+// Function to handle rating button press
 async function ratingButtonPressed(interaction: ButtonInteraction) {
 	const rating = interaction.customId.slice(3, 4);
 	const ticketNumber = interaction.customId.split('_')[1];
 	const locales = lib.locales.events.onButtonPressjs.ratebutton;
 	const ticektDatabase = lib.db.table(`tt_${ticketNumber}`);
 
+	// Save the rating to the database
 	await ticektDatabase.set('analytics.rating', rating);
 
+	// Create disabled rating buttons
 	const rate5 = new ButtonBuilder()
 		.setCustomId('completed5')
 		.setEmoji(locales.ratew5.emoji)
@@ -61,6 +68,7 @@ async function ratingButtonPressed(interaction: ButtonInteraction) {
 		.setDisabled(true)
 		.setStyle(ButtonStyle.Secondary);
 
+	// Highlight the selected rating button
 	const arr = [rate1, rate2, rate3, rate4, rate5];
 	for (const x of arr) {
 		const name = x.data.label;
@@ -75,12 +83,14 @@ async function ratingButtonPressed(interaction: ButtonInteraction) {
 		.addComponents(rate2)
 		.addComponents(rate1);
 
+	// Update the interaction with the new buttons
 	await interaction.update({
 		embeds: [interaction.message.embeds[0]],
 		components: [creatorRow, interaction.message.components[1]]
 	});
 }
 
+// Function to handle new ticket button press
 async function newTicketButtonPressed(interaction: ButtonInteraction) {
 	lib.newTicket(undefined, interaction);
 	const locales = lib.locales.events.onButtonPressjs;
@@ -98,6 +108,7 @@ async function newTicketButtonPressed(interaction: ButtonInteraction) {
 	});
 }
 
+// Function to handle removed new ticket button press
 async function openNewTicketButtonRemoved(interaction: ButtonInteraction) {
 	lib.newTicket(undefined, interaction);
 	const locales = lib.locales.events.onButtonPressjs;

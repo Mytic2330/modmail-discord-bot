@@ -12,7 +12,8 @@ import {
 	DMChannel
 } from 'discord.js';
 import lib from '../bridge/bridge';
-// FUNCTION
+
+// Function to create a new ticket
 async function newTicket(
 	passedMessage: Message | undefined,
 	passedInteraction: Interaction | undefined
@@ -30,17 +31,19 @@ async function newTicket(
 		const locales = lib.locales.utils.openTicketjs;
 		let type;
 
-		// If is button -- True
+		// Determine if the request is from a button or interaction
 		if (message) {
 			type = false;
 		} else {
 			type = true;
 		}
 
+		// Check if the message is from a guild
 		if (!type && message) {
 			if (message.guildId !== null) return;
 		}
 
+		// Check if the user already has an open ticket
 		if (type && interaction) {
 			if (await lib.ticket.has(interaction.user.id)) return;
 		} else if (message) {
@@ -68,6 +71,7 @@ async function newTicket(
 			.setCustomId('ticket')
 			.setPlaceholder(locales.userSelectCategory.SelectMenuPlaceholder);
 
+		// Add options to the select menu based on categories
 		for (const val of lib.settings.categories) {
 			const index = lib.settings.categories.indexOf(val);
 			select.addOptions(

@@ -1,3 +1,4 @@
+/* eslint-disable no-inline-comments */
 import {
 	SlashCommandBuilder,
 	PermissionFlagsBits,
@@ -5,13 +6,14 @@ import {
 } from 'discord.js';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const originalEmbed = require('../../events/rating/ratingStatistics');
+
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('stats')
 		.setDMPermission(false)
 		.setDefaultMemberPermissions(PermissionFlagsBits.MoveMembers)
-		.setDescription('Preveri statistike'),
+		.setDescription('Preveri statistike'), // Command description
 	async execute(interaction: CommandInteraction) {
-		originalEmbed.originalEmbed(interaction);
+		originalEmbed.originalEmbed(interaction); // Execute the original embed function
 	}
 };

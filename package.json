@@ -9,16 +9,19 @@
 		"fs-extra": "^11.2.0",
 		"jsonc": "^2.0.0",
 		"quick.db": "^9.1.7",
-		"utf-8-validate": "^6.0.3"
+		"utf-8-validate": "^6.0.3",
+		"express": "^4.19.2",
+		"typescript": "^5.4.3"
 	},
-	"name": "bluecity-modmail",
-	"version": "1.3.1",
+	"name": "modmail",
+	"version": "1.4.0",
 	"main": "index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"runtest": "node --trace-warnings --trace-uncaught .",
 		"dev": "nodemon index.ts",
-		"compile": "tsc -w",
+		"compile": "tsc && xcopy .\\config .\\dist\\config /E /I /Y",
+		"watch": "tsc -w",
 		"register": "node register.js",
 		"start": "node index.js",
 		"format:fix": "npx prettier --write .",
@@ -44,9 +47,7 @@
 		"eslint-plugin-import": "^2.29.1",
 		"eslint-plugin-node": "^11.1.0",
 		"eslint-plugin-prettier": "^5.1.3",
-		"express": "^4.19.2",
 		"prettier": "3.2.5",
-		"ts-node": "^10.9.2",
-		"typescript": "^5.4.3"
+		"ts-node": "^10.9.2"
 	}
 }

@@ -35,6 +35,7 @@ module.exports = {
 	}
 };
 
+// Function to check status and pass interaction to appropriate handler
 async function checksAndPass(
 	interaction: ModalSubmitInteraction | StringSelectMenuInteraction,
 	type: string
@@ -58,6 +59,7 @@ async function checksAndPass(
 	}
 }
 
+// Function to handle string select menu interaction
 async function stringSelect(interaction: StringSelectMenuInteraction) {
 	const indexOfType: string = interaction.values[0];
 	const typeOfHelp: settings['categories'][0] =
@@ -70,6 +72,7 @@ async function stringSelect(interaction: StringSelectMenuInteraction) {
 	await interaction.showModal(modal);
 }
 
+// Function to create a modal based on settings
 async function createModal(
 	interaction: StringSelectMenuInteraction,
 	modalSettings: any
@@ -109,6 +112,7 @@ async function createModal(
 	return modal;
 }
 
+// Function to open a new ticket
 async function openNewTicket(
 	interaction: ModalSubmitInteraction | StringSelectMenuInteraction,
 	indexOfType: string
@@ -141,6 +145,7 @@ async function openNewTicket(
 	createChannel(guild, interaction, ticketPrefix);
 }
 
+// Function to send error messages
 async function sendError(
 	interaction: ModalSubmitInteraction | StringSelectMenuInteraction,
 	param: { code: number; message: string }
@@ -191,6 +196,7 @@ async function sendError(
 	return;
 }
 
+// Function to check the status of the interaction
 async function checkStatus(
 	interaction: StringSelectMenuInteraction | ModalSubmitInteraction
 ): Promise<{ code: number; message: string }> {
@@ -217,6 +223,7 @@ async function checkStatus(
 	return { code: 505, message: 'error' };
 }
 
+// Function to create a new channel for the ticket
 async function createChannel(
 	guild: Guild,
 	interaction: StringSelectMenuInteraction | ModalSubmitInteraction,
@@ -240,6 +247,7 @@ async function createChannel(
 	}
 }
 
+// Function to send the initial message in the new ticket channel
 async function sendInitial(
 	guildChannel: TextChannel,
 	interaction: StringSelectMenuInteraction | ModalSubmitInteraction,
@@ -343,6 +351,7 @@ async function sendInitial(
 	}
 }
 
+// Function to log the interaction in the log channel
 async function logInteraction(
 	x: TextChannel,
 	member: GuildMember,
@@ -387,6 +396,7 @@ async function logInteraction(
 	wbh?.send({ embeds: [embed] });
 }
 
+// Function to sync the ticket data with the database
 async function databaseSync(
 	interaction: StringSelectMenuInteraction | ModalSubmitInteraction,
 	x: TextChannel,
@@ -429,6 +439,7 @@ async function databaseSync(
 	});
 }
 
+// Function to calculate the ticket number
 async function ticketNumberCalculation(
 	interaction: StringSelectMenuInteraction | ModalSubmitInteraction,
 	x: TextChannel

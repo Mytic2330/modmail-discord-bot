@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { GuildMember, User } from 'discord.js';
 
+// Function to check if a user has a new username format
 export async function hasNewUsername(
 	x: User | GuildMember,
 	returnUsername: boolean,
@@ -39,6 +40,7 @@ export async function hasNewUsername(
 	return;
 }
 
+// Function to get the current timestamp in HH:MM:SS format
 export function getTimestamp(): string {
 	const date = new Date();
 	const hours = String(date.getHours()).padStart(2, '0');
@@ -47,6 +49,7 @@ export function getTimestamp(): string {
 	return `${hours}:${minutes}:${seconds}`;
 }
 
+// Function to get the current datestamp in a custom format
 export function getDatestamp(): string {
 	const date = new Date();
 	const year = date.getFullYear();
@@ -57,6 +60,7 @@ export function getDatestamp(): string {
 	return `D:${day}_W:${week}_M:${month}_Y:${year}`;
 }
 
+// Helper function to get the week number of a date
 function getWeekNumber(date: Date): number {
 	const d: any = new Date(
 		Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
@@ -67,6 +71,7 @@ function getWeekNumber(date: Date): number {
 	return weekNumber;
 }
 
+// Function to get the current Unix timestamp
 export function unixTimestamp(): number {
 	const timestamp = Math.floor(new Date().getTime());
 	return timestamp;

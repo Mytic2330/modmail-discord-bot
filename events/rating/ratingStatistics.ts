@@ -16,9 +16,11 @@ import {
 } from 'discord.js';
 import lib from '../../bridge/bridge';
 import ticketInfoI from '../../interfaces/ticketInfo';
+
 module.exports = {
 	name: Events.InteractionCreate,
 	async execute(interaction: ButtonInteraction | ModalSubmitInteraction) {
+		// Handle button interactions
 		if (interaction.isButton()) {
 			if (!interaction.customId.startsWith('stat')) return;
 			if (
@@ -30,6 +32,7 @@ module.exports = {
 			}
 			switchCheck(interaction);
 		} else if (interaction.isModalSubmit()) {
+			// Handle modal submissions
 			if (interaction.customId == 'getTicketStatsModal') {
 				processModal(interaction);
 			}
@@ -38,6 +41,7 @@ module.exports = {
 	originalEmbed
 };
 
+// Function to handle different button interactions
 async function switchCheck(interaction: ButtonInteraction) {
 	switch (interaction.customId.split('_')[1]) {
 		case 'rating':
@@ -52,6 +56,7 @@ async function switchCheck(interaction: ButtonInteraction) {
 	}
 }
 
+// Function to gather and display rating statistics
 async function rateFnc(interaction: ButtonInteraction) {
 	const all_tickets = await lib.ticket.get('tickets');
 	const arr = [];
@@ -120,6 +125,7 @@ async function rateFnc(interaction: ButtonInteraction) {
 	}
 }
 
+// Function to calculate average data and find the most frequent creator
 async function calculateData(
 	ratings: Array<string>,
 	messagesByServer: Array<number>,
@@ -153,6 +159,7 @@ async function calculateData(
 	};
 }
 
+// Function to find the most frequent creator
 function findMostFrequent(arr: Array<string>): {
 	mostFrequent: string;
 	maxCount: number;
@@ -174,6 +181,7 @@ function findMostFrequent(arr: Array<string>): {
 	return { mostFrequent, maxCount };
 }
 
+// Function to handle ticket statistics modal
 async function ticketFnc(interaction: ButtonInteraction) {
 	const modal = new ModalBuilder()
 		.setCustomId('getTicketStatsModal')
@@ -190,6 +198,7 @@ async function ticketFnc(interaction: ButtonInteraction) {
 	await interaction.showModal(modal);
 }
 
+// Function to process modal submission
 async function processModal(interaction: ModalSubmitInteraction) {
 	await interaction.deferUpdate();
 	const num = parseInt(interaction.fields.getTextInputValue('ticketNumber'));
@@ -226,6 +235,7 @@ async function processModal(interaction: ModalSubmitInteraction) {
 	await interaction.message?.edit({ embeds: [embed], components: [row] });
 }
 
+// Function to gather ticket information
 async function gatherTicketInfo(num: number): Promise<ticketInfoI | null> {
 	const table = lib.db.table(`tt_${num}`);
 	try {
@@ -245,6 +255,7 @@ async function gatherTicketInfo(num: number): Promise<ticketInfoI | null> {
 	}
 }
 
+// Function to create an embed with ticket information
 async function embedCreator(
 	obj: { info: any; analytics: any; messageAnalitys: any; num: number },
 	client: Client
@@ -281,6 +292,7 @@ async function embedCreator(
 	return embed;
 }
 
+// Function to format date
 async function dateMaker(data: any) {
 	const arr = data.split('_');
 
@@ -292,6 +304,7 @@ async function dateMaker(data: any) {
 	return dataToReturn;
 }
 
+// Function to get all users in a ticket
 async function getAllUsers(
 	client: Client,
 	data: { dmChannel: any; creatorId: Snowflake }
@@ -309,6 +322,7 @@ async function getAllUsers(
 	return string;
 }
 
+// Function to create the original embed
 async function originalEmbed(
 	interaction: ButtonInteraction | CommandInteraction
 ) {

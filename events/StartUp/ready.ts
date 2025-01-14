@@ -12,20 +12,28 @@ import {
 import lib from '../../bridge/bridge';
 import startServer from '../../api/main';
 import startWebServer from '../../web';
+
 module.exports = {
 	name: Events.ClientReady,
 	once: true,
 	async execute(client: Client) {
+		// Start API and web server if settings are enabled
 		if (lib.settings.useAPI) {
 			startServer();
 		}
 		if (lib.settings.useWebServerForTickets) {
 			startWebServer();
 		}
+
+		// Initialize the database
 		await lib.db.init();
+
+		// Perform various setup tasks if the client is available
 		if (client) {
 			openTicketMessage(client);
-			// readyMessage(client);
+			readyMessage(client);
+
+			// Set color settings in the database
 			const colorSettings = lib.settings.colors;
 			await lib.db.set('color', {
 				default: colorSettings.default,
@@ -36,21 +44,24 @@ module.exports = {
 				error: colorSettings.error,
 				info: colorSettings.info
 			});
+
+			// Set various other settings in the database
 			if (lib.settings.vactarCommunityID.length > 1) {
-				await lib.db.set(
-					'vactarCommunityID',
-					lib.settings.vactarCommunityID
-				);
+				await lib.db.set('vactarCommunityID', lib.settings.vactarCommunityID);
 			}
 			await lib.db.set('guildId', lib.settings.guildId);
 			await lib.db.set('botID', client.user?.id);
 			await lib.db.set('ApplicationID', client.application?.id);
+
+			// Initialize ticket number and user whitelist if not already set
 			if (!(await lib.db.has('ticketNumber'))) {
 				await lib.db.set('ticketNumber', 1);
 			}
 			if (!(await lib.db.has('uWsr'))) {
 				await lib.db.set('uWsr', []);
 			}
+
+			// Set rank settings in the database
 			if (lib.settings.enableRanks) {
 				await lib.db.set('enableRanks', true);
 				await lib.db.set('ranks', lib.settings.ranks);
@@ -58,10 +69,14 @@ module.exports = {
 				lib.db.delete('ranks');
 				lib.db.set('enableRanks', false);
 			}
+
+			// Initialize ticket blacklist if not already set
 			if (!(await lib.ticket.has('blacklist'))) {
 				await lib.ticket.set('blacklist', []);
 			}
 		}
+
+		// Log a message indicating the bot is ready
 		console.log(`   \x1b[36m     
 ██████╗░░█████╗░████████╗░░██████╗░███████╗░█████╗░██████╗░██╗░░░██╗
 ██╔══██╗██╔══██╗╚══██╔══╝░░██╔══██╗██╔════╝██╔══██╗██╔══██╗╚██╗░██╔╝
@@ -74,15 +89,12 @@ module.exports = {
 	}
 };
 
+// Function to send a ready message to log and transcript channels
 async function readyMessage(client: Client) {
 	const data = await lib.db.get(lib.settings.guildId);
 	if (data) {
-		const logChan: Channel | null = await client.channels.fetch(
-			data.logChannel
-		);
-		const transChan: Channel | null = await client.channels.fetch(
-			data.transcriptChannel
-		);
+		const logChan: Channel | null = await client.channels.fetch(data.logChannel);
+		const transChan: Channel | null = await client.channels.fetch(data.transcriptChannel);
 
 		const idOfLog = logChan as TextChannel;
 		const idOfTranscript = transChan as TextChannel;
@@ -105,6 +117,7 @@ async function readyMessage(client: Client) {
 	}
 }
 
+// Function to handle the open ticket message
 async function openTicketMessage(client: Client) {
 	const databaseRecived: { messageID: string; channelID: string } | null =
 		await lib.db.get('openMessage');
@@ -120,9 +133,7 @@ async function openTicketMessage(client: Client) {
 		const channel = await client.channels.fetch(databaseRecived.channelID);
 		if (channel instanceof BaseGuildTextChannel) {
 			try {
-				const msg = await channel.messages.fetch(
-					databaseRecived.messageID
-				);
+				const msg = await channel.messages.fetch(databaseRecived.messageID);
 				msg.delete();
 			} catch (e) {
 				console.error(e);
@@ -136,6 +147,7 @@ async function openTicketMessage(client: Client) {
 	}
 }
 
+// Function to send an embed message to the specified channel
 async function sendEmbed(client: Client, channelidRecived: string) {
 	try {
 		const channel = await client.channels.fetch(channelidRecived);

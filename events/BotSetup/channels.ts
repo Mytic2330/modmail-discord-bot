@@ -9,22 +9,24 @@ import {
 	Role
 } from 'discord.js';
 import lib from '../../bridge/bridge';
+
 module.exports = {
 	name: Events.ClientReady,
 	once: true,
 	async execute(client: Client) {
+		// Fetch the guild using the guild ID from settings
 		const guild = await client.guilds.fetch(lib.settings.guildId);
 		const status = await lib.db.has(guild.id);
+
+		// If the guild is not set up, create necessary channels and categories
 		if (status === false) {
 			try {
 				const category = await guild.channels.create({
-					name: lib.locales.events.channelsjs.channelCreation
-						.category,
+					name: lib.locales.events.channelsjs.channelCreation.category,
 					type: ChannelType.GuildCategory
 				});
 				const categoryClosed = await guild.channels.create({
-					name: lib.locales.events.channelsjs.channelCreation
-						.categoryClosed,
+					name: lib.locales.events.channelsjs.channelCreation.categoryClosed,
 					type: ChannelType.GuildCategory
 				});
 
@@ -38,28 +40,21 @@ module.exports = {
 					type: ChannelType.GuildText
 				});
 
-				await category.permissionOverwrites.create(
-					guild.roles.everyone,
-					{
-						ViewChannel: false
-					}
-				);
-				await categoryClosed.permissionOverwrites.create(
-					guild.roles.everyone,
-					{
-						ViewChannel: false
-					}
-				);
+				// Set permissions for the created channels and categories
+				await category.permissionOverwrites.create(guild.roles.everyone, {
+					ViewChannel: false
+				});
+				await categoryClosed.permissionOverwrites.create(guild.roles.everyone, {
+					ViewChannel: false
+				});
 				await log.permissionOverwrites.create(guild.roles.everyone, {
 					ViewChannel: false
 				});
-				await archive.permissionOverwrites.create(
-					guild.roles.everyone,
-					{
-						ViewChannel: false
-					}
-				);
+				await archive.permissionOverwrites.create(guild.roles.everyone, {
+					ViewChannel: false
+				});
 
+				// Set permissions for allowed roles
 				permissionSet(category, log, archive, categoryClosed, guild);
 			} catch (e) {
 				console.error(e);
@@ -68,6 +63,7 @@ module.exports = {
 	}
 };
 
+// Function to set permissions for allowed roles
 async function permissionSet(
 	category: CategoryChannel,
 	log: TextChannel,
@@ -86,9 +82,12 @@ async function permissionSet(
 			ViewChannel: true
 		});
 	}
+
+	// Create webhooks for log and archive channels
 	const wbh = await lib.wbh(log);
 	const wbh2 = await lib.wbh(archive);
 
+	// Save channel IDs to the database
 	await lib.db.set(guild.id, {
 		logChannel: log.id,
 		transcriptChannel: archive.id,
@@ -96,6 +95,7 @@ async function permissionSet(
 		closeCategoryId: categoryClosed.id
 	});
 
+	// Send embed messages to the log and archive channels
 	const embed = new EmbedBuilder()
 		.setColor(await lib.db.get('color.default'))
 		.setTitle(lib.locales.events.channelsjs.logEmbed.title)

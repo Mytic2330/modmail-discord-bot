@@ -1,9 +1,11 @@
+/* eslint-disable no-inline-comments */
 import {
 	SlashCommandBuilder,
 	CommandInteraction,
 	PermissionFlagsBits
 } from 'discord.js';
 import lib from '../../bridge/bridge';
+
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('clearcache')
@@ -20,13 +22,13 @@ module.exports = {
 				)
 		)
 		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
-		.setDescription('Debug command'),
+		.setDescription('Debug command'), // Sets up the slash command
 	async execute(interaction: CommandInteraction) {
 		const reason = interaction.options.get('category') ?? null;
 		if (reason) {
 			if (reason.value == 'closing') {
 				try {
-					lib.cache.closingTickets.clear();
+					lib.cache.closingTickets.clear(); // Clears the closing tickets cache
 					interaction.reply({ ephemeral: true, content: 'Cleared!' });
 				} catch (e) {
 					console.error(e);
@@ -37,7 +39,7 @@ module.exports = {
 				}
 			} else if (reason.value == 'ranks') {
 				try {
-					lib.cache.userRanks.clear();
+					lib.cache.userRanks.clear(); // Clears the user ranks cache
 					interaction.reply({ ephemeral: true, content: 'Cleared!' });
 				} catch (e) {
 					console.error(e);
@@ -48,7 +50,7 @@ module.exports = {
 				}
 			} else if (reason.value == 'users') {
 				try {
-					lib.cache.usersOpeningTicket.clear();
+					lib.cache.usersOpeningTicket.clear(); // Clears the users opening ticket cache
 					interaction.reply({ ephemeral: true, content: 'Cleared!' });
 				} catch (e) {
 					console.error(e);
@@ -61,7 +63,7 @@ module.exports = {
 				try {
 					lib.cache.usersOpeningTicket.clear();
 					lib.cache.userRanks.clear();
-					lib.cache.closingTickets.clear();
+					lib.cache.closingTickets.clear(); // Clears all caches
 					interaction.reply({ ephemeral: true, content: 'Cleared!' });
 				} catch (e) {
 					console.error(e);

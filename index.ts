@@ -13,21 +13,19 @@ import { QuickDB } from 'quick.db';
 import { version } from './package.json';
 import * as fs from 'fs-extra';
 import * as path from 'node:path';
+
+// Initialize the database
 const database: QuickDB = new QuickDB({ filePath: './database.sqlite' });
 export default database;
+
+// Load the bot token from the configuration file
 const { Token } = jsonc.parse(
 	fs.readFileSync(path.join(__dirname, 'config/token.jsonc'), 'utf8')
 );
 const debug: boolean = true;
 
+// Display a startup message
 console.log(` \x1b[36m
-
-██████╗░██╗░░░░░██╗░░░██╗███████╗░█████╗░██╗████████╗██╗░░░██╗
-██╔══██╗██║░░░░░██║░░░██║██╔════╝██╔══██╗██║╚══██╔══╝╚██╗░██╔╝
-██████╦╝██║░░░░░██║░░░██║█████╗░░██║░░╚═╝██║░░░██║░░░░╚████╔╝░
-██╔══██╗██║░░░░░██║░░░██║██╔══╝░░██║░░██╗██║░░░██║░░░░░╚██╔╝░░
-██████╦╝███████╗╚██████╔╝███████╗╚█████╔╝██║░░░██║░░░░░░██║░░░
-╚═════╝░╚══════╝░╚═════╝░╚══════╝░╚════╝░╚═╝░░░╚═╝░░░░░░╚═╝░░░
 	
 ███╗░░░███╗░█████╗░██████╗░███╗░░░███╗░█████╗░██╗██╗░░░░░
 ████╗░████║██╔══██╗██╔══██╗████╗░████║██╔══██╗██║██║░░░░░
@@ -39,6 +37,7 @@ console.log(` \x1b[36m
 Made by mytic2330
 Version: ${version} \x1b[0m`);
 
+// Initialize the Discord client
 const client = new Client({
 	presence: {
 		status: 'online',
@@ -74,6 +73,8 @@ const client = new Client({
 	],
 	partials: [Partials.Message, Partials.Channel, Partials.Reaction]
 });
+
+// Load commands from the commands folder
 const commands = new Collection<string, any>();
 const foldersPath = path.join(__dirname, 'commands');
 const commandFolders = fs.readdirSync(foldersPath);
@@ -96,6 +97,7 @@ for (const folder of commandFolders) {
 	}
 }
 
+// Handle interaction events
 client.on(Events.InteractionCreate, async (interaction) => {
 	if (!interaction.isChatInputCommand()) return;
 	const command = commands.get(interaction.commandName);
@@ -111,18 +113,19 @@ client.on(Events.InteractionCreate, async (interaction) => {
 		console.error(error);
 		if (interaction.replied || interaction.deferred) {
 			await interaction.followUp({
-				content: 'Neki se je zjebal... Probi še enkrat!',
+				content: 'Error occurred!',
 				ephemeral: true
 			});
 		} else {
 			await interaction.reply({
-				content: 'Neki se je zjebal... Probi še enkrat!',
+				content: 'Error occurred!',
 				ephemeral: true
 			});
 		}
 	}
 });
 
+// Load events from the events folder
 const evnetPath = path.join(__dirname, 'events');
 const eventFolders = fs.readdirSync(evnetPath);
 for (const folder of eventFolders) {
@@ -140,12 +143,16 @@ for (const folder of eventFolders) {
 		}
 	}
 }
+
+// Handle unhandled promise rejections
 process.on(
 	'unhandledRejection',
 	(reason: unknown, promise: unknown, a: unknown) => {
 		console.log(reason, promise, a);
 	}
 );
+
+// Handle uncaught exceptions
 process.on(
 	'uncaughtException',
 	(reason: unknown, promise: unknown, a: unknown) => {
@@ -153,10 +160,12 @@ process.on(
 	}
 );
 
+// Log errors and warnings
 client.on('error', console.log).on('warn', console.log);
 if (debug === true) client.on('debug', console.log);
 
+// Log in to Discord
 client.login(Token).catch((err) => {
-	console.log("[TOKEN-ERROR] Unable to connect to the BOT's Token");
+	console.log('[TOKEN-ERROR] Unable to connect to the BOT\'s Token');
 	console.log(err);
 });

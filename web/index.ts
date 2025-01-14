@@ -15,6 +15,17 @@ export async function createAuthKey(): Promise<string> {
 
 app.use(cors());
 
+app.get('/', (req: Request, res: Response) => {
+	const indexPath = path.join(__dirname, 'src/index.html');
+	fs.readFile(indexPath, 'utf8', (err, data) => {
+		if (err) {
+			res.sendStatus(500);
+			return;
+		}
+		res.send(data);
+	});
+});
+
 app.get('/api/auth/createKey', (req: Request, res: Response) => {
 	const head = req.headers;
 	if (head.bytecode) {
@@ -54,6 +65,7 @@ app.get('/api/transcript/getPath', (req: Request, res: Response) => {
 			if (number) {
 				const basePath = `ticketarchive/${number}.htm`;
 				const correctPath = path.join(__dirname, basePath);
+				console.log(__dirname, correctPath);
 				fs.access(correctPath, fs.constants.F_OK, (err) => {
 					if (err) {
 						const invalidPath = '../ticketarchive/notfound.htm';

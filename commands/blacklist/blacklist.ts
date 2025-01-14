@@ -1,9 +1,11 @@
+/* eslint-disable no-inline-comments */
 import {
 	SlashCommandBuilder,
 	CommandInteraction,
 	PermissionFlagsBits
 } from 'discord.js';
 import lib from '../../bridge/bridge';
+
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('blacklist')
@@ -14,7 +16,7 @@ module.exports = {
 				.setDescription('Uporabnik, ki bo blacklistan')
 		)
 		.setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
-		.setDescription('Debug command'),
+		.setDescription('Debug command'), // Sets up the slash command
 	async execute(interaction: CommandInteraction) {
 		const user = interaction.options.getUser('user');
 		if (user) {
@@ -26,7 +28,7 @@ module.exports = {
 				});
 				return;
 			} else {
-				await lib.ticket.push('blacklist', user.id);
+				await lib.ticket.push('blacklist', user.id); // Adds the user to the blacklist
 				interaction.reply({
 					ephemeral: true,
 					content: 'Uporabnik blacklistan!'

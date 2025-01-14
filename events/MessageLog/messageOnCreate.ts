@@ -10,10 +10,13 @@ import {
 	type MessageReaction
 } from 'discord.js';
 import lib from '../../bridge/bridge';
+
 module.exports = {
 	name: Events.MessageCreate,
 	async execute(message: Message) {
+		// Ignore messages from bots
 		if (message.author.bot === true) return;
+		// Ignore messages starting with '!adm' in guild channels
 		if (message.guildId) {
 			if (message.content.toLowerCase().startsWith('!adm')) {
 				return;
@@ -23,9 +26,11 @@ module.exports = {
 		const client = message.client;
 		const locales = lib.locales.events.messageOnCreatejs;
 
+		// Check if the channel is in the cache
 		const hasInCache = lib.cache.openTickets.has(message.channelId);
 
 		if (!hasInCache) {
+			// Check if the channel has an open ticket
 			status = await lib.ticket.has(message.channelId);
 		} else {
 			status = hasInCache;
@@ -33,15 +38,18 @@ module.exports = {
 
 		switch (status) {
 			case true:
+				// If the message is in a guild, react with a blue circle
 				if (message.guildId != undefined) {
 					var processing: MessageReaction | undefined =
 						await message.react('🔵');
 				} else {
 					processing = undefined;
 				}
+				// Handle the message
 				messageHandeler(message, client, locales, processing);
 				break;
 			case false:
+				// Create a new ticket if no open ticket is found
 				lib.newTicket(message, undefined);
 				break;
 		}
@@ -53,6 +61,7 @@ async function getName(
 ): Promise<{ username: string; rank: string }> {
 	const userId = member.user.id;
 	const userRankCache = lib.cache.userRanks;
+	// Check if the user's rank is cached
 	if (userRankCache.has(userId)) {
 		const userRank = userRankCache.get(userId);
 		if (userRank) return userRank;
@@ -73,6 +82,7 @@ async function getName(
 
 	const memberRoles = member.roles.cache;
 
+	// Check the user's roles and return the rank
 	for (const roleID in roles) {
 		if (roleID !== 'enable' && memberRoles.has(roleID)) {
 			const rank: string = roles[roleID];
@@ -85,6 +95,7 @@ async function getName(
 	userRankCache.set(userId, result);
 	return result;
 }
+
 async function messageHandeler(
 	message: Message,
 	client: Client,
@@ -103,9 +114,7 @@ async function messageHandeler(
 				iconURL: member.displayAvatarURL()
 			})
 			.setColor(await lib.db.get('color.recive'))
-			// .setTitle(locales.messageProcessing.reciveNewMessageEmbed.title)
 			.setTimestamp()
-			// ${locales.messageProcessing.reciveNewMessageEmbed.footer.text} |
 			.setFooter({
 				text: `Rank: ${returned.rank}`,
 				iconURL:
@@ -120,7 +129,6 @@ async function messageHandeler(
 				iconURL: user.displayAvatarURL()
 			})
 			.setColor(await lib.db.get('color.recive'))
-			// .setTitle(locales.messageProcessing.reciveNewMessageEmbed.title)
 			.setTimestamp()
 			.setFooter({
 				text: `${locales.messageProcessing.reciveNewMessageEmbed.footer.text}`,
@@ -145,6 +153,7 @@ async function messageHandeler(
 	}
 	messageReciverSwitch(message, reciveChannelEmbed, client, processing);
 }
+
 async function messageReciverSwitch(
 	message: Message,
 	reciveChannelEmbed: EmbedBuilder,
@@ -205,6 +214,7 @@ async function afterSendErrorHandler(
 		}
 	}
 }
+
 async function errorEmbedAsemblyServer(
 	client: Client,
 	values: any,
@@ -250,6 +260,7 @@ async function errorEmbedAsemblyServer(
 	}
 	return one_time_warn_EMBED;
 }
+
 async function errorEmbedAsemblyClient(
 	message: Message,
 	client: Client,
@@ -324,6 +335,7 @@ async function errorEmbedAsemblyClient(
 	}
 	return one_time_warn_EMBED;
 }
+
 async function sendToDMChannel(
 	message: Message,
 	reciveChannelEmbed: EmbedBuilder

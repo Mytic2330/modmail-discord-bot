@@ -52,7 +52,7 @@ module.exports = {
 				}
 			}
 		} else {
-			// TRIGGER IN GUILD /
+			// TRIGGER IN GUILD //
 			for (const chanId of data.dmChannel) {
 				try {
 					if (chanId == typingRefrence.channel.id) continue;
