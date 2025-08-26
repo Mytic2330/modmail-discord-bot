@@ -1,5 +1,8 @@
 # DISCORD MODMAIL BOT
-## Opis
+
+> [!WARNING]
+> Repository ni več vzdrževan. Koda je kot je. Kasnejših sprememb ne pričakujem.
+
 Ta modmail bot je bil narejen zaradi želje po unikatni izkušnji uporabnikov, ki potrebujejo pomoč, imajo vprašanja ali želijo zgolj klepetati z vami.
 
 ## Osnovne funkcije
